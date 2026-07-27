@@ -1,0 +1,31 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+  Brand fonts: "Mirano" (base) and "Extended" (headlines) are licensed
+  brand faces. Drop the font files into /public/fonts and declare them here
+  to match the brand exactly. Until then, they fall back to the system
+  sans-serif stack configured in tailwind.config.js.
+
+  Example once you have the files:
+
+  @font-face {
+    font-family: 'Mirano';
+    src: url('/fonts/Mirano.woff2') format('woff2');
+    font-weight: 100 900;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: 'Extended';
+    src: url('/fonts/Extended.woff2') format('woff2');
+    font-weight: 100 900;
+    font-display: swap;
+  }
+*/
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
