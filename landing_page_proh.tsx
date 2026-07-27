@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Target, TrendingUp, Megaphone, Users, Globe, ArrowRight, CheckCircle2, Sparkles, Loader2, Menu, X } from 'lucide-react';
 
-// --- CONFIGURAÇÃO DA API GEMINI ---
-// Defina VITE_GEMINI_API_KEY no arquivo .env.local para ativar o simulador de IA.
-const apiKey = (import.meta as any).env?.VITE_GEMINI_API_KEY ?? "";
+// --- CONFIGURAÇÃO DO SIMULADOR DE IA ---
+// A chave da API NÃO fica no site. O front chama um proxy (Cloudflare Worker)
+// que guarda a chave no servidor. Defina a URL do proxy em VITE_GEMINI_PROXY_URL
+// (arquivo .env.local no dev, e nas variáveis de ambiente do build em produção).
+const geminiProxyUrl = (import.meta as any).env?.VITE_GEMINI_PROXY_URL ?? "";
 
 // --- CORES E FONTES DA MARCA ---
 // Paleta:
@@ -435,8 +437,8 @@ function GeminiSimulator() {
   const generateIdeas = async () => {
     if (!businessNiche.trim()) return;
 
-    if (!apiKey) {
-      setError("Configure VITE_GEMINI_API_KEY no arquivo .env.local para ativar o simulador.");
+    if (!geminiProxyUrl) {
+      setError("Configure VITE_GEMINI_PROXY_URL (URL do proxy) para ativar o simulador.");
       return;
     }
 
@@ -444,44 +446,22 @@ function GeminiSimulator() {
     setError(null);
     setResult(null);
 
-    const prompt = `
-      Você é um estrategista de marca sênior da agência PROH.
-      A filosofia da PROH baseia-se em duas dimensões:
-      1) "proPAGAR resultados" (performance, vendas, crescimento).
-      2) "proPAGAR valor" (propósito, impacto humano, causas sociais).
-
-      O usuário possui um negócio no seguinte segmento: "${businessNiche}".
-
-      Gere 2 ideias curtas e criativas para esta empresa, uma para cada dimensão da PROH.
-      Formate a resposta estritamente como um objeto JSON válido com as seguintes propriedades:
-      {
-        "resultado": "Uma ideia de campanha focada em performance/vendas em até 25 palavras.",
-        "valor": "Uma ideia de ação focada em impacto social/comunidade em até 25 palavras."
-      }
-      Não inclua marcação markdown no JSON, apenas o objeto.
-    `;
-
     const fetchWithBackoff = async (attempt = 0) => {
       const delays = [1000, 2000, 4000, 8000, 16000];
       try {
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
+        // Chama o proxy no Cloudflare Worker; a chave da API fica no servidor.
+        const response = await fetch(geminiProxyUrl, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: prompt }] }],
-            generationConfig: {
-              responseMimeType: "application/json"
-            }
-          })
+          body: JSON.stringify({ niche: businessNiche.trim() })
         });
 
         if (!response.ok) throw new Error('Falha na comunicação com a IA.');
 
         const data = await response.json();
-        const textResponse = data.candidates?.[0]?.content?.parts?.[0]?.text;
-
-        if (textResponse) {
-          setResult(JSON.parse(textResponse));
+        // O proxy retorna { resultado, valor } diretamente.
+        if (data && (data.resultado || data.valor)) {
+          setResult(data);
         } else {
           throw new Error('Resposta vazia da IA.');
         }
