@@ -3,6 +3,9 @@ import react from '@vitejs/plugin-react';
 
 // https://vite.dev/config/
 export default defineConfig({
+  // Caminhos relativos nos assets: o build funciona tanto na raiz do domínio
+  // (proh.media) quanto dentro de uma subpasta na Hostinger.
+  base: './',
   plugins: [react()],
   server: {
     port: 5173,
