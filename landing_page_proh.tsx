@@ -1,6 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Target, TrendingUp, Megaphone, Users, Globe, ArrowRight, CheckCircle2, Sparkles, Loader2, Menu, X } from 'lucide-react';
 
+// --- LOGOS OFICIAIS ---
+// PROH = escrita completa | PH = abreviada (só as letras) | "bg" = versão com fundo.
+// Header (fundo bege claro): PROH completo em preto.
+import logoHeader from './src/assets/logos/proh-black.svg';
+// Rodapé (fundo preto): PROH completo em branco com o H em bege.
+import logoFooter from './src/assets/logos/proh-white-off.svg';
+
 // --- CONFIGURAÇÃO DO SIMULADOR DE IA ---
 // A chave da API NÃO fica no site. O front chama um proxy (Cloudflare Worker)
 // que guarda a chave no servidor. Defina a URL do proxy em VITE_GEMINI_PROXY_URL
@@ -157,24 +164,9 @@ export default function App() {
         }`}
       >
         <div className="max-w-7xl mx-auto px-6 md:px-12 flex justify-between items-center">
-          {/* Logo PROH - Recriado em SVG Inline para garantir carregamento perfeito e o recorte (cutout) transparente */}
+          {/* Logo oficial PROH (fundo claro) */}
           <div className="cursor-pointer transition-transform hover:scale-105 flex items-center" onClick={() => { closeMenu(); window.scrollTo(0, 0); }}>
-            <svg viewBox="0 0 120 70" fill="none" xmlns="http://www.w3.org/2000/svg" className="h-8 md:h-12 w-auto drop-shadow-sm">
-              <defs>
-                <mask id="logo-cutout">
-                  {/* Fundo branco (tudo o que for branco na máscara fica visível) */}
-                  <rect width="100%" height="100%" fill="white" />
-                  {/* A silhueta do P com uma borda extra grossa em preto para "recortar" o H com transparência real */}
-                  <path d="M10 10 h35 c15 0 25 8 25 20 c0 12 -10 20 -25 20 h-15 v10 h-20 z" fill="black" stroke="black" strokeWidth="6" strokeLinejoin="round" />
-                </mask>
-              </defs>
-
-              {/* Letra H (Branca) - Com a máscara de recorte aplicada */}
-              <path d="M55 10 h18 v14 h18 v-14 h18 v40 h-18 v-13 h-18 v13 h-18 z" fill="#FFFFFF" mask="url(#logo-cutout)" />
-
-              {/* Letra P (Preta) */}
-              <path d="M10 10 h35 c15 0 25 8 25 20 c0 12 -10 20 -25 20 h-15 v10 h-20 z M30 24 v12 h15 c5 0 8 -2.5 8 -6 c0 -3.5 -3 -6 -8 -6 z" fill="#111111" />
-            </svg>
+            <img src={logoHeader} alt="PROH Media" className="h-7 md:h-10 w-auto drop-shadow-sm" />
           </div>
 
           <nav className="hidden md:flex gap-8 text-sm font-bold tracking-wider uppercase text-[#111111] font-extended">
@@ -413,11 +405,7 @@ export default function App() {
           </a>
 
           <div className="w-full flex flex-col md:flex-row justify-between items-center gap-4 pt-8 border-t border-[#DCD7C9]/20 text-sm font-bold uppercase tracking-widest text-[#DCD7C9]/50 font-extended animate-on-scroll delay-300">
-            <div className="flex items-center gap-2">
-              <span className="text-[#DCD7C9]">P</span>
-              <span className="text-white">H</span>
-              <span className="ml-1 text-[10px]">MEDIA</span>
-            </div>
+            <img src={logoFooter} alt="PROH Media" className="h-8 w-auto" />
             <p>© {new Date().getFullYear()} PROH Media. Todos os direitos reservados.</p>
           </div>
         </div>
