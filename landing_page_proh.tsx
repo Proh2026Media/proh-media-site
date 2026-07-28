@@ -120,6 +120,38 @@ export default function App() {
     window.addEventListener('scroll', onScroll, { passive: true });
     updateReflect();
 
+    // Reflexo ambiente: amostra as cores REAIS dos vizinhos — o texto
+    // abaixo (computed color) e a imagem ao lado (média via canvas).
+    const foto = document.querySelector('#conceito img') as HTMLImageElement | null;
+    const textoAbaixo = document.querySelector('#conceito h2');
+    const setAmbient = () => {
+      if (textoAbaixo) {
+        const cor = getComputedStyle(textoAbaixo).color;
+        const m = cor.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+        if (m) glass.style.setProperty('--c-baixo', `rgba(${m[1]}, ${m[2]}, ${m[3]}, 0.24)`);
+      }
+      if (foto && foto.complete && foto.naturalWidth) {
+        try {
+          const cv = document.createElement('canvas');
+          cv.width = 8; cv.height = 8;
+          const ctx = cv.getContext('2d');
+          ctx.drawImage(foto, 0, 0, 8, 8);
+          const d = ctx.getImageData(0, 0, 8, 8).data;
+          let r = 0, gg = 0, b = 0;
+          const n = d.length / 4;
+          for (let i = 0; i < d.length; i += 4) { r += d[i]; gg += d[i + 1]; b += d[i + 2]; }
+          glass.style.setProperty('--c-lado',
+            `rgba(${Math.round(r / n)}, ${Math.round(gg / n)}, ${Math.round(b / n)}, 0.28)`);
+        } catch (e) { /* canvas bloqueado por CORS: mantém a cor padrão */ }
+      }
+    };
+    setAmbient();
+    if (foto) foto.addEventListener('load', setAmbient);
+    // Se a imagem ou o estilo do texto mudarem, o reflexo re-amostra sozinho
+    const ambientObserver = new MutationObserver(setAmbient);
+    if (foto) ambientObserver.observe(foto, { attributes: true, attributeFilter: ['src', 'class', 'style'] });
+    if (textoAbaixo) ambientObserver.observe(textoAbaixo, { attributes: true, attributeFilter: ['class', 'style'] });
+
     const secao = document.getElementById('conceito');
     const temMouse = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
     const onMove = (e) => {
@@ -142,6 +174,8 @@ export default function App() {
 
     return () => {
       window.removeEventListener('scroll', onScroll);
+      if (foto) foto.removeEventListener('load', setAmbient);
+      ambientObserver.disconnect();
       if (secao && temMouse) {
         secao.removeEventListener('mousemove', onMove);
         secao.removeEventListener('mouseleave', onLeave);
@@ -270,12 +304,24 @@ export default function App() {
           transform: translateX(var(--gx, 0%));
           will-change: transform;
         }
+        /* Reflexo ambiente: cores AMOSTRADAS dos vizinhos reais.
+           A cor do texto abaixo entra por baixo; a cor da imagem ao lado
+           entra pela direita. Se os vizinhos mudarem, o JS re-amostra. */
+        .glass-brand-ambient {
+          position: absolute;
+          inset: 0;
+          background:
+            linear-gradient(90deg, transparent 45%, var(--c-lado, rgba(163, 161, 150, 0.16)) 100%),
+            linear-gradient(180deg, transparent 40%, var(--c-baixo, rgba(216, 212, 189, 0.20)) 100%);
+        }
         /* Brilho que responde à aproximação do cursor (desktop) */
         .glass-brand-glow {
           position: absolute;
           inset: 0;
-          background: radial-gradient(150px 95px at var(--mx, 50%) var(--my, 50%),
-            rgba(255, 255, 255, 0.30), transparent 70%);
+          background: radial-gradient(250px 155px at var(--mx, 50%) var(--my, 50%),
+            rgba(255, 255, 255, 0.48),
+            rgba(255, 255, 255, 0.14) 55%,
+            transparent 78%);
           opacity: var(--mo, 0);
           transition: opacity 0.25s ease;
         }
@@ -455,6 +501,7 @@ export default function App() {
           <div className="grid md:grid-cols-2 gap-10 md:gap-16 items-center">
             <div className="animate-on-scroll">
               <div className="glass-brand mb-8 select-none" aria-hidden="true">
+                <div className="glass-brand-ambient"></div>
                 <div className="glass-brand-reflect"></div>
                 <div className="glass-brand-glow"></div>
               </div>
@@ -478,6 +525,7 @@ export default function App() {
             <img
               src="https://images.unsplash.com/photo-1704579924216-31ef96f7e008?q=80&w=1200&auto=format&fit=crop"
               alt="Retrato de uma mulher de cabelos cacheados sorrindo"
+              crossOrigin="anonymous"
               loading="lazy"
               className="img-brand w-full h-52 md:h-64 rounded-[2rem] md:rounded-[2.5rem] shadow-2xl"
             />
