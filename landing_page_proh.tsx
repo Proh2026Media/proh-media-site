@@ -177,6 +177,26 @@ export default function App() {
         }
         .img-brand:hover { filter: grayscale(0); }
 
+        /* Texto "liquid glass": gradiente das cores do sistema recortado no
+           texto, com um reflexo que percorre lentamente a superfície. */
+        .glass-text {
+          background: linear-gradient(115deg,
+            rgba(255, 255, 255, 0.22) 0%,
+            rgba(216, 212, 189, 0.06) 25%,
+            rgba(255, 255, 255, 0.30) 48%,
+            rgba(216, 212, 189, 0.05) 72%,
+            rgba(255, 255, 255, 0.18) 100%);
+          background-size: 220% 100%;
+          -webkit-background-clip: text;
+          background-clip: text;
+          color: transparent;
+          animation: glass-shine 9s ease-in-out infinite;
+        }
+        @keyframes glass-shine {
+          0%, 100% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
+        }
+
         /* Pilha de cartas: cada seção pina (com top calculado via JS para
            seções mais altas que a tela) e a seguinte desliza por cima. */
         .stack-card { position: relative; }
@@ -189,7 +209,6 @@ export default function App() {
         .marquee-track {
           display: flex;
           flex-shrink: 0;
-          min-width: 100%;
           align-items: center;
           animation: marquee-scroll 38s linear infinite;
         }
@@ -232,6 +251,7 @@ export default function App() {
           .animate-on-scroll { opacity: 1 !important; transform: none !important; transition: none !important; }
           .animate-spin-slow { animation: none !important; }
           .marquee-track { animation: none !important; }
+          .glass-text { animation: none !important; }
         }
       `}} />
 
@@ -341,7 +361,7 @@ export default function App() {
         </div>
 
         {/* Faixa: sistema de mensagens da marca */}
-        <div className="absolute bottom-0 left-0 right-0 bg-white pt-4 pb-16" aria-hidden="true">
+        <div className="absolute bottom-0 left-0 right-0 bg-[#D8D4BD] pt-4 pb-16" aria-hidden="true">
           <Marquee />
         </div>
       </section>
@@ -351,7 +371,7 @@ export default function App() {
         <div className="max-w-7xl mx-auto px-6 md:px-12 relative z-10 w-full">
           <div className="grid md:grid-cols-2 gap-10 md:gap-16 items-center">
             <div className="animate-on-scroll">
-              <div className="text-6xl md:text-9xl font-black text-white/5 mb-6 leading-none font-mirano select-none" aria-hidden="true">
+              <div className="glass-text text-6xl md:text-9xl font-black mb-6 leading-none font-mirano select-none" aria-hidden="true">
                 PROH
               </div>
               <p className="flex items-center gap-3 uppercase text-sm font-bold tracking-widest font-extended text-[#D8D4BD]/60 mb-4"><span className="font-mirano">01</span><span className="w-8 h-[2px] bg-[#D8D4BD]/30" aria-hidden="true"></span>Conceito</p>
@@ -1098,8 +1118,8 @@ function MarqueeTrack() {
     <div className="marquee-track">
       {MARQUEE_ITEMS.map((t) => (
         <span key={t} className="flex items-center shrink-0">
-          <span className="font-mirano text-xs md:text-sm font-bold uppercase tracking-[0.2em] text-[#0F0F15] whitespace-nowrap">{t}</span>
-          <span className="mx-6 md:mx-10 w-1.5 h-1.5 bg-[#0F0F15]/30 rounded-full shrink-0"></span>
+          <span className="font-mirano text-xs md:text-sm font-bold uppercase tracking-[0.2em] text-white whitespace-nowrap">{t}</span>
+          <span className="mx-6 md:mx-10 w-1.5 h-1.5 bg-white/50 rounded-full shrink-0"></span>
         </span>
       ))}
     </div>
