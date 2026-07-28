@@ -282,11 +282,11 @@ export default function App() {
             </p>
           </div>
 
-          {/* Foto editorial: equipe em trabalho criativo */}
+          {/* Foto editorial: Avenida Paulista — pessoas reais, movimento, alcance */}
           <div className="animate-on-scroll delay-300">
             <img
-              src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=1200&auto=format&fit=crop"
-              alt="Equipe colaborando em um projeto criativo ao redor da mesa"
+              src="https://images.unsplash.com/photo-1578002573559-689b0abc4148?q=80&w=1200&auto=format&fit=crop"
+              alt="Avenida Paulista, em São Paulo, com pessoas atravessando a ciclovia entre os prédios"
               loading="eager"
               className="img-brand w-full h-64 sm:h-80 lg:h-[32rem] rounded-[2rem] md:rounded-[2.5rem] shadow-2xl"
             />
@@ -317,10 +317,10 @@ export default function App() {
               </ul>
             </div>
             <div className="flex flex-col gap-6 animate-on-scroll delay-200">
-            {/* Foto: conversa de estratégia */}
+            {/* Foto conceitual: prédios apontando para cima, avião cruzando o céu — alcançar mais */}
             <img
-              src="https://images.unsplash.com/photo-1568992688065-536aad8a12f6?q=80&w=1200&auto=format&fit=crop"
-              alt="Profissionais conversando em uma reunião de estratégia"
+              src="https://images.unsplash.com/photo-1529063317578-487cc3a86772?q=80&w=1200&auto=format&fit=crop"
+              alt="Prédios vistos de baixo com um avião cruzando o céu ao centro"
               loading="lazy"
               className="img-brand w-full h-52 md:h-64 rounded-[2rem] md:rounded-[2.5rem] shadow-2xl"
             />
@@ -398,10 +398,10 @@ export default function App() {
           <div className="grid md:grid-cols-2 gap-6 md:gap-12">
             {/* Valor de negócio */}
             <div className="bg-[#D8D4BD]/50 border border-[#0F0F15]/5 p-8 sm:p-10 md:p-14 transition-all hover:-translate-y-2 duration-500 rounded-[2rem] md:rounded-[2.5rem] animate-on-scroll delay-100">
-              {/* Foto: reunião de negócio */}
+              {/* Foto: estratégia em ação — brainstorm na parede de vidro */}
               <img
-                src="https://images.unsplash.com/photo-1552664730-d307ca884978?q=80&w=1000&auto=format&fit=crop"
-                alt="Equipe em reunião de planejamento estratégico ao redor da mesa"
+                src="https://images.unsplash.com/photo-1758691736836-0413b066787a?q=80&w=1000&auto=format&fit=crop"
+                alt="Equipe diversa fazendo brainstorm com notas adesivas em uma parede de vidro"
                 loading="lazy"
                 className="img-brand w-full h-44 md:h-52 rounded-2xl shadow-lg mb-8"
               />
@@ -428,10 +428,10 @@ export default function App() {
 
             {/* Valor humano */}
             <div className="bg-[#0F0F15] text-[#D8D4BD] p-8 sm:p-10 md:p-14 transition-all hover:-translate-y-2 duration-500 rounded-[2rem] md:rounded-[2.5rem] shadow-2xl animate-on-scroll delay-300">
-              {/* Foto: grupo com as mãos unidas */}
+              {/* Foto: encontro humano real e descontraído */}
               <img
-                src="https://images.unsplash.com/photo-1582213782179-e0d53f98f2ca?q=80&w=1000&auto=format&fit=crop"
-                alt="Grupo de pessoas unindo as mãos ao centro"
+                src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=1000&auto=format&fit=crop"
+                alt="Três pessoas rindo juntas durante uma conversa à mesa"
                 loading="lazy"
                 className="img-brand w-full h-44 md:h-52 rounded-2xl shadow-lg mb-8"
               />
