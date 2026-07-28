@@ -60,7 +60,8 @@ $payload = json_encode([
     'generationConfig' => ['responseMimeType' => 'application/json'],
 ]);
 
-$url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=' . urlencode($apiKey);
+// Modelo estável (os "preview" são descontinuados após alguns meses).
+$url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' . urlencode($apiKey);
 $ch  = curl_init($url);
 curl_setopt_array($ch, [
     CURLOPT_POST           => true,
@@ -73,9 +74,15 @@ $resp = curl_exec($ch);
 $code = (int) curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
 curl_close($ch);
 
-if ($resp === false || $code >= 400) {
+if ($resp === false) {
     http_response_code(502);
-    echo json_encode(['error' => 'Falha na comunicação com a IA.']);
+    echo json_encode(['error' => 'Falha na comunicação com a IA.', 'detalhe' => 'sem resposta do serviço']);
+    exit;
+}
+if ($code >= 400) {
+    // Expõe apenas o status da API (sem corpo) para facilitar diagnóstico.
+    http_response_code(502);
+    echo json_encode(['error' => 'Falha na comunicação com a IA.', 'detalhe' => 'API HTTP ' . $code]);
     exit;
 }
 
