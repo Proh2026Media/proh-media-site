@@ -297,7 +297,7 @@ export default function App() {
 
       {/* SEÇÃO 1 — HERO */}
       <section id="hero" className="stack-card z-[10] w-full min-h-screen flex flex-col justify-center overflow-hidden bg-[#D8D4BD]">
-        <div className="max-w-7xl w-full mx-auto px-6 md:px-12 relative z-10 pt-28 pb-20 md:pt-32 grid lg:grid-cols-[1.15fr_0.85fr] gap-10 lg:gap-16 items-center">
+        <div className="max-w-7xl w-full mx-auto px-6 md:px-12 relative z-10 pt-28 pb-32 md:pt-32 md:pb-36 grid lg:grid-cols-[1.15fr_0.85fr] gap-10 lg:gap-16 items-center">
           <div className="max-w-4xl">
             <h2 className="text-[#0F0F15] font-bold uppercase tracking-widest text-xs sm:text-sm md:text-base mb-6 border-l-4 border-[#0F0F15] pl-4 font-extended animate-on-scroll">
               Estratégia, marca, mídia e impacto
@@ -338,13 +338,13 @@ export default function App() {
         </div>
 
         {/* Faixa: sistema de mensagens da marca */}
-        <div className="absolute bottom-0 left-0 right-0 bg-[#0F0F15] py-4" aria-hidden="true">
+        <div className="absolute bottom-0 left-0 right-0 bg-[#0F0F15] pt-4 pb-16" aria-hidden="true">
           <Marquee />
         </div>
       </section>
 
       {/* SEÇÃO 2 — O CONCEITO */}
-      <section id="conceito" className="stack-card z-[20] w-full md:min-h-screen flex flex-col md:justify-center py-20 md:py-24 rounded-t-[2.5rem] md:rounded-t-[3rem] bg-[#0F0F15] text-[#D8D4BD] overflow-hidden shadow-[0_-20px_50px_rgba(0,0,0,0.4)] mt-[-2rem] md:mt-0">
+      <section id="conceito" className="stack-card z-[20] w-full md:min-h-screen flex flex-col md:justify-center py-20 md:py-24 rounded-t-[2.5rem] md:rounded-t-[3rem] bg-[#0F0F15] text-[#D8D4BD] overflow-hidden shadow-[0_-20px_50px_rgba(0,0,0,0.4)] mt-[-2.5rem] md:mt-[-3rem]">
         <div className="max-w-7xl mx-auto px-6 md:px-12 relative z-10 w-full">
           <div className="grid md:grid-cols-2 gap-10 md:gap-16 items-center">
             <div className="animate-on-scroll">
@@ -391,7 +391,7 @@ export default function App() {
       </section>
 
       {/* SEÇÃO 3 — O SIGNIFICADO */}
-      <section id="significado" className="stack-card z-[30] w-full md:min-h-screen flex flex-col md:justify-center py-20 md:py-24 bg-[#D8D4BD] text-[#0F0F15] rounded-t-[2.5rem] md:rounded-t-[3rem] shadow-[0_-20px_50px_rgba(0,0,0,0.3)] mt-[-2rem] md:mt-0 overflow-hidden">
+      <section id="significado" className="stack-card z-[30] w-full md:min-h-screen flex flex-col md:justify-center py-20 md:py-24 bg-[#D8D4BD] text-[#0F0F15] rounded-t-[2.5rem] md:rounded-t-[3rem] shadow-[0_-20px_50px_rgba(0,0,0,0.3)] mt-[-2.5rem] md:mt-[-3rem] overflow-hidden">
         <div className="max-w-7xl mx-auto px-6 md:px-12 relative z-10 w-full">
           <div className="max-w-3xl mb-12 md:mb-16 animate-on-scroll">
             <p className="flex items-center gap-3 uppercase text-sm font-bold tracking-widest font-extended text-[#0F0F15]/60 mb-4"><span className="font-mirano">02</span><span className="w-8 h-[2px] bg-[#0F0F15]/30" aria-hidden="true"></span>O significado</p>
@@ -433,7 +433,7 @@ export default function App() {
       </section>
 
       {/* SEÇÃO 4 — DUAS DIMENSÕES DO VALOR */}
-      <section id="dimensoes" className="stack-card z-[40] w-full md:min-h-screen flex flex-col md:justify-center py-20 md:py-24 bg-white text-[#0F0F15] rounded-t-[2.5rem] md:rounded-t-[3rem] shadow-[0_-20px_50px_rgba(0,0,0,0.15)] mt-[-2rem] md:mt-0 overflow-hidden">
+      <section id="dimensoes" className="stack-card z-[40] w-full md:min-h-screen flex flex-col md:justify-center py-20 md:py-24 bg-white text-[#0F0F15] rounded-t-[2.5rem] md:rounded-t-[3rem] shadow-[0_-20px_50px_rgba(0,0,0,0.15)] mt-[-2.5rem] md:mt-[-3rem] overflow-hidden">
         <div className="max-w-7xl mx-auto px-6 md:px-12 relative z-10 w-full">
           <div className="max-w-3xl mb-12 md:mb-16 animate-on-scroll">
             <p className="flex items-center gap-3 uppercase text-sm font-bold tracking-widest font-extended text-[#0F0F15]/60 mb-4"><span className="font-mirano">03</span><span className="w-8 h-[2px] bg-[#0F0F15]/30" aria-hidden="true"></span>Duas dimensões do valor</p>
@@ -516,7 +516,7 @@ export default function App() {
       </section>
 
       {/* SEÇÃO 5 — SOLUÇÕES */}
-      <section id="solucoes" className="stack-card z-[50] w-full py-20 md:py-28 bg-[#D8D4BD] text-[#0F0F15] rounded-t-[2.5rem] md:rounded-t-[3rem] shadow-[0_-20px_50px_rgba(0,0,0,0.15)] mt-[-2rem] md:mt-0 overflow-hidden">
+      <section id="solucoes" className="stack-card z-[50] w-full py-20 md:py-28 bg-[#D8D4BD] text-[#0F0F15] rounded-t-[2.5rem] md:rounded-t-[3rem] shadow-[0_-20px_50px_rgba(0,0,0,0.15)] mt-[-2.5rem] md:mt-[-3rem] overflow-hidden">
         <div className="max-w-7xl mx-auto px-6 md:px-12 w-full">
           <div className="max-w-3xl mb-12 md:mb-16 animate-on-scroll">
             <p className="flex items-center gap-3 uppercase text-sm font-bold tracking-widest font-extended text-[#0F0F15]/60 mb-4"><span className="font-mirano">04</span><span className="w-8 h-[2px] bg-[#0F0F15]/30" aria-hidden="true"></span>Soluções</p>
@@ -545,7 +545,7 @@ export default function App() {
       </section>
 
       {/* SEÇÃO 6 — MÉTODO */}
-      <section id="metodo" className="stack-card z-[60] w-full py-20 md:py-28 bg-[#0F0F15] text-[#D8D4BD] rounded-t-[2.5rem] md:rounded-t-[3rem] shadow-[0_-20px_50px_rgba(0,0,0,0.4)] mt-[-2rem] md:mt-0 overflow-hidden">
+      <section id="metodo" className="stack-card z-[60] w-full py-20 md:py-28 bg-[#0F0F15] text-[#D8D4BD] rounded-t-[2.5rem] md:rounded-t-[3rem] shadow-[0_-20px_50px_rgba(0,0,0,0.4)] mt-[-2.5rem] md:mt-[-3rem] overflow-hidden">
         <div className="max-w-7xl mx-auto px-6 md:px-12 w-full">
           <div className="grid md:grid-cols-2 gap-10 md:gap-16 items-center mb-12 md:mb-16">
             <div className="animate-on-scroll">
@@ -587,7 +587,7 @@ export default function App() {
       </section>
 
       {/* SEÇÃO 7 — DIFERENCIAIS */}
-      <section id="diferenciais" className="stack-card z-[70] w-full py-20 md:py-28 bg-white text-[#0F0F15] rounded-t-[2.5rem] md:rounded-t-[3rem] shadow-[0_-20px_50px_rgba(0,0,0,0.15)] mt-[-2rem] md:mt-0 overflow-hidden">
+      <section id="diferenciais" className="stack-card z-[70] w-full py-20 md:py-28 bg-white text-[#0F0F15] rounded-t-[2.5rem] md:rounded-t-[3rem] shadow-[0_-20px_50px_rgba(0,0,0,0.15)] mt-[-2.5rem] md:mt-[-3rem] overflow-hidden">
         <div className="max-w-7xl mx-auto px-6 md:px-12 w-full">
           <div className="max-w-3xl mb-12 md:mb-16 animate-on-scroll">
             <p className="flex items-center gap-3 uppercase text-sm font-bold tracking-widest font-extended text-[#0F0F15]/60 mb-4"><span className="font-mirano">06</span><span className="w-8 h-[2px] bg-[#0F0F15]/30" aria-hidden="true"></span>Diferenciais</p>
@@ -608,7 +608,7 @@ export default function App() {
       </section>
 
       {/* SEÇÃO 8 — PARA QUEM É A PROH */}
-      <section id="publicos" className="stack-card z-[80] w-full py-20 md:py-28 bg-[#D8D4BD] text-[#0F0F15] rounded-t-[2.5rem] md:rounded-t-[3rem] shadow-[0_-20px_50px_rgba(0,0,0,0.15)] mt-[-2rem] md:mt-0 overflow-hidden">
+      <section id="publicos" className="stack-card z-[80] w-full py-20 md:py-28 bg-[#D8D4BD] text-[#0F0F15] rounded-t-[2.5rem] md:rounded-t-[3rem] shadow-[0_-20px_50px_rgba(0,0,0,0.15)] mt-[-2.5rem] md:mt-[-3rem] overflow-hidden">
         <div className="max-w-7xl mx-auto px-6 md:px-12 w-full">
           <div className="max-w-3xl mb-12 md:mb-16 animate-on-scroll">
             <p className="flex items-center gap-3 uppercase text-sm font-bold tracking-widest font-extended text-[#0F0F15]/60 mb-4"><span className="font-mirano">07</span><span className="w-8 h-[2px] bg-[#0F0F15]/30" aria-hidden="true"></span>Para quem</p>
@@ -645,7 +645,7 @@ export default function App() {
       </section>
 
       {/* SEÇÃO 9 — IMPACTO */}
-      <section id="impacto" className="stack-card z-[90] w-full py-20 md:py-28 bg-[#0F0F15] text-[#D8D4BD] rounded-t-[2.5rem] md:rounded-t-[3rem] shadow-[0_-20px_50px_rgba(0,0,0,0.4)] mt-[-2rem] md:mt-0 overflow-hidden">
+      <section id="impacto" className="stack-card z-[90] w-full py-20 md:py-28 bg-[#0F0F15] text-[#D8D4BD] rounded-t-[2.5rem] md:rounded-t-[3rem] shadow-[0_-20px_50px_rgba(0,0,0,0.4)] mt-[-2.5rem] md:mt-[-3rem] overflow-hidden">
         <div className="max-w-7xl mx-auto px-6 md:px-12 w-full">
           <div className="grid md:grid-cols-2 gap-10 md:gap-16 items-center">
             <div className="animate-on-scroll">
@@ -695,7 +695,7 @@ export default function App() {
       </section>
 
       {/* SEÇÃO 10 — MODELOS DE PARCERIA */}
-      <section id="modelos" className="stack-card z-[100] w-full py-20 md:py-28 bg-[#D8D4BD] text-[#0F0F15] rounded-t-[2.5rem] md:rounded-t-[3rem] shadow-[0_-20px_50px_rgba(0,0,0,0.15)] mt-[-2rem] md:mt-0 overflow-hidden">
+      <section id="modelos" className="stack-card z-[100] w-full py-20 md:py-28 bg-[#D8D4BD] text-[#0F0F15] rounded-t-[2.5rem] md:rounded-t-[3rem] shadow-[0_-20px_50px_rgba(0,0,0,0.15)] mt-[-2.5rem] md:mt-[-3rem] overflow-hidden">
         <div className="max-w-7xl mx-auto px-6 md:px-12 w-full">
           <div className="max-w-3xl mb-12 md:mb-16 animate-on-scroll">
             <p className="flex items-center gap-3 uppercase text-sm font-bold tracking-widest font-extended text-[#0F0F15]/60 mb-4"><span className="font-mirano">09</span><span className="w-8 h-[2px] bg-[#0F0F15]/30" aria-hidden="true"></span>Modelos de parceria</p>
@@ -721,7 +721,7 @@ export default function App() {
       </section>
 
       {/* SEÇÃO 11 — MANIFESTO */}
-      <section id="manifesto" className="stack-card z-[110] w-full py-24 md:py-32 bg-[#0F0F15] text-[#D8D4BD] rounded-t-[2.5rem] md:rounded-t-[3rem] shadow-[0_-20px_50px_rgba(0,0,0,0.4)] mt-[-2rem] md:mt-0 overflow-hidden">
+      <section id="manifesto" className="stack-card z-[110] w-full py-24 md:py-32 bg-[#0F0F15] text-[#D8D4BD] rounded-t-[2.5rem] md:rounded-t-[3rem] shadow-[0_-20px_50px_rgba(0,0,0,0.4)] mt-[-2.5rem] md:mt-[-3rem] overflow-hidden">
         <div className="max-w-7xl mx-auto px-6 md:px-12 w-full">
           <div className="grid md:grid-cols-[1.1fr_1fr] gap-12 md:gap-20 items-start">
             {/* Coluna fixa: título e assinatura */}
@@ -765,7 +765,7 @@ export default function App() {
       </section>
 
       {/* SEÇÃO 12 — PERGUNTAS FREQUENTES */}
-      <section id="faq" className="stack-card z-[120] w-full py-20 md:py-28 bg-white text-[#0F0F15] rounded-t-[2.5rem] md:rounded-t-[3rem] shadow-[0_-20px_50px_rgba(0,0,0,0.15)] mt-[-2rem] md:mt-0 overflow-hidden">
+      <section id="faq" className="stack-card z-[120] w-full py-20 md:py-28 bg-white text-[#0F0F15] rounded-t-[2.5rem] md:rounded-t-[3rem] shadow-[0_-20px_50px_rgba(0,0,0,0.15)] mt-[-2.5rem] md:mt-[-3rem] overflow-hidden">
         <div className="max-w-4xl mx-auto px-6 md:px-12 w-full">
           <div className="mb-12 md:mb-16 animate-on-scroll">
             <p className="flex items-center gap-3 uppercase text-sm font-bold tracking-widest font-extended text-[#0F0F15]/60 mb-4"><span className="font-mirano">11</span><span className="w-8 h-[2px] bg-[#0F0F15]/30" aria-hidden="true"></span>Perguntas frequentes</p>
@@ -786,7 +786,7 @@ export default function App() {
       </section>
 
       {/* SEÇÃO 13 — CTA FINAL + FORMULÁRIO */}
-      <section id="contato" className="stack-card z-[130] w-full py-20 md:py-28 bg-[#D8D4BD] text-[#0F0F15] rounded-t-[2.5rem] md:rounded-t-[3rem] shadow-[0_-20px_50px_rgba(0,0,0,0.2)] mt-[-2rem] md:mt-0 overflow-hidden">
+      <section id="contato" className="stack-card z-[130] w-full py-20 md:py-28 bg-[#D8D4BD] text-[#0F0F15] rounded-t-[2.5rem] md:rounded-t-[3rem] shadow-[0_-20px_50px_rgba(0,0,0,0.2)] mt-[-2.5rem] md:mt-[-3rem] overflow-hidden">
         <div className="max-w-7xl mx-auto px-6 md:px-12 w-full">
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-start">
             <div className="animate-on-scroll lg:sticky lg:top-28">
@@ -813,7 +813,7 @@ export default function App() {
       </section>
 
       {/* RODAPÉ */}
-      <footer className="relative z-[140] w-full bg-[#0F0F15] text-[#D8D4BD] pt-20 pb-12 rounded-t-[2.5rem] md:rounded-t-[3rem] shadow-[0_-20px_50px_rgba(0,0,0,0.5)] overflow-hidden">
+      <footer className="relative z-[140] w-full bg-[#0F0F15] text-[#D8D4BD] pt-20 pb-12 rounded-t-[2.5rem] md:rounded-t-[3rem] shadow-[0_-20px_50px_rgba(0,0,0,0.5)] mt-[-2.5rem] md:mt-[-3rem] overflow-hidden">
         <div className="max-w-7xl mx-auto px-6 md:px-12">
           <div className="grid md:grid-cols-[1.5fr_1fr_1fr] gap-12 md:gap-10 mb-14">
             <div>
