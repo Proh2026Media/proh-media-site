@@ -76,8 +76,11 @@ export default function App() {
     const stackCards = Array.from(document.querySelectorAll('.stack-card'));
     const setStackTops = () => {
       const vh = window.innerHeight;
+      // Só no desktop (sticky). No mobile as cartas são position: relative,
+      // e um top negativo as deslocaria visualmente.
+      const desktop = window.matchMedia('(min-width: 768px)').matches;
       stackCards.forEach((el) => {
-        el.style.top = Math.min(0, vh - el.offsetHeight) + 'px';
+        el.style.top = desktop ? Math.min(0, vh - el.offsetHeight) + 'px' : '';
       });
     };
     setStackTops();
@@ -257,7 +260,7 @@ export default function App() {
           </nav>
 
           <div className="flex items-center gap-3">
-            <a href="#contato" className="hidden lg:inline-flex whitespace-nowrap bg-[#0F0F15] text-[#D8D4BD] px-6 py-3 text-sm font-bold uppercase tracking-wider hover:bg-white hover:text-[#0F0F15] hover:shadow-[0_0_20px_rgba(255,255,255,0.3)] transition-all duration-300 rounded-xl font-extended">
+            <a href="#contato" className="hidden lg:inline-flex whitespace-nowrap bg-[#0F0F15] text-[#D8D4BD] px-6 py-3 text-sm font-bold uppercase tracking-wider hover:bg-white hover:text-[#0F0F15] hover:shadow-[0_0_20px_rgba(255,255,255,0.3)] transition-all duration-300 rounded-full font-extended">
               Começar um projeto
             </a>
 
@@ -267,7 +270,7 @@ export default function App() {
               onClick={() => setMenuOpen((v) => !v)}
               aria-label={menuOpen ? 'Fechar menu' : 'Abrir menu'}
               aria-expanded={menuOpen}
-              className="lg:hidden inline-flex items-center justify-center w-11 h-11 rounded-xl text-[#0F0F15] hover:bg-[#0F0F15]/5 transition-colors"
+              className="lg:hidden inline-flex items-center justify-center w-11 h-11 rounded-full text-[#0F0F15] hover:bg-[#0F0F15]/5 transition-colors"
             >
               {menuOpen ? <X size={26} /> : <Menu size={26} />}
             </button>
@@ -284,7 +287,7 @@ export default function App() {
             {navLinks.map((l) => (
               <a key={l.id} href={`#${l.id}`} onClick={closeMenu} className="py-4 text-lg font-bold uppercase tracking-wider text-[#0F0F15] border-b border-[#0F0F15]/10 font-extended">{l.label}</a>
             ))}
-            <a href="#contato" onClick={closeMenu} className="mt-5 bg-[#0F0F15] text-[#D8D4BD] px-6 py-4 text-sm font-bold uppercase tracking-widest text-center rounded-xl font-extended">
+            <a href="#contato" onClick={closeMenu} className="mt-5 bg-[#0F0F15] text-[#D8D4BD] px-6 py-4 text-sm font-bold uppercase tracking-widest text-center rounded-full font-extended">
               Começar um projeto
             </a>
           </nav>
@@ -311,11 +314,11 @@ export default function App() {
               marcas, projetos e causas em presença, crescimento e impacto real.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 animate-on-scroll delay-300">
-              <a href="#contato" className="inline-flex items-center justify-center gap-2 bg-[#0F0F15] text-[#D8D4BD] px-8 py-4 text-sm font-bold uppercase tracking-wider hover:bg-white hover:text-[#0F0F15] transition-all duration-300 rounded-xl group font-extended w-full sm:w-fit shadow-lg hover:shadow-2xl">
+              <a href="#contato" className="inline-flex items-center justify-center gap-2 bg-[#0F0F15] text-[#D8D4BD] px-8 py-4 text-sm font-bold uppercase tracking-wider hover:bg-white hover:text-[#0F0F15] transition-all duration-300 rounded-full group font-extended w-full sm:w-fit shadow-lg hover:shadow-2xl">
                 Quero propagar valor
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </a>
-              <a href="#metodo" className="inline-flex items-center justify-center gap-2 border-2 border-[#0F0F15] text-[#0F0F15] px-8 py-4 text-sm font-bold uppercase tracking-wider hover:bg-[#0F0F15] hover:text-[#D8D4BD] transition-all duration-300 rounded-xl font-extended w-full sm:w-fit">
+              <a href="#metodo" className="inline-flex items-center justify-center gap-2 border-2 border-[#0F0F15] text-[#0F0F15] px-8 py-4 text-sm font-bold uppercase tracking-wider hover:bg-[#0F0F15] hover:text-[#D8D4BD] transition-all duration-300 rounded-full font-extended w-full sm:w-fit">
                 Conhecer nosso método
               </a>
             </div>
@@ -578,7 +581,7 @@ export default function App() {
             <p className="text-sm md:text-lg font-bold uppercase tracking-[0.2em] text-white/80 font-extended mb-8">
               Origem <span className="text-[#D8D4BD]/40 mx-1">→</span> Forma <span className="text-[#D8D4BD]/40 mx-1">→</span> Voz <span className="text-[#D8D4BD]/40 mx-1">→</span> Alcance <span className="text-[#D8D4BD]/40 mx-1">→</span> Efeito
             </p>
-            <a href="#contato" className="inline-flex items-center justify-center gap-2 bg-[#D8D4BD] text-[#0F0F15] px-8 py-4 text-sm font-bold uppercase tracking-wider hover:bg-white transition-all duration-300 rounded-xl group font-extended shadow-lg">
+            <a href="#contato" className="inline-flex items-center justify-center gap-2 bg-[#D8D4BD] text-[#0F0F15] px-8 py-4 text-sm font-bold uppercase tracking-wider hover:bg-white transition-all duration-300 rounded-full group font-extended shadow-lg">
               Aplicar o Sistema <Proh />
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </a>
@@ -671,7 +674,7 @@ export default function App() {
                   </li>
                 ))}
               </ul>
-              <a href="#contato" className="inline-flex items-center justify-center gap-2 bg-[#D8D4BD] text-[#0F0F15] px-8 py-4 text-sm font-bold uppercase tracking-wider hover:bg-white transition-all duration-300 rounded-xl group font-extended shadow-lg">
+              <a href="#contato" className="inline-flex items-center justify-center gap-2 bg-[#D8D4BD] text-[#0F0F15] px-8 py-4 text-sm font-bold uppercase tracking-wider hover:bg-white transition-all duration-300 rounded-full group font-extended shadow-lg">
                 Propagar uma causa
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </a>
@@ -712,7 +715,7 @@ export default function App() {
           </div>
 
           <div className="text-center animate-on-scroll delay-400">
-            <a href="#contato" className="inline-flex items-center justify-center gap-2 bg-[#0F0F15] text-[#D8D4BD] px-8 py-4 text-sm font-bold uppercase tracking-wider hover:bg-white hover:text-[#0F0F15] transition-all duration-300 rounded-xl group font-extended shadow-lg">
+            <a href="#contato" className="inline-flex items-center justify-center gap-2 bg-[#0F0F15] text-[#D8D4BD] px-8 py-4 text-sm font-bold uppercase tracking-wider hover:bg-white hover:text-[#0F0F15] transition-all duration-300 rounded-full group font-extended shadow-lg">
               Encontrar o modelo ideal
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </a>
@@ -937,7 +940,7 @@ function ContactForm() {
         </select>
       </div>
 
-      <button type="submit" className="w-full bg-[#0F0F15] text-[#D8D4BD] px-8 py-5 text-sm font-bold uppercase tracking-widest hover:bg-black transition-all rounded-xl font-extended shadow-lg flex items-center justify-center gap-2 group">
+      <button type="submit" className="w-full bg-[#0F0F15] text-[#D8D4BD] px-8 py-5 text-sm font-bold uppercase tracking-widest hover:bg-black transition-all rounded-full font-extended shadow-lg flex items-center justify-center gap-2 group">
         <MessageCircle className="w-4 h-4" />
         Enviar pelo WhatsApp
         <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
@@ -1040,7 +1043,7 @@ function GeminiSimulator() {
             <button
               onClick={generateIdeas}
               disabled={loading || !businessNiche.trim()}
-              className="bg-[#0F0F15] text-[#D8D4BD] px-6 py-4 rounded-xl font-bold uppercase tracking-wider hover:bg-black transition-all font-extended disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 whitespace-nowrap shadow-lg"
+              className="bg-[#0F0F15] text-[#D8D4BD] px-6 py-4 rounded-full font-bold uppercase tracking-wider hover:bg-black transition-all font-extended disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 whitespace-nowrap shadow-lg"
             >
               {loading ? <Loader2 size={18} className="animate-spin" /> : <Sparkles size={18} />}
               {loading ? 'Gerando...' : 'Gerar Ideias'}
