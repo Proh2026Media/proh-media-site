@@ -109,18 +109,6 @@ export default function App() {
           box-shadow: 0 8px 32px 0 rgba(17, 17, 17, 0.05);
         }
 
-        /* Efeito Parallax Background.
-           background-attachment: fixed trava/pisca em navegadores mobile (iOS Safari),
-           então só o ativamos em telas largas com ponteiro fino (desktop). */
-        .bg-parallax {
-          background-position: center;
-          background-size: cover;
-          background-repeat: no-repeat;
-        }
-        @media (min-width: 768px) and (hover: hover) and (pointer: fine) {
-          .bg-parallax { background-attachment: fixed; }
-        }
-
         /* Animações de Scroll (Fade & Slide) */
         .animate-on-scroll {
           opacity: 0;
@@ -216,13 +204,7 @@ export default function App() {
       */}
 
       {/* HERO SECTION - Card 1 */}
-      <section id="hero" className="md:sticky md:top-0 z-10 w-full min-h-screen flex flex-col justify-center overflow-hidden relative">
-        {/* Parallax Fotográfico */}
-        <div className="absolute inset-0 z-0 bg-parallax" style={{ backgroundImage: 'url(https://images.unsplash.com/photo-1600607686527-6fb886090705?q=80&w=2000&auto=format&fit=crop)' }}>
-          <div className="absolute inset-0 bg-[#DCD7C9]/60 mix-blend-multiply"></div>
-          <div className="absolute inset-0 bg-gradient-to-b from-[#DCD7C9]/30 to-[#DCD7C9]"></div>
-        </div>
-
+      <section id="hero" className="md:sticky md:top-0 z-10 w-full min-h-screen flex flex-col justify-center overflow-hidden relative bg-[#DCD7C9]">
         <div className="max-w-7xl w-full mx-auto px-6 md:px-12 relative z-10 pt-28 pb-20 md:pt-32">
           <div className="max-w-4xl glass-panel-light p-6 sm:p-8 md:p-14 rounded-[2rem] md:rounded-[2.5rem] animate-on-scroll">
             <h2 className="text-[#111111] font-bold uppercase tracking-widest text-xs sm:text-sm md:text-base mb-6 border-l-4 border-[#111111] pl-4 font-extended animate-on-scroll delay-100">
@@ -249,11 +231,6 @@ export default function App() {
 
       {/* MANIFESTO / CONCEITO - Card 2 */}
       <section id="conceito" className="md:sticky md:top-0 z-20 w-full md:min-h-screen flex flex-col md:justify-center py-20 md:py-24 rounded-t-[2.5rem] md:rounded-t-[3rem] bg-[#111111] text-[#DCD7C9] overflow-hidden shadow-[0_-20px_50px_rgba(0,0,0,0.4)] relative mt-[-2rem] md:mt-0 transition-transform duration-500">
-        {/* Parallax Fundo Liquid Dark */}
-        <div className="absolute inset-0 z-0 opacity-40 bg-parallax mix-blend-luminosity" style={{ backgroundImage: 'url(https://images.unsplash.com/photo-1557804506-669a67965ba0?q=80&w=1600&auto=format&fit=crop)' }}>
-          <div className="absolute inset-0 bg-gradient-to-r from-[#111111] via-[#111111]/80 to-transparent"></div>
-        </div>
-
         <div className="max-w-7xl mx-auto px-6 md:px-12 grid md:grid-cols-2 gap-10 md:gap-16 items-center relative z-10">
           <div className="animate-on-scroll">
             <div className="text-6xl md:text-9xl font-black text-white/5 mb-6 leading-none font-extended">
@@ -283,11 +260,6 @@ export default function App() {
 
       {/* DUAS DIMENSÕES - Card 3 */}
       <section id="proposito" className="md:sticky md:top-0 z-30 w-full md:min-h-screen flex flex-col md:justify-center py-20 md:py-24 bg-[#DCD7C9] text-[#111111] rounded-t-[2.5rem] md:rounded-t-[3rem] shadow-[0_-20px_50px_rgba(0,0,0,0.3)] relative mt-[-2rem] md:mt-0 overflow-hidden">
-        {/* Parallax Fundo Liquid Beige */}
-        <div className="absolute inset-0 z-0 opacity-40 bg-parallax" style={{ backgroundImage: 'url(https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1600&auto=format&fit=crop)' }}>
-          <div className="absolute inset-0 bg-[#DCD7C9]/60 backdrop-blur-[2px]"></div>
-        </div>
-
         <div className="max-w-7xl mx-auto px-6 md:px-12 relative z-10">
           <div className="text-center mb-12 md:mb-16 animate-on-scroll">
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-black mb-4 uppercase tracking-tighter font-extended leading-tight">As duas dimensões do <span className="mark-dark">proPAGAR</span></h2>
@@ -352,9 +324,6 @@ export default function App() {
 
       {/* PILARES DE ATUAÇÃO - Card 4 */}
       <section id="pilares" className="md:sticky md:top-0 z-40 w-full md:min-h-screen flex flex-col md:justify-center py-20 md:py-24 bg-[#E5E1D5] rounded-t-[2.5rem] md:rounded-t-[3rem] shadow-[0_-20px_50px_rgba(0,0,0,0.15)] relative mt-[-2rem] md:mt-0 overflow-hidden">
-        {/* Fundo leve para diferenciar do card anterior */}
-        <div className="absolute inset-0 z-0 opacity-[0.08] bg-parallax mix-blend-multiply" style={{ backgroundImage: 'url(https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=1600&auto=format&fit=crop)' }}></div>
-
         <div className="max-w-7xl mx-auto px-6 md:px-12 relative z-10 w-full">
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-black mb-12 md:mb-16 uppercase tracking-tighter text-center font-extended animate-on-scroll">
             Pilares de <span className="mark-dark">Atuação</span>
@@ -387,9 +356,6 @@ export default function App() {
 
       {/* FOOTER / CTA - Ultimo Card */}
       <footer id="contato" className="relative z-50 w-full bg-[#111111] text-[#DCD7C9] pt-24 md:pt-32 pb-12 rounded-t-[2.5rem] md:rounded-t-[3rem] shadow-[0_-20px_50px_rgba(0,0,0,0.6)] mt-[-2rem] md:mt-0 overflow-hidden">
-        {/* Fundo do footer parallax */}
-        <div className="absolute inset-0 z-0 opacity-10 bg-parallax grayscale" style={{ backgroundImage: 'url(https://images.unsplash.com/photo-1600607686527-6fb886090705?q=80&w=2000&auto=format&fit=crop)' }}></div>
-
         <div className="max-w-7xl mx-auto px-6 md:px-12 flex flex-col items-center text-center relative z-10">
 
           <h2 className="text-4xl sm:text-5xl md:text-8xl font-black tracking-tighter mb-8 text-white font-extended animate-on-scroll leading-[0.95]">
