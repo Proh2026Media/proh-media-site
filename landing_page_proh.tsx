@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Target, TrendingUp, Megaphone, Users, Globe, ArrowRight, CheckCircle2, Sparkles, Loader2, Menu, X } from 'lucide-react';
 
-// --- LOGOS OFICIAIS ---
-// PROH = escrita completa | PH = abreviada (só as letras) | "bg" = versão com fundo.
+// --- LOGOS OFICIAIS (pasta /SVG) ---
+// PROH = escrita completa | PH = abreviada (só as letras) | "bg" = versão com fundo
+// | "s-media" = sem a palavra MEDIA embaixo.
 // Header (fundo bege claro): PROH completo em preto.
-import logoHeader from './src/assets/logos/proh-black.svg';
+import logoHeader from './SVG/proh-black.svg';
 // Rodapé (fundo preto): PROH completo em branco com o H em bege.
-import logoFooter from './src/assets/logos/proh-white-off.svg';
+import logoFooter from './SVG/proh-white-off.svg';
 
 // --- CONFIGURAÇÃO DO SIMULADOR DE IA ---
 // A chave da API NÃO fica no site. O front chama um proxy (Cloudflare Worker)
@@ -71,12 +72,12 @@ export default function App() {
   }, []);
 
   return (
-    <div className="text-[#111111] bg-[#DCD7C9] selection:bg-[#111111] selection:text-[#DCD7C9] overflow-x-hidden" style={{ fontFamily: "'Mirano', sans-serif" }}>
+    <div className="text-[#111111] bg-[#DCD7C9] selection:bg-[#111111] selection:text-[#DCD7C9] overflow-x-hidden" style={{ fontFamily: "'Gotham', sans-serif" }}>
       <style dangerouslySetInnerHTML={{__html: `
         html { scroll-behavior: smooth; scroll-padding-top: 5rem; }
         * { -webkit-tap-highlight-color: transparent; }
         body { overflow-x: hidden; }
-        .font-extended { font-family: 'Extended', sans-serif; }
+        .font-extended { font-family: 'Gotham', sans-serif; }
 
         /* Destaque legível para palavras-chave sobre fundos claros */
         .mark-dark {

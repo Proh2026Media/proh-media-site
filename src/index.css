@@ -1,28 +1,59 @@
+/* Família de fonte oficial: Gotham (arquivos em /GOTHAM).
+   O Vite resolve os caminhos relativos abaixo e inclui as fontes no build. */
+@font-face {
+  font-family: 'Gotham';
+  src: url('../GOTHAM/Gotham-Light.otf') format('opentype');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Gotham';
+  src: url('../GOTHAM/Gotham-Book.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Gotham';
+  src: url('../GOTHAM/Gotham-Medium.otf') format('opentype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Gotham';
+  src: url('../GOTHAM/Gotham-Bold.otf') format('opentype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Gotham';
+  src: url('../GOTHAM/Gotham-Black.otf') format('opentype');
+  font-weight: 800 900;
+  font-style: normal;
+  font-display: swap;
+}
+/* Itálicos (usados quando aplicar italic) */
+@font-face {
+  font-family: 'Gotham';
+  src: url('../GOTHAM/Gotham-BookIta.otf') format('opentype');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Gotham';
+  src: url('../GOTHAM/Gotham-BoldIta.otf') format('opentype');
+  font-weight: 700;
+  font-style: italic;
+  font-display: swap;
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-/*
-  Brand fonts: "Mirano" (base) and "Extended" (headlines) are licensed
-  brand faces. Drop the font files into /public/fonts and declare them here
-  to match the brand exactly. Until then, they fall back to the system
-  sans-serif stack configured in tailwind.config.js.
-
-  Example once you have the files:
-
-  @font-face {
-    font-family: 'Mirano';
-    src: url('/fonts/Mirano.woff2') format('woff2');
-    font-weight: 100 900;
-    font-display: swap;
-  }
-  @font-face {
-    font-family: 'Extended';
-    src: url('/fonts/Extended.woff2') format('woff2');
-    font-weight: 100 900;
-    font-display: swap;
-  }
-*/
 
 html,
 body {

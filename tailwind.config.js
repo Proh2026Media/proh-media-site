@@ -8,9 +8,10 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        // Brand fonts fall back gracefully until the licensed files are added.
-        mirano: ['Mirano', 'ui-sans-serif', 'system-ui', 'sans-serif'],
-        extended: ['Extended', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        // Fonte oficial da marca: Gotham (declarada em src/index.css).
+        sans: ['Gotham', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        gotham: ['Gotham', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        extended: ['Gotham', 'ui-sans-serif', 'system-ui', 'sans-serif'],
       },
     },
   },
