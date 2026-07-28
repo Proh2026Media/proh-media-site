@@ -1,0 +1,34 @@
+# ============================================================
+# PROH Media — segurança e performance (Hostinger / LiteSpeed)
+# ============================================================
+
+# Força HTTPS
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteCond %{HTTPS} !=on
+  RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
+</IfModule>
+
+<IfModule mod_headers.c>
+  # Impede que o navegador "adivinhe" tipos de conteúdo
+  Header always set X-Content-Type-Options "nosniff"
+  # Impede que o site seja embutido em iframes de terceiros (clickjacking)
+  Header always set X-Frame-Options "SAMEORIGIN"
+  # Não vaza URLs completas para outros sites
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+  # Bloqueia APIs sensíveis do navegador que o site não usa
+  Header always set Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=()"
+  # HTTPS obrigatório por 1 ano (HSTS)
+  Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+  # Content Security Policy: só o próprio site + imagens do Unsplash
+  Header always set Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://images.unsplash.com; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'; upgrade-insecure-requests"
+</IfModule>
+
+# Cache longo para assets com hash no nome (js/css/fontes/imagens)
+<IfModule mod_expires.c>
+  ExpiresActive On
+  <FilesMatch "\.(js|css|woff2|otf|svg|jpg|jpeg|png|webp)$">
+    ExpiresDefault "access plus 1 year"
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </FilesMatch>
+</IfModule>

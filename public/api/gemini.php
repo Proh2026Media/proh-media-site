@@ -26,6 +26,25 @@ $method = $_SERVER['REQUEST_METHOD'] ?? '';
 if ($method === 'OPTIONS') { http_response_code(204); exit; }
 if ($method !== 'POST')    { http_response_code(405); echo json_encode(['error' => 'Método não permitido.']); exit; }
 
+// Limite de requisições: 10 por minuto por IP (protege a cota da API).
+$ipHash = hash('sha256', ($_SERVER['REMOTE_ADDR'] ?? '') . '|proh-gemini');
+$rlFile = sys_get_temp_dir() . '/proh_rl_' . $ipHash;
+$now    = time();
+$hits   = [];
+if (is_readable($rlFile)) {
+    foreach (file($rlFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) as $t) {
+        if ($now - (int) $t < 60) { $hits[] = (int) $t; }
+    }
+}
+if (count($hits) >= 10) {
+    http_response_code(429);
+    header('Retry-After: 60');
+    echo json_encode(['error' => 'Muitas solicitações. Aguarde um instante e tente novamente.']);
+    exit;
+}
+$hits[] = $now;
+@file_put_contents($rlFile, implode("\n", $hits), LOCK_EX);
+
 // Chave: procurada fora da pasta pública (1 ou 2 níveis acima), com
 // fallback para variável de ambiente.
 $apiKey = '';
