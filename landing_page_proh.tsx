@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import {
   ArrowRight, CheckCircle2, Sparkles, Loader2, Menu, X, ChevronDown,
   Compass, Fingerprint, PenLine, TrendingUp, MonitorSmartphone, HeartHandshake,
-  Briefcase, UserRound, Landmark, HandHeart,
+  Briefcase, UserRound, Landmark, HandHeart, MessageCircle,
 } from 'lucide-react';
 
 // --- LOGOS OFICIAIS (pasta /SVG) ---
@@ -10,8 +10,8 @@ import logoHeader from './SVG/proh-black.svg';
 import logoFooter from './SVG/proh-white-off.svg';
 
 // --- CONFIGURAÇÃO ---
-// E-mail que recebe os projetos do formulário (ajuste quando tiver o oficial).
-const CONTACT_EMAIL = 'contato@prohmedia.com';
+// WhatsApp que recebe os projetos do formulário (somente dígitos, com DDI).
+const WHATSAPP_NUMBER = '5519995951316';
 // Redes sociais: preencha as URLs para os links aparecerem no rodapé.
 const SOCIAL = { instagram: '', linkedin: '' };
 
@@ -282,11 +282,11 @@ export default function App() {
             </p>
           </div>
 
-          {/* Foto editorial: Avenida Paulista — pessoas reais, movimento, alcance */}
+          {/* Foto: apresentação de resultados — marketing e B2B com pessoas reais */}
           <div className="animate-on-scroll delay-300">
             <img
-              src="https://images.unsplash.com/photo-1578002573559-689b0abc4148?q=80&w=1200&auto=format&fit=crop"
-              alt="Avenida Paulista, em São Paulo, com pessoas atravessando a ciclovia entre os prédios"
+              src="https://images.unsplash.com/photo-1758691736490-03d39c292d7a?q=80&w=1200&auto=format&fit=crop"
+              alt="Profissional apresentando gráficos de resultados para a equipe em uma reunião"
               loading="eager"
               className="img-brand w-full h-64 sm:h-80 lg:h-[32rem] rounded-[2rem] md:rounded-[2.5rem] shadow-2xl"
             />
@@ -317,10 +317,10 @@ export default function App() {
               </ul>
             </div>
             <div className="flex flex-col gap-6 animate-on-scroll delay-200">
-            {/* Foto conceitual: prédios apontando para cima, avião cruzando o céu — alcançar mais */}
+            {/* Foto: rosto real — comunicação existe para fazer sentido para pessoas */}
             <img
-              src="https://images.unsplash.com/photo-1529063317578-487cc3a86772?q=80&w=1200&auto=format&fit=crop"
-              alt="Prédios vistos de baixo com um avião cruzando o céu ao centro"
+              src="https://images.unsplash.com/photo-1704579924216-31ef96f7e008?q=80&w=1200&auto=format&fit=crop"
+              alt="Retrato de uma mulher de cabelos cacheados sorrindo"
               loading="lazy"
               className="img-brand w-full h-52 md:h-64 rounded-[2rem] md:rounded-[2.5rem] shadow-2xl"
             />
@@ -398,10 +398,10 @@ export default function App() {
           <div className="grid md:grid-cols-2 gap-6 md:gap-12">
             {/* Valor de negócio */}
             <div className="bg-[#D8D4BD]/50 border border-[#0F0F15]/5 p-8 sm:p-10 md:p-14 transition-all hover:-translate-y-2 duration-500 rounded-[2rem] md:rounded-[2.5rem] animate-on-scroll delay-100">
-              {/* Foto: estratégia em ação — brainstorm na parede de vidro */}
+              {/* Foto: performance na prática — painel de métricas e dados */}
               <img
-                src="https://images.unsplash.com/photo-1758691736836-0413b066787a?q=80&w=1000&auto=format&fit=crop"
-                alt="Equipe diversa fazendo brainstorm com notas adesivas em uma parede de vidro"
+                src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=1000&auto=format&fit=crop"
+                alt="Tela de laptop com painel de métricas e gráficos de desempenho"
                 loading="lazy"
                 className="img-brand w-full h-44 md:h-52 rounded-2xl shadow-lg mb-8"
               />
@@ -428,10 +428,10 @@ export default function App() {
 
             {/* Valor humano */}
             <div className="bg-[#0F0F15] text-[#D8D4BD] p-8 sm:p-10 md:p-14 transition-all hover:-translate-y-2 duration-500 rounded-[2rem] md:rounded-[2.5rem] shadow-2xl animate-on-scroll delay-300">
-              {/* Foto: encontro humano real e descontraído */}
+              {/* Foto: causa social real — educação e oportunidade */}
               <img
-                src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=1000&auto=format&fit=crop"
-                alt="Três pessoas rindo juntas durante uma conversa à mesa"
+                src="https://images.unsplash.com/photo-1610500796385-3ffc1ae2f046?q=80&w=1000&auto=format&fit=crop"
+                alt="Meninos lendo livros juntos em uma atividade educativa"
                 loading="lazy"
                 className="img-brand w-full h-44 md:h-52 rounded-2xl shadow-lg mb-8"
               />
@@ -625,10 +625,10 @@ export default function App() {
               </a>
             </div>
             <div className="flex flex-col gap-6 animate-on-scroll delay-200">
-              {/* Foto: voluntariado com dignidade e participação */}
+              {/* Foto: comunidade real — participação e pertencimento */}
               <img
-                src="https://images.unsplash.com/photo-1593113598332-cd288d649433?q=80&w=1200&auto=format&fit=crop"
-                alt="Voluntária organizando caixas de doações com um sorriso"
+                src="https://images.unsplash.com/photo-1694286068561-3233c946e9be?q=80&w=1200&auto=format&fit=crop"
+                alt="Crianças reunidas em uma atividade comunitária ao ar livre"
                 loading="lazy"
                 className="img-brand w-full h-56 md:h-72 rounded-[2rem] md:rounded-[2.5rem] shadow-2xl"
               />
@@ -787,18 +787,21 @@ function ContactForm() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    // Monta a mensagem e abre o WhatsApp da PROH com o texto pronto para envio.
     const body = [
-      `Nome: ${form.nome}`,
-      `Empresa ou projeto: ${form.empresa}`,
-      `E-mail: ${form.email}`,
-      `WhatsApp: ${form.whatsapp}`,
-      `Tipo de projeto: ${form.tipo}`,
-      `Momento: ${form.momento}`,
+      `Olá, PROH! Quero propagar valor. 🚀`,
       '',
-      'Principal desafio:',
+      `*Nome:* ${form.nome}`,
+      `*Empresa ou projeto:* ${form.empresa || '—'}`,
+      `*E-mail:* ${form.email}`,
+      `*WhatsApp:* ${form.whatsapp || '—'}`,
+      `*Tipo de projeto:* ${form.tipo}`,
+      `*Momento:* ${form.momento}`,
+      '',
+      `*Principal desafio:*`,
       form.desafio,
     ].join('\n');
-    window.location.href = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(`Novo projeto — ${form.empresa || form.nome}`)}&body=${encodeURIComponent(body)}`;
+    window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(body)}`, '_blank', 'noopener');
     setSent(true);
   };
 
@@ -854,13 +857,17 @@ function ContactForm() {
       </div>
 
       <button type="submit" className="w-full bg-[#0F0F15] text-[#D8D4BD] px-8 py-5 text-sm font-bold uppercase tracking-widest hover:bg-black transition-all rounded-xl font-extended shadow-lg flex items-center justify-center gap-2 group">
-        Enviar projeto
+        <MessageCircle className="w-4 h-4" />
+        Enviar pelo WhatsApp
         <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
       </button>
+      <p className="mt-3 text-xs font-medium text-[#0F0F15]/50 text-center">
+        Ao enviar, o WhatsApp abre com sua mensagem pronta — é só confirmar.
+      </p>
 
       {sent && (
-        <p className="mt-5 text-sm font-medium text-[#0F0F15]/80 text-center">
-          Seu e-mail foi preparado no seu aplicativo — basta confirmar o envio.
+        <p className="mt-4 text-sm font-medium text-[#0F0F15]/80 text-center">
+          Abrimos o WhatsApp com sua mensagem pronta — é só apertar enviar.
           Em breve, entraremos em contato para entender como podemos propagar esse valor.
         </p>
       )}
