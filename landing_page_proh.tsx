@@ -71,8 +71,26 @@ export default function App() {
     const animElements = document.querySelectorAll('.animate-on-scroll');
     animElements.forEach((el) => animObserver.observe(el));
 
+    // Pilha de cartas: seções mais altas que a tela pinam pelo fundo
+    // (top negativo), para nunca cortar a leitura.
+    const stackCards = Array.from(document.querySelectorAll('.stack-card'));
+    const setStackTops = () => {
+      const vh = window.innerHeight;
+      stackCards.forEach((el) => {
+        el.style.top = Math.min(0, vh - el.offsetHeight) + 'px';
+      });
+    };
+    setStackTops();
+    window.addEventListener('resize', setStackTops);
+    window.addEventListener('load', setStackTops);
+    const stackRO = 'ResizeObserver' in window ? new ResizeObserver(setStackTops) : null;
+    if (stackRO) stackCards.forEach((el) => stackRO.observe(el));
+
     return () => {
       window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('resize', setStackTops);
+      window.removeEventListener('load', setStackTops);
+      if (stackRO) stackRO.disconnect();
       observer.disconnect();
       animObserver.disconnect();
     };
@@ -155,6 +173,13 @@ export default function App() {
           object-fit: cover;
         }
         .img-brand:hover { filter: grayscale(0); }
+
+        /* Pilha de cartas: cada seção pina (com top calculado via JS para
+           seções mais altas que a tela) e a seguinte desliza por cima. */
+        .stack-card { position: relative; }
+        @media (min-width: 768px) {
+          .stack-card { position: sticky; top: 0; }
+        }
 
         /* Faixa com o sistema de mensagens da marca */
         .marquee { display: flex; overflow: hidden; }
@@ -271,7 +296,7 @@ export default function App() {
           Da seção Soluções em diante, o fluxo volta ao normal. */}
 
       {/* SEÇÃO 1 — HERO */}
-      <section id="hero" className="md:sticky md:top-0 z-10 w-full min-h-screen flex flex-col justify-center overflow-hidden relative bg-[#D8D4BD]">
+      <section id="hero" className="stack-card z-[10] w-full min-h-screen flex flex-col justify-center overflow-hidden bg-[#D8D4BD]">
         <div className="max-w-7xl w-full mx-auto px-6 md:px-12 relative z-10 pt-28 pb-20 md:pt-32 grid lg:grid-cols-[1.15fr_0.85fr] gap-10 lg:gap-16 items-center">
           <div className="max-w-4xl">
             <h2 className="text-[#0F0F15] font-bold uppercase tracking-widest text-xs sm:text-sm md:text-base mb-6 border-l-4 border-[#0F0F15] pl-4 font-extended animate-on-scroll">
@@ -319,7 +344,7 @@ export default function App() {
       </section>
 
       {/* SEÇÃO 2 — O CONCEITO */}
-      <section id="conceito" className="md:sticky md:top-0 z-20 w-full md:min-h-screen flex flex-col md:justify-center py-20 md:py-24 rounded-t-[2.5rem] md:rounded-t-[3rem] bg-[#0F0F15] text-[#D8D4BD] overflow-hidden shadow-[0_-20px_50px_rgba(0,0,0,0.4)] relative mt-[-2rem] md:mt-0">
+      <section id="conceito" className="stack-card z-[20] w-full md:min-h-screen flex flex-col md:justify-center py-20 md:py-24 rounded-t-[2.5rem] md:rounded-t-[3rem] bg-[#0F0F15] text-[#D8D4BD] overflow-hidden shadow-[0_-20px_50px_rgba(0,0,0,0.4)] mt-[-2rem] md:mt-0">
         <div className="max-w-7xl mx-auto px-6 md:px-12 relative z-10 w-full">
           <div className="grid md:grid-cols-2 gap-10 md:gap-16 items-center">
             <div className="animate-on-scroll">
@@ -366,12 +391,12 @@ export default function App() {
       </section>
 
       {/* SEÇÃO 3 — O SIGNIFICADO */}
-      <section id="significado" className="md:sticky md:top-0 z-30 w-full md:min-h-screen flex flex-col md:justify-center py-20 md:py-24 bg-[#D8D4BD] text-[#0F0F15] rounded-t-[2.5rem] md:rounded-t-[3rem] shadow-[0_-20px_50px_rgba(0,0,0,0.3)] relative mt-[-2rem] md:mt-0 overflow-hidden">
+      <section id="significado" className="stack-card z-[30] w-full md:min-h-screen flex flex-col md:justify-center py-20 md:py-24 bg-[#D8D4BD] text-[#0F0F15] rounded-t-[2.5rem] md:rounded-t-[3rem] shadow-[0_-20px_50px_rgba(0,0,0,0.3)] mt-[-2rem] md:mt-0 overflow-hidden">
         <div className="max-w-7xl mx-auto px-6 md:px-12 relative z-10 w-full">
-          <div className="text-center mb-12 md:mb-16 animate-on-scroll">
-            <p className="flex items-center gap-3 justify-center uppercase text-sm font-bold tracking-widest font-extended text-[#0F0F15]/60 mb-4"><span className="font-mirano">02</span><span className="w-8 h-[2px] bg-[#0F0F15]/30" aria-hidden="true"></span>O significado</p>
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-black mb-4 uppercase tracking-tighter font-extended leading-tight">
-              Comunicação a favor do progresso,<br className="hidden md:block" /> com o <span className="mark-dark">humano</span> no centro.
+          <div className="max-w-3xl mb-12 md:mb-16 animate-on-scroll">
+            <p className="flex items-center gap-3 uppercase text-sm font-bold tracking-widest font-extended text-[#0F0F15]/60 mb-4"><span className="font-mirano">02</span><span className="w-8 h-[2px] bg-[#0F0F15]/30" aria-hidden="true"></span>O significado</p>
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-black uppercase tracking-tighter font-extended leading-tight">
+              Comunicação a favor do progresso, com o <span className="mark-dark">humano</span> no centro.
             </h2>
           </div>
 
@@ -401,21 +426,21 @@ export default function App() {
             </div>
           </div>
 
-          <p className="text-center text-lg md:text-2xl font-bold font-extended animate-on-scroll delay-400">
+          <p className="text-lg md:text-2xl font-bold font-extended border-l-4 border-[#0F0F15] pl-5 max-w-3xl animate-on-scroll delay-400">
             <Proh /> transforma valor em percepção, presença, crescimento e impacto.
           </p>
         </div>
       </section>
 
       {/* SEÇÃO 4 — DUAS DIMENSÕES DO VALOR */}
-      <section id="dimensoes" className="md:sticky md:top-0 z-40 w-full md:min-h-screen flex flex-col md:justify-center py-20 md:py-24 bg-white text-[#0F0F15] rounded-t-[2.5rem] md:rounded-t-[3rem] shadow-[0_-20px_50px_rgba(0,0,0,0.15)] relative mt-[-2rem] md:mt-0 overflow-hidden">
+      <section id="dimensoes" className="stack-card z-[40] w-full md:min-h-screen flex flex-col md:justify-center py-20 md:py-24 bg-white text-[#0F0F15] rounded-t-[2.5rem] md:rounded-t-[3rem] shadow-[0_-20px_50px_rgba(0,0,0,0.15)] mt-[-2rem] md:mt-0 overflow-hidden">
         <div className="max-w-7xl mx-auto px-6 md:px-12 relative z-10 w-full">
-          <div className="text-center mb-12 md:mb-16 animate-on-scroll">
-            <p className="flex items-center gap-3 justify-center uppercase text-sm font-bold tracking-widest font-extended text-[#0F0F15]/60 mb-4"><span className="font-mirano">03</span><span className="w-8 h-[2px] bg-[#0F0F15]/30" aria-hidden="true"></span>Duas dimensões do valor</p>
+          <div className="max-w-3xl mb-12 md:mb-16 animate-on-scroll">
+            <p className="flex items-center gap-3 uppercase text-sm font-bold tracking-widest font-extended text-[#0F0F15]/60 mb-4"><span className="font-mirano">03</span><span className="w-8 h-[2px] bg-[#0F0F15]/30" aria-hidden="true"></span>Duas dimensões do valor</p>
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-black mb-4 uppercase tracking-tighter font-extended leading-tight">
-              Resultado e humanidade<br className="hidden md:block" /> não precisam caminhar <span className="mark-dark">separados</span>.
+              Resultado e humanidade não precisam caminhar <span className="mark-dark">separados</span>.
             </h2>
-            <p className="text-lg md:text-xl text-[#0F0F15]/70 max-w-3xl mx-auto">
+            <p className="text-lg md:text-xl text-[#0F0F15]/70">
               A comunicação pode gerar crescimento sem se tornar fria. Pode falar de
               impacto sem perder estratégia. Pode construir desejo sem abrir mão da
               responsabilidade.
@@ -484,14 +509,14 @@ export default function App() {
             </div>
           </div>
 
-          <p className="text-center text-base md:text-xl font-medium text-[#0F0F15]/70 mt-12 animate-on-scroll delay-400">
+          <p className="text-base md:text-xl font-bold mt-12 border-l-4 border-[#0F0F15] pl-5 max-w-3xl animate-on-scroll delay-400">
             O resultado não precisa ser apenas um número. Ele também pode ser relevância.
           </p>
         </div>
       </section>
 
       {/* SEÇÃO 5 — SOLUÇÕES */}
-      <section id="solucoes" className="relative z-50 w-full py-20 md:py-28 bg-[#D8D4BD] text-[#0F0F15] rounded-t-[2.5rem] md:rounded-t-[3rem] shadow-[0_-20px_50px_rgba(0,0,0,0.15)] mt-[-2rem] md:mt-0 overflow-hidden">
+      <section id="solucoes" className="stack-card z-[50] w-full py-20 md:py-28 bg-[#D8D4BD] text-[#0F0F15] rounded-t-[2.5rem] md:rounded-t-[3rem] shadow-[0_-20px_50px_rgba(0,0,0,0.15)] mt-[-2rem] md:mt-0 overflow-hidden">
         <div className="max-w-7xl mx-auto px-6 md:px-12 w-full">
           <div className="max-w-3xl mb-12 md:mb-16 animate-on-scroll">
             <p className="flex items-center gap-3 uppercase text-sm font-bold tracking-widest font-extended text-[#0F0F15]/60 mb-4"><span className="font-mirano">04</span><span className="w-8 h-[2px] bg-[#0F0F15]/30" aria-hidden="true"></span>Soluções</p>
@@ -520,7 +545,7 @@ export default function App() {
       </section>
 
       {/* SEÇÃO 6 — MÉTODO */}
-      <section id="metodo" className="relative z-50 w-full py-20 md:py-28 bg-[#0F0F15] text-[#D8D4BD] rounded-t-[2.5rem] md:rounded-t-[3rem] shadow-[0_-20px_50px_rgba(0,0,0,0.4)] mt-[-2rem] md:mt-0 overflow-hidden">
+      <section id="metodo" className="stack-card z-[60] w-full py-20 md:py-28 bg-[#0F0F15] text-[#D8D4BD] rounded-t-[2.5rem] md:rounded-t-[3rem] shadow-[0_-20px_50px_rgba(0,0,0,0.4)] mt-[-2rem] md:mt-0 overflow-hidden">
         <div className="max-w-7xl mx-auto px-6 md:px-12 w-full">
           <div className="grid md:grid-cols-2 gap-10 md:gap-16 items-center mb-12 md:mb-16">
             <div className="animate-on-scroll">
@@ -562,7 +587,7 @@ export default function App() {
       </section>
 
       {/* SEÇÃO 7 — DIFERENCIAIS */}
-      <section id="diferenciais" className="relative z-50 w-full py-20 md:py-28 bg-white text-[#0F0F15] rounded-t-[2.5rem] md:rounded-t-[3rem] shadow-[0_-20px_50px_rgba(0,0,0,0.15)] mt-[-2rem] md:mt-0 overflow-hidden">
+      <section id="diferenciais" className="stack-card z-[70] w-full py-20 md:py-28 bg-white text-[#0F0F15] rounded-t-[2.5rem] md:rounded-t-[3rem] shadow-[0_-20px_50px_rgba(0,0,0,0.15)] mt-[-2rem] md:mt-0 overflow-hidden">
         <div className="max-w-7xl mx-auto px-6 md:px-12 w-full">
           <div className="max-w-3xl mb-12 md:mb-16 animate-on-scroll">
             <p className="flex items-center gap-3 uppercase text-sm font-bold tracking-widest font-extended text-[#0F0F15]/60 mb-4"><span className="font-mirano">06</span><span className="w-8 h-[2px] bg-[#0F0F15]/30" aria-hidden="true"></span>Diferenciais</p>
@@ -583,7 +608,7 @@ export default function App() {
       </section>
 
       {/* SEÇÃO 8 — PARA QUEM É A PROH */}
-      <section id="publicos" className="relative z-50 w-full py-20 md:py-28 bg-[#D8D4BD] text-[#0F0F15] rounded-t-[2.5rem] md:rounded-t-[3rem] shadow-[0_-20px_50px_rgba(0,0,0,0.15)] mt-[-2rem] md:mt-0 overflow-hidden">
+      <section id="publicos" className="stack-card z-[80] w-full py-20 md:py-28 bg-[#D8D4BD] text-[#0F0F15] rounded-t-[2.5rem] md:rounded-t-[3rem] shadow-[0_-20px_50px_rgba(0,0,0,0.15)] mt-[-2rem] md:mt-0 overflow-hidden">
         <div className="max-w-7xl mx-auto px-6 md:px-12 w-full">
           <div className="max-w-3xl mb-12 md:mb-16 animate-on-scroll">
             <p className="flex items-center gap-3 uppercase text-sm font-bold tracking-widest font-extended text-[#0F0F15]/60 mb-4"><span className="font-mirano">07</span><span className="w-8 h-[2px] bg-[#0F0F15]/30" aria-hidden="true"></span>Para quem</p>
@@ -620,7 +645,7 @@ export default function App() {
       </section>
 
       {/* SEÇÃO 9 — IMPACTO */}
-      <section id="impacto" className="relative z-50 w-full py-20 md:py-28 bg-[#0F0F15] text-[#D8D4BD] rounded-t-[2.5rem] md:rounded-t-[3rem] shadow-[0_-20px_50px_rgba(0,0,0,0.4)] mt-[-2rem] md:mt-0 overflow-hidden">
+      <section id="impacto" className="stack-card z-[90] w-full py-20 md:py-28 bg-[#0F0F15] text-[#D8D4BD] rounded-t-[2.5rem] md:rounded-t-[3rem] shadow-[0_-20px_50px_rgba(0,0,0,0.4)] mt-[-2rem] md:mt-0 overflow-hidden">
         <div className="max-w-7xl mx-auto px-6 md:px-12 w-full">
           <div className="grid md:grid-cols-2 gap-10 md:gap-16 items-center">
             <div className="animate-on-scroll">
@@ -670,7 +695,7 @@ export default function App() {
       </section>
 
       {/* SEÇÃO 10 — MODELOS DE PARCERIA */}
-      <section id="modelos" className="relative z-50 w-full py-20 md:py-28 bg-[#D8D4BD] text-[#0F0F15] rounded-t-[2.5rem] md:rounded-t-[3rem] shadow-[0_-20px_50px_rgba(0,0,0,0.15)] mt-[-2rem] md:mt-0 overflow-hidden">
+      <section id="modelos" className="stack-card z-[100] w-full py-20 md:py-28 bg-[#D8D4BD] text-[#0F0F15] rounded-t-[2.5rem] md:rounded-t-[3rem] shadow-[0_-20px_50px_rgba(0,0,0,0.15)] mt-[-2rem] md:mt-0 overflow-hidden">
         <div className="max-w-7xl mx-auto px-6 md:px-12 w-full">
           <div className="max-w-3xl mb-12 md:mb-16 animate-on-scroll">
             <p className="flex items-center gap-3 uppercase text-sm font-bold tracking-widest font-extended text-[#0F0F15]/60 mb-4"><span className="font-mirano">09</span><span className="w-8 h-[2px] bg-[#0F0F15]/30" aria-hidden="true"></span>Modelos de parceria</p>
@@ -696,28 +721,51 @@ export default function App() {
       </section>
 
       {/* SEÇÃO 11 — MANIFESTO */}
-      <section id="manifesto" className="relative z-50 w-full py-24 md:py-32 bg-[#0F0F15] text-[#D8D4BD] rounded-t-[2.5rem] md:rounded-t-[3rem] shadow-[0_-20px_50px_rgba(0,0,0,0.4)] mt-[-2rem] md:mt-0 overflow-hidden">
-        <div className="max-w-4xl mx-auto px-6 md:px-12 w-full text-center">
-          <p className="flex items-center gap-3 justify-center uppercase text-sm font-bold tracking-widest font-extended text-[#D8D4BD]/60 mb-8 animate-on-scroll"><span className="font-mirano">10</span><span className="w-8 h-[2px] bg-[#D8D4BD]/30" aria-hidden="true"></span>Manifesto</p>
-          <h2 className="text-4xl sm:text-5xl md:text-7xl font-black uppercase tracking-tighter font-extended leading-[0.95] mb-12 text-white animate-on-scroll delay-100">
-            Propagação não é barulho.<br />É direção.
-          </h2>
-          <div className="space-y-6 text-lg md:text-2xl font-medium leading-relaxed text-[#D8D4BD]/80 animate-on-scroll delay-200">
-            <p>Nem tudo que aparece permanece.<br />Nem tudo que alcança gera impacto.<br />Nem toda mensagem se transforma em movimento.</p>
-            <p>Para propagar, não basta falar mais alto.<br />É preciso ter <strong className="text-white">verdade. Forma. Direção. Consistência.</strong></p>
-            <p>Acreditamos em marcas que constroem, empresas que geram oportunidades, pessoas que lideram e causas que transformam realidades.</p>
-            <p>Acreditamos que estratégia e humanidade podem caminhar juntas. Que crescimento pode produzir valor. Que influência pode ser usada com responsabilidade. Que comunicação pode gerar negócios e, ao mesmo tempo, gerar significado.</p>
-            <p className="text-white font-bold">A <Proh /> existe para fazer o que tem valor alcançar mais.</p>
+      <section id="manifesto" className="stack-card z-[110] w-full py-24 md:py-32 bg-[#0F0F15] text-[#D8D4BD] rounded-t-[2.5rem] md:rounded-t-[3rem] shadow-[0_-20px_50px_rgba(0,0,0,0.4)] mt-[-2rem] md:mt-0 overflow-hidden">
+        <div className="max-w-7xl mx-auto px-6 md:px-12 w-full">
+          <div className="grid md:grid-cols-[1.1fr_1fr] gap-12 md:gap-20 items-start">
+            {/* Coluna fixa: título e assinatura */}
+            <div className="animate-on-scroll md:sticky md:top-28 self-start">
+              <p className="flex items-center gap-3 uppercase text-sm font-bold tracking-widest font-extended text-[#D8D4BD]/60 mb-6"><span className="font-mirano">10</span><span className="w-8 h-[2px] bg-[#D8D4BD]/30" aria-hidden="true"></span>Manifesto</p>
+              <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black uppercase tracking-tighter font-extended leading-[0.95] text-white">
+                Propagação não é barulho.<br />É direção.
+              </h2>
+              <div className="h-divider text-[#D8D4BD]/60 mt-10" aria-hidden="true"><span></span></div>
+              <p className="mt-8 text-lg md:text-xl font-black uppercase tracking-widest font-mirano text-white">
+                PROH. Propagar valor.
+              </p>
+            </div>
+
+            {/* Coluna de leitura: blocos curtos, alinhados à esquerda */}
+            <div className="max-w-[60ch]">
+              <ul className="space-y-4 text-lg md:text-xl font-medium text-[#D8D4BD]/80 animate-on-scroll">
+                <li className="flex items-start gap-4"><span className="mt-3.5 w-7 h-[2px] bg-[#D8D4BD]/40 shrink-0" aria-hidden="true"></span>Nem tudo que aparece permanece.</li>
+                <li className="flex items-start gap-4"><span className="mt-3.5 w-7 h-[2px] bg-[#D8D4BD]/40 shrink-0" aria-hidden="true"></span>Nem tudo que alcança gera impacto.</li>
+                <li className="flex items-start gap-4"><span className="mt-3.5 w-7 h-[2px] bg-[#D8D4BD]/40 shrink-0" aria-hidden="true"></span>Nem toda mensagem se transforma em movimento.</li>
+              </ul>
+
+              <p className="mt-10 text-base md:text-lg leading-relaxed text-[#D8D4BD]/70 animate-on-scroll delay-100">
+                Para propagar, não basta falar mais alto. É preciso ter:
+              </p>
+              <p className="mt-4 text-2xl md:text-4xl font-black text-white font-extended uppercase tracking-tight leading-tight animate-on-scroll delay-100">
+                Verdade. Forma.<br />Direção. Consistência.
+              </p>
+
+              <div className="mt-10 space-y-6 text-base md:text-lg leading-relaxed text-[#D8D4BD]/70 animate-on-scroll delay-200">
+                <p>Acreditamos em marcas que constroem, empresas que geram oportunidades, pessoas que lideram e causas que transformam realidades.</p>
+                <p>Acreditamos que estratégia e humanidade podem caminhar juntas. Que crescimento pode produzir valor. Que influência pode ser usada com responsabilidade. Que comunicação pode gerar negócios e, ao mesmo tempo, gerar significado.</p>
+              </div>
+
+              <p className="mt-10 text-lg md:text-xl font-bold text-white border-l-4 border-[#D8D4BD] pl-5 animate-on-scroll delay-300">
+                A <Proh /> existe para fazer o que tem valor alcançar mais.
+              </p>
+            </div>
           </div>
-          <div className="h-divider justify-center text-[#D8D4BD] mt-12 animate-on-scroll delay-300" aria-hidden="true"><span></span></div>
-          <p className="mt-8 text-xl md:text-2xl font-black uppercase tracking-widest font-mirano text-white animate-on-scroll delay-300">
-            PROH. Propagar valor.
-          </p>
         </div>
       </section>
 
       {/* SEÇÃO 12 — PERGUNTAS FREQUENTES */}
-      <section id="faq" className="relative z-50 w-full py-20 md:py-28 bg-white text-[#0F0F15] rounded-t-[2.5rem] md:rounded-t-[3rem] shadow-[0_-20px_50px_rgba(0,0,0,0.15)] mt-[-2rem] md:mt-0 overflow-hidden">
+      <section id="faq" className="stack-card z-[120] w-full py-20 md:py-28 bg-white text-[#0F0F15] rounded-t-[2.5rem] md:rounded-t-[3rem] shadow-[0_-20px_50px_rgba(0,0,0,0.15)] mt-[-2rem] md:mt-0 overflow-hidden">
         <div className="max-w-4xl mx-auto px-6 md:px-12 w-full">
           <div className="mb-12 md:mb-16 animate-on-scroll">
             <p className="flex items-center gap-3 uppercase text-sm font-bold tracking-widest font-extended text-[#0F0F15]/60 mb-4"><span className="font-mirano">11</span><span className="w-8 h-[2px] bg-[#0F0F15]/30" aria-hidden="true"></span>Perguntas frequentes</p>
@@ -738,7 +786,7 @@ export default function App() {
       </section>
 
       {/* SEÇÃO 13 — CTA FINAL + FORMULÁRIO */}
-      <section id="contato" className="relative z-50 w-full py-20 md:py-28 bg-[#D8D4BD] text-[#0F0F15] rounded-t-[2.5rem] md:rounded-t-[3rem] shadow-[0_-20px_50px_rgba(0,0,0,0.2)] mt-[-2rem] md:mt-0 overflow-hidden">
+      <section id="contato" className="stack-card z-[130] w-full py-20 md:py-28 bg-[#D8D4BD] text-[#0F0F15] rounded-t-[2.5rem] md:rounded-t-[3rem] shadow-[0_-20px_50px_rgba(0,0,0,0.2)] mt-[-2rem] md:mt-0 overflow-hidden">
         <div className="max-w-7xl mx-auto px-6 md:px-12 w-full">
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-start">
             <div className="animate-on-scroll lg:sticky lg:top-28">
@@ -765,7 +813,7 @@ export default function App() {
       </section>
 
       {/* RODAPÉ */}
-      <footer className="relative z-50 w-full bg-[#0F0F15] text-[#D8D4BD] pt-20 pb-12 overflow-hidden">
+      <footer className="relative z-[140] w-full bg-[#0F0F15] text-[#D8D4BD] pt-20 pb-12 rounded-t-[2.5rem] md:rounded-t-[3rem] shadow-[0_-20px_50px_rgba(0,0,0,0.5)] overflow-hidden">
         <div className="max-w-7xl mx-auto px-6 md:px-12">
           <div className="grid md:grid-cols-[1.5fr_1fr_1fr] gap-12 md:gap-10 mb-14">
             <div>
@@ -976,8 +1024,8 @@ function GeminiSimulator() {
           </h3>
           <p className="text-[#0F0F15]/70 mb-8 font-medium leading-relaxed max-w-md">
             Digite o segmento da sua empresa e receba, na hora, uma ideia de
-            crescimento e uma ideia de impacto — as duas dimensões do valor que a
-            <Proh /> propaga.
+            crescimento e uma ideia de impacto — as duas dimensões do valor
+            que a <Proh /> propaga.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-3">
