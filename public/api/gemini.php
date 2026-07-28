@@ -60,8 +60,9 @@ $payload = json_encode([
     'generationConfig' => ['responseMimeType' => 'application/json'],
 ]);
 
-// Modelo estável (os "preview" são descontinuados após alguns meses).
-$url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' . urlencode($apiKey);
+// "gemini-flash-latest": apelido oficial que aponta sempre para o modelo
+// Flash estável mais recente — nunca quebra por modelo descontinuado.
+$url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=' . urlencode($apiKey);
 $ch  = curl_init($url);
 curl_setopt_array($ch, [
     CURLOPT_POST           => true,
