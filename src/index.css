@@ -1,51 +1,107 @@
-/* Família de fonte oficial: Gotham (arquivos em /GOTHAM).
-   O Vite resolve os caminhos relativos abaixo e inclui as fontes no build. */
+/* Tipografia oficial da PROH (Plataforma da Marca):
+   - Mirano Extended: personalidade — títulos, chamadas, frases-manifesto.
+   - Gotham: apoio — leitura, textos, botões, formulários.
+   Arquivos em /fonts (Mirano em .woff2) e /fonts/GOTHAM (.otf). */
+
+/* ---------- MIRANO EXTENDED ---------- */
+@font-face {
+  font-family: 'Mirano Extended';
+  src: url('../fonts/MiranoExtended-Light.woff2') format('woff2');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Mirano Extended';
+  src: url('../fonts/MiranoExtended-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Mirano Extended';
+  src: url('../fonts/MiranoExtended-Medium.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Mirano Extended';
+  src: url('../fonts/MiranoExtended-SemiBold.woff2') format('woff2');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+/* Bold cobre 700–900: o peso "black" dos títulos usa o Bold real,
+   sem negrito sintético. */
+@font-face {
+  font-family: 'Mirano Extended';
+  src: url('../fonts/MiranoExtended-Bold.woff2') format('woff2');
+  font-weight: 700 900;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Mirano Extended';
+  src: url('../fonts/MiranoExtended-RegularItalic.woff2') format('woff2');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Mirano Extended';
+  src: url('../fonts/MiranoExtended-BoldItalic.woff2') format('woff2');
+  font-weight: 700 900;
+  font-style: italic;
+  font-display: swap;
+}
+
+/* ---------- GOTHAM ---------- */
 @font-face {
   font-family: 'Gotham';
-  src: url('../GOTHAM/Gotham-Light.otf') format('opentype');
+  src: url('../fonts/GOTHAM/Gotham-Light.otf') format('opentype');
   font-weight: 300;
   font-style: normal;
   font-display: swap;
 }
 @font-face {
   font-family: 'Gotham';
-  src: url('../GOTHAM/Gotham-Book.otf') format('opentype');
+  src: url('../fonts/GOTHAM/Gotham-Book.otf') format('opentype');
   font-weight: 400;
   font-style: normal;
   font-display: swap;
 }
 @font-face {
   font-family: 'Gotham';
-  src: url('../GOTHAM/Gotham-Medium.otf') format('opentype');
+  src: url('../fonts/GOTHAM/Gotham-Medium.otf') format('opentype');
   font-weight: 500;
   font-style: normal;
   font-display: swap;
 }
 @font-face {
   font-family: 'Gotham';
-  src: url('../GOTHAM/Gotham-Bold.otf') format('opentype');
+  src: url('../fonts/GOTHAM/Gotham-Bold.otf') format('opentype');
   font-weight: 700;
   font-style: normal;
   font-display: swap;
 }
 @font-face {
   font-family: 'Gotham';
-  src: url('../GOTHAM/Gotham-Black.otf') format('opentype');
+  src: url('../fonts/GOTHAM/Gotham-Black.otf') format('opentype');
   font-weight: 800 900;
   font-style: normal;
   font-display: swap;
 }
-/* Itálicos (usados quando aplicar italic) */
 @font-face {
   font-family: 'Gotham';
-  src: url('../GOTHAM/Gotham-BookIta.otf') format('opentype');
+  src: url('../fonts/GOTHAM/Gotham-BookIta.otf') format('opentype');
   font-weight: 400;
   font-style: italic;
   font-display: swap;
 }
 @font-face {
   font-family: 'Gotham';
-  src: url('../GOTHAM/Gotham-BoldIta.otf') format('opentype');
+  src: url('../fonts/GOTHAM/Gotham-BoldIta.otf') format('opentype');
   font-weight: 700;
   font-style: italic;
   font-display: swap;

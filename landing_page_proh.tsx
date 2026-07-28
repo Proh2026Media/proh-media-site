@@ -90,7 +90,7 @@ export default function App() {
         html { scroll-behavior: smooth; scroll-padding-top: 5rem; }
         * { -webkit-tap-highlight-color: transparent; }
         body { overflow-x: hidden; }
-        .font-extended { font-family: 'Gotham', sans-serif; }
+        .font-extended { font-family: 'Mirano Extended', 'Gotham', sans-serif; }
 
         /* Destaque legível para palavras-chave sobre fundos claros */
         .mark-dark {
@@ -143,6 +143,15 @@ export default function App() {
           background: currentColor;
           opacity: 0.9;
         }
+
+        /* Fotografia da marca: preto e branco para harmonizar com a paleta
+           oficial; a cor volta suavemente na interação. */
+        .img-brand {
+          filter: grayscale(1);
+          transition: filter 0.6s ease, transform 0.6s ease;
+          object-fit: cover;
+        }
+        .img-brand:hover { filter: grayscale(0); }
 
         /* Animações de Scroll (Fade & Slide) */
         .animate-on-scroll {
@@ -245,7 +254,7 @@ export default function App() {
 
       {/* SEÇÃO 1 — HERO */}
       <section id="hero" className="md:sticky md:top-0 z-10 w-full min-h-screen flex flex-col justify-center overflow-hidden relative bg-[#D8D4BD]">
-        <div className="max-w-7xl w-full mx-auto px-6 md:px-12 relative z-10 pt-28 pb-20 md:pt-32">
+        <div className="max-w-7xl w-full mx-auto px-6 md:px-12 relative z-10 pt-28 pb-20 md:pt-32 grid lg:grid-cols-[1.15fr_0.85fr] gap-10 lg:gap-16 items-center">
           <div className="max-w-4xl">
             <h2 className="text-[#0F0F15] font-bold uppercase tracking-widest text-xs sm:text-sm md:text-base mb-6 border-l-4 border-[#0F0F15] pl-4 font-extended animate-on-scroll">
               Estratégia, marca, mídia e impacto
@@ -270,6 +279,16 @@ export default function App() {
             <p className="mt-10 text-xs uppercase tracking-[0.3em] text-[#0F0F15]/50 font-bold font-extended animate-on-scroll delay-400">
               PROH. Propagar valor.
             </p>
+          </div>
+
+          {/* Foto editorial: equipe em trabalho criativo */}
+          <div className="animate-on-scroll delay-300">
+            <img
+              src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=1200&auto=format&fit=crop"
+              alt="Equipe colaborando em um projeto criativo ao redor da mesa"
+              loading="eager"
+              className="img-brand w-full h-64 sm:h-80 lg:h-[32rem] rounded-[2rem] md:rounded-[2.5rem] shadow-2xl"
+            />
           </div>
         </div>
       </section>
@@ -296,7 +315,15 @@ export default function App() {
                 <li className="flex items-start gap-3"><span className="mt-2.5 w-6 h-[2px] bg-[#D8D4BD]/40 shrink-0"></span>Investem em mídia, mas não possuem uma mensagem forte.</li>
               </ul>
             </div>
-            <div className="glass-panel p-8 sm:p-10 md:p-14 border-l-4 border-[#D8D4BD] rounded-[2rem] md:rounded-[2.5rem] shadow-[0_8px_32px_0_rgba(0,0,0,0.3)] animate-on-scroll delay-200">
+            <div className="flex flex-col gap-6 animate-on-scroll delay-200">
+            {/* Foto: conversa de estratégia */}
+            <img
+              src="https://images.unsplash.com/photo-1568992688065-536aad8a12f6?q=80&w=1200&auto=format&fit=crop"
+              alt="Profissionais conversando em uma reunião de estratégia"
+              loading="lazy"
+              className="img-brand w-full h-52 md:h-64 rounded-[2rem] md:rounded-[2.5rem] shadow-2xl"
+            />
+            <div className="glass-panel p-8 sm:p-10 md:p-14 border-l-4 border-[#D8D4BD] rounded-[2rem] md:rounded-[2.5rem] shadow-[0_8px_32px_0_rgba(0,0,0,0.3)]">
               <h3 className="text-xl font-bold uppercase tracking-widest text-white mb-6 font-extended">A PROH existe para resolver essa distância</h3>
               <p className="text-lg md:text-xl font-medium leading-relaxed mb-8">
                 Identificamos o valor presente em uma marca, damos forma à sua mensagem
@@ -306,6 +333,7 @@ export default function App() {
               <p className="text-xl md:text-2xl font-black text-white font-extended leading-snug">
                 PROH é o nome.<br />Propagar é a missão.
               </p>
+            </div>
             </div>
           </div>
         </div>
@@ -369,6 +397,13 @@ export default function App() {
           <div className="grid md:grid-cols-2 gap-6 md:gap-12">
             {/* Valor de negócio */}
             <div className="bg-[#D8D4BD]/50 border border-[#0F0F15]/5 p-8 sm:p-10 md:p-14 transition-all hover:-translate-y-2 duration-500 rounded-[2rem] md:rounded-[2.5rem] animate-on-scroll delay-100">
+              {/* Foto: reunião de negócio */}
+              <img
+                src="https://images.unsplash.com/photo-1552664730-d307ca884978?q=80&w=1000&auto=format&fit=crop"
+                alt="Equipe em reunião de planejamento estratégico ao redor da mesa"
+                loading="lazy"
+                className="img-brand w-full h-44 md:h-52 rounded-2xl shadow-lg mb-8"
+              />
               <div className="bg-[#0F0F15] text-[#D8D4BD] w-16 h-16 flex items-center justify-center rounded-2xl mb-8 shadow-xl">
                 <TrendingUp size={32} />
               </div>
@@ -392,6 +427,13 @@ export default function App() {
 
             {/* Valor humano */}
             <div className="bg-[#0F0F15] text-[#D8D4BD] p-8 sm:p-10 md:p-14 transition-all hover:-translate-y-2 duration-500 rounded-[2rem] md:rounded-[2.5rem] shadow-2xl animate-on-scroll delay-300">
+              {/* Foto: grupo com as mãos unidas */}
+              <img
+                src="https://images.unsplash.com/photo-1582213782179-e0d53f98f2ca?q=80&w=1000&auto=format&fit=crop"
+                alt="Grupo de pessoas unindo as mãos ao centro"
+                loading="lazy"
+                className="img-brand w-full h-44 md:h-52 rounded-2xl shadow-lg mb-8"
+              />
               <div className="bg-[#D8D4BD] text-[#0F0F15] w-16 h-16 flex items-center justify-center rounded-2xl mb-8 shadow-xl">
                 <HeartHandshake size={32} />
               </div>
@@ -452,14 +494,23 @@ export default function App() {
       {/* SEÇÃO 6 — MÉTODO */}
       <section id="metodo" className="relative z-50 w-full py-20 md:py-28 bg-[#0F0F15] text-[#D8D4BD] rounded-t-[2.5rem] md:rounded-t-[3rem] shadow-[0_-20px_50px_rgba(0,0,0,0.4)] mt-[-2rem] md:mt-0 overflow-hidden">
         <div className="max-w-7xl mx-auto px-6 md:px-12 w-full">
-          <div className="max-w-3xl mb-12 md:mb-16 animate-on-scroll">
-            <p className="uppercase text-sm font-bold tracking-widest font-extended text-[#D8D4BD]/60 mb-4">Método</p>
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-black uppercase tracking-tighter font-extended leading-tight mb-4 text-white">
-              Antes de propagar, é preciso dar direção.
-            </h2>
-            <p className="text-lg md:text-xl text-[#D8D4BD]/70">
-              O Sistema PROH organiza estratégia e execução em cinco movimentos.
-            </p>
+          <div className="grid md:grid-cols-2 gap-10 md:gap-16 items-center mb-12 md:mb-16">
+            <div className="animate-on-scroll">
+              <p className="uppercase text-sm font-bold tracking-widest font-extended text-[#D8D4BD]/60 mb-4">Método</p>
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-black uppercase tracking-tighter font-extended leading-tight mb-4 text-white">
+                Antes de propagar, é preciso dar direção.
+              </h2>
+              <p className="text-lg md:text-xl text-[#D8D4BD]/70">
+                O Sistema PROH organiza estratégia e execução em cinco movimentos.
+              </p>
+            </div>
+            {/* Foto: bastidores de produção */}
+            <img
+              src="https://images.unsplash.com/photo-1632187981988-40f3cbaeef5e?q=80&w=1200&auto=format&fit=crop"
+              alt="Equipe de produção reunida em volta de uma câmera nos bastidores"
+              loading="lazy"
+              className="img-brand w-full h-56 md:h-72 rounded-[2rem] md:rounded-[2.5rem] shadow-2xl animate-on-scroll delay-200"
+            />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-12">
@@ -572,10 +623,19 @@ export default function App() {
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </a>
             </div>
-            <div className="glass-panel p-8 sm:p-10 md:p-14 border-l-4 border-[#D8D4BD] rounded-[2rem] md:rounded-[2.5rem] animate-on-scroll delay-200">
-              <p className="text-2xl md:text-4xl font-black text-white font-extended leading-snug">
-                Causas relevantes também merecem marcas fortes.
-              </p>
+            <div className="flex flex-col gap-6 animate-on-scroll delay-200">
+              {/* Foto: voluntariado com dignidade e participação */}
+              <img
+                src="https://images.unsplash.com/photo-1593113598332-cd288d649433?q=80&w=1200&auto=format&fit=crop"
+                alt="Voluntária organizando caixas de doações com um sorriso"
+                loading="lazy"
+                className="img-brand w-full h-56 md:h-72 rounded-[2rem] md:rounded-[2.5rem] shadow-2xl"
+              />
+              <div className="glass-panel p-8 sm:p-10 md:p-14 border-l-4 border-[#D8D4BD] rounded-[2rem] md:rounded-[2.5rem]">
+                <p className="text-2xl md:text-4xl font-black text-white font-extended leading-snug">
+                  Causas relevantes também merecem marcas fortes.
+                </p>
+              </div>
             </div>
           </div>
         </div>
