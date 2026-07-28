@@ -3,6 +3,7 @@ dist
 dist-ssr
 *.zip
 *.local
+gemini_key.txt
 .env
 .env.local
 .DS_Store

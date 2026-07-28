@@ -16,9 +16,11 @@ const WHATSAPP_NUMBER = '5519995951316';
 const SOCIAL = { instagram: '', linkedin: '' };
 
 // --- CONFIGURAÇÃO DO SIMULADOR DE IA ---
-// A chave da API NÃO fica no site. O front chama um proxy (Cloudflare Worker)
-// que guarda a chave no servidor. Defina a URL do proxy em VITE_GEMINI_PROXY_URL.
-const geminiProxyUrl = (import.meta as any).env?.VITE_GEMINI_PROXY_URL ?? "";
+// A chave da API NÃO fica no site: o front chama /api/gemini.php (proxy no
+// próprio servidor da Hostinger, que guarda a chave fora da pasta pública).
+// Em desenvolvimento, defina VITE_GEMINI_PROXY_URL no .env.local apontando
+// para o site publicado (ex.: https://proh.media/api/gemini.php).
+const geminiProxyUrl = (import.meta as any).env?.VITE_GEMINI_PROXY_URL ?? "/api/gemini.php";
 
 // --- CORES OFICIAIS DA MARCA (Plataforma PROH) ---
 // Preto:     #0F0F15
@@ -154,6 +156,20 @@ export default function App() {
         }
         .img-brand:hover { filter: grayscale(0); }
 
+        /* Faixa com o sistema de mensagens da marca */
+        .marquee { display: flex; overflow: hidden; }
+        .marquee-track {
+          display: flex;
+          flex-shrink: 0;
+          min-width: 100%;
+          align-items: center;
+          animation: marquee-scroll 38s linear infinite;
+        }
+        @keyframes marquee-scroll {
+          from { transform: translateX(0); }
+          to { transform: translateX(-100%); }
+        }
+
         /* Animações de Scroll (Fade & Slide) */
         .animate-on-scroll {
           opacity: 0;
@@ -187,6 +203,7 @@ export default function App() {
           html { scroll-behavior: auto; }
           .animate-on-scroll { opacity: 1 !important; transform: none !important; transition: none !important; }
           .animate-spin-slow { animation: none !important; }
+          .marquee-track { animation: none !important; }
         }
       `}} />
 
@@ -283,14 +300,21 @@ export default function App() {
           </div>
 
           {/* Foto: apresentação de resultados — marketing e B2B com pessoas reais */}
-          <div className="animate-on-scroll delay-300">
+          <div className="animate-on-scroll delay-300 relative">
+            {/* Moldura deslocada: profundidade editorial */}
+            <div className="absolute top-6 -bottom-4 -right-3 left-10 md:top-8 md:-bottom-6 md:-right-5 rounded-[2rem] md:rounded-[2.5rem] border-2 border-[#0F0F15]/15" aria-hidden="true"></div>
             <img
               src="https://images.unsplash.com/photo-1758691736490-03d39c292d7a?q=80&w=1200&auto=format&fit=crop"
               alt="Profissional apresentando gráficos de resultados para a equipe em uma reunião"
               loading="eager"
-              className="img-brand w-full h-64 sm:h-80 lg:h-[32rem] rounded-[2rem] md:rounded-[2.5rem] shadow-2xl"
+              className="img-brand relative w-full h-64 sm:h-80 lg:h-[30rem] rounded-[2rem] md:rounded-[2.5rem] shadow-2xl"
             />
           </div>
+        </div>
+
+        {/* Faixa: sistema de mensagens da marca */}
+        <div className="absolute bottom-0 left-0 right-0 bg-[#0F0F15] py-4" aria-hidden="true">
+          <Marquee />
         </div>
       </section>
 
@@ -302,6 +326,7 @@ export default function App() {
               <div className="text-6xl md:text-9xl font-black text-white/5 mb-6 leading-none font-mirano select-none" aria-hidden="true">
                 PROH
               </div>
+              <p className="flex items-center gap-3 uppercase text-sm font-bold tracking-widest font-extended text-[#D8D4BD]/60 mb-4"><span className="font-mirano">01</span><span className="w-8 h-[2px] bg-[#D8D4BD]/30" aria-hidden="true"></span>Conceito</p>
               <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-6 leading-tight font-extended">
                 Propagar não é aparecer mais. É <span className="text-white">fazer sentido</span> para mais pessoas.
               </h2>
@@ -344,6 +369,7 @@ export default function App() {
       <section id="significado" className="md:sticky md:top-0 z-30 w-full md:min-h-screen flex flex-col md:justify-center py-20 md:py-24 bg-[#D8D4BD] text-[#0F0F15] rounded-t-[2.5rem] md:rounded-t-[3rem] shadow-[0_-20px_50px_rgba(0,0,0,0.3)] relative mt-[-2rem] md:mt-0 overflow-hidden">
         <div className="max-w-7xl mx-auto px-6 md:px-12 relative z-10 w-full">
           <div className="text-center mb-12 md:mb-16 animate-on-scroll">
+            <p className="flex items-center gap-3 justify-center uppercase text-sm font-bold tracking-widest font-extended text-[#0F0F15]/60 mb-4"><span className="font-mirano">02</span><span className="w-8 h-[2px] bg-[#0F0F15]/30" aria-hidden="true"></span>O significado</p>
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-black mb-4 uppercase tracking-tighter font-extended leading-tight">
               Comunicação a favor do progresso,<br className="hidden md:block" /> com o <span className="mark-dark">humano</span> no centro.
             </h2>
@@ -385,6 +411,7 @@ export default function App() {
       <section id="dimensoes" className="md:sticky md:top-0 z-40 w-full md:min-h-screen flex flex-col md:justify-center py-20 md:py-24 bg-white text-[#0F0F15] rounded-t-[2.5rem] md:rounded-t-[3rem] shadow-[0_-20px_50px_rgba(0,0,0,0.15)] relative mt-[-2rem] md:mt-0 overflow-hidden">
         <div className="max-w-7xl mx-auto px-6 md:px-12 relative z-10 w-full">
           <div className="text-center mb-12 md:mb-16 animate-on-scroll">
+            <p className="flex items-center gap-3 justify-center uppercase text-sm font-bold tracking-widest font-extended text-[#0F0F15]/60 mb-4"><span className="font-mirano">03</span><span className="w-8 h-[2px] bg-[#0F0F15]/30" aria-hidden="true"></span>Duas dimensões do valor</p>
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-black mb-4 uppercase tracking-tighter font-extended leading-tight">
               Resultado e humanidade<br className="hidden md:block" /> não precisam caminhar <span className="mark-dark">separados</span>.
             </h2>
@@ -467,7 +494,7 @@ export default function App() {
       <section id="solucoes" className="relative z-50 w-full py-20 md:py-28 bg-[#D8D4BD] text-[#0F0F15] rounded-t-[2.5rem] md:rounded-t-[3rem] shadow-[0_-20px_50px_rgba(0,0,0,0.15)] mt-[-2rem] md:mt-0 overflow-hidden">
         <div className="max-w-7xl mx-auto px-6 md:px-12 w-full">
           <div className="max-w-3xl mb-12 md:mb-16 animate-on-scroll">
-            <p className="uppercase text-sm font-bold tracking-widest font-extended text-[#0F0F15]/60 mb-4">Soluções</p>
+            <p className="flex items-center gap-3 uppercase text-sm font-bold tracking-widest font-extended text-[#0F0F15]/60 mb-4"><span className="font-mirano">04</span><span className="w-8 h-[2px] bg-[#0F0F15]/30" aria-hidden="true"></span>Soluções</p>
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-black uppercase tracking-tighter font-extended leading-tight mb-4">
               Tudo o que uma marca precisa para se posicionar, comunicar e crescer com coerência.
             </h2>
@@ -497,7 +524,7 @@ export default function App() {
         <div className="max-w-7xl mx-auto px-6 md:px-12 w-full">
           <div className="grid md:grid-cols-2 gap-10 md:gap-16 items-center mb-12 md:mb-16">
             <div className="animate-on-scroll">
-              <p className="uppercase text-sm font-bold tracking-widest font-extended text-[#D8D4BD]/60 mb-4">Método</p>
+              <p className="flex items-center gap-3 uppercase text-sm font-bold tracking-widest font-extended text-[#D8D4BD]/60 mb-4"><span className="font-mirano">05</span><span className="w-8 h-[2px] bg-[#D8D4BD]/30" aria-hidden="true"></span>Método</p>
               <h2 className="text-3xl sm:text-4xl md:text-5xl font-black uppercase tracking-tighter font-extended leading-tight mb-4 text-white">
                 Antes de propagar, é preciso dar direção.
               </h2>
@@ -538,7 +565,7 @@ export default function App() {
       <section id="diferenciais" className="relative z-50 w-full py-20 md:py-28 bg-white text-[#0F0F15] rounded-t-[2.5rem] md:rounded-t-[3rem] shadow-[0_-20px_50px_rgba(0,0,0,0.15)] mt-[-2rem] md:mt-0 overflow-hidden">
         <div className="max-w-7xl mx-auto px-6 md:px-12 w-full">
           <div className="max-w-3xl mb-12 md:mb-16 animate-on-scroll">
-            <p className="uppercase text-sm font-bold tracking-widest font-extended text-[#0F0F15]/60 mb-4">Diferenciais</p>
+            <p className="flex items-center gap-3 uppercase text-sm font-bold tracking-widest font-extended text-[#0F0F15]/60 mb-4"><span className="font-mirano">06</span><span className="w-8 h-[2px] bg-[#0F0F15]/30" aria-hidden="true"></span>Diferenciais</p>
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-black uppercase tracking-tighter font-extended leading-tight">
               Não entregamos peças isoladas. Construímos <span className="mark-dark">sistemas de propagação</span>.
             </h2>
@@ -559,7 +586,7 @@ export default function App() {
       <section id="publicos" className="relative z-50 w-full py-20 md:py-28 bg-[#D8D4BD] text-[#0F0F15] rounded-t-[2.5rem] md:rounded-t-[3rem] shadow-[0_-20px_50px_rgba(0,0,0,0.15)] mt-[-2rem] md:mt-0 overflow-hidden">
         <div className="max-w-7xl mx-auto px-6 md:px-12 w-full">
           <div className="max-w-3xl mb-12 md:mb-16 animate-on-scroll">
-            <p className="uppercase text-sm font-bold tracking-widest font-extended text-[#0F0F15]/60 mb-4">Para quem</p>
+            <p className="flex items-center gap-3 uppercase text-sm font-bold tracking-widest font-extended text-[#0F0F15]/60 mb-4"><span className="font-mirano">07</span><span className="w-8 h-[2px] bg-[#0F0F15]/30" aria-hidden="true"></span>Para quem</p>
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-black uppercase tracking-tighter font-extended leading-tight">
               Trabalhamos com quem possui valor real e deseja comunicá-lo com mais direção.
             </h2>
@@ -597,7 +624,7 @@ export default function App() {
         <div className="max-w-7xl mx-auto px-6 md:px-12 w-full">
           <div className="grid md:grid-cols-2 gap-10 md:gap-16 items-center">
             <div className="animate-on-scroll">
-              <p className="uppercase text-sm font-bold tracking-widest font-extended text-[#D8D4BD]/60 mb-4">Impacto</p>
+              <p className="flex items-center gap-3 uppercase text-sm font-bold tracking-widest font-extended text-[#D8D4BD]/60 mb-4"><span className="font-mirano">08</span><span className="w-8 h-[2px] bg-[#D8D4BD]/30" aria-hidden="true"></span>Impacto</p>
               <h2 className="text-3xl sm:text-4xl md:text-5xl font-black uppercase tracking-tighter font-extended leading-tight mb-6 text-white">
                 Propósito também precisa de estratégia.
               </h2>
@@ -646,7 +673,7 @@ export default function App() {
       <section id="modelos" className="relative z-50 w-full py-20 md:py-28 bg-[#D8D4BD] text-[#0F0F15] rounded-t-[2.5rem] md:rounded-t-[3rem] shadow-[0_-20px_50px_rgba(0,0,0,0.15)] mt-[-2rem] md:mt-0 overflow-hidden">
         <div className="max-w-7xl mx-auto px-6 md:px-12 w-full">
           <div className="max-w-3xl mb-12 md:mb-16 animate-on-scroll">
-            <p className="uppercase text-sm font-bold tracking-widest font-extended text-[#0F0F15]/60 mb-4">Modelos de parceria</p>
+            <p className="flex items-center gap-3 uppercase text-sm font-bold tracking-widest font-extended text-[#0F0F15]/60 mb-4"><span className="font-mirano">09</span><span className="w-8 h-[2px] bg-[#0F0F15]/30" aria-hidden="true"></span>Modelos de parceria</p>
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-black uppercase tracking-tighter font-extended leading-tight">
               Diferentes formas de começar. Uma mesma direção.
             </h2>
@@ -671,7 +698,7 @@ export default function App() {
       {/* SEÇÃO 11 — MANIFESTO */}
       <section id="manifesto" className="relative z-50 w-full py-24 md:py-32 bg-[#0F0F15] text-[#D8D4BD] rounded-t-[2.5rem] md:rounded-t-[3rem] shadow-[0_-20px_50px_rgba(0,0,0,0.4)] mt-[-2rem] md:mt-0 overflow-hidden">
         <div className="max-w-4xl mx-auto px-6 md:px-12 w-full text-center">
-          <p className="uppercase text-sm font-bold tracking-widest font-extended text-[#D8D4BD]/60 mb-8 animate-on-scroll">Manifesto</p>
+          <p className="flex items-center gap-3 justify-center uppercase text-sm font-bold tracking-widest font-extended text-[#D8D4BD]/60 mb-8 animate-on-scroll"><span className="font-mirano">10</span><span className="w-8 h-[2px] bg-[#D8D4BD]/30" aria-hidden="true"></span>Manifesto</p>
           <h2 className="text-4xl sm:text-5xl md:text-7xl font-black uppercase tracking-tighter font-extended leading-[0.95] mb-12 text-white animate-on-scroll delay-100">
             Propagação não é barulho.<br />É direção.
           </h2>
@@ -693,7 +720,7 @@ export default function App() {
       <section id="faq" className="relative z-50 w-full py-20 md:py-28 bg-white text-[#0F0F15] rounded-t-[2.5rem] md:rounded-t-[3rem] shadow-[0_-20px_50px_rgba(0,0,0,0.15)] mt-[-2rem] md:mt-0 overflow-hidden">
         <div className="max-w-4xl mx-auto px-6 md:px-12 w-full">
           <div className="mb-12 md:mb-16 animate-on-scroll">
-            <p className="uppercase text-sm font-bold tracking-widest font-extended text-[#0F0F15]/60 mb-4">Perguntas frequentes</p>
+            <p className="flex items-center gap-3 uppercase text-sm font-bold tracking-widest font-extended text-[#0F0F15]/60 mb-4"><span className="font-mirano">11</span><span className="w-8 h-[2px] bg-[#0F0F15]/30" aria-hidden="true"></span>Perguntas frequentes</p>
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-black uppercase tracking-tighter font-extended leading-tight">
               O que você precisa saber antes de começar.
             </h2>
@@ -715,6 +742,7 @@ export default function App() {
         <div className="max-w-7xl mx-auto px-6 md:px-12 w-full">
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-start">
             <div className="animate-on-scroll lg:sticky lg:top-28">
+              <p className="flex items-center gap-3 uppercase text-sm font-bold tracking-widest font-extended text-[#0F0F15]/60 mb-4"><span className="font-mirano">12</span><span className="w-8 h-[2px] bg-[#0F0F15]/30" aria-hidden="true"></span>Contato</p>
               <h2 className="text-3xl sm:text-4xl md:text-6xl font-black uppercase tracking-tighter font-extended leading-[0.95] mb-6">
                 O que tem valor não deveria permanecer <span className="mark-dark">invisível</span>.
               </h2>
@@ -739,7 +767,7 @@ export default function App() {
       {/* RODAPÉ */}
       <footer className="relative z-50 w-full bg-[#0F0F15] text-[#D8D4BD] pt-20 pb-12 overflow-hidden">
         <div className="max-w-7xl mx-auto px-6 md:px-12">
-          <div className="flex flex-col md:flex-row justify-between gap-10 mb-14">
+          <div className="grid md:grid-cols-[1.5fr_1fr_1fr] gap-12 md:gap-10 mb-14">
             <div>
               <img src={logoFooter} alt="PROH Media" className="h-10 w-auto mb-6" />
               <p className="text-sm uppercase tracking-widest font-bold font-extended text-[#D8D4BD]/70">
@@ -748,20 +776,25 @@ export default function App() {
               <p className="text-sm uppercase tracking-widest font-bold font-mirano text-white mt-1">
                 Propagar valor.
               </p>
+              <div className="h-divider text-[#D8D4BD]/50 mt-8" aria-hidden="true"><span></span></div>
             </div>
-            <nav className="flex flex-col sm:flex-row gap-4 sm:gap-10 text-sm font-bold uppercase tracking-widest font-extended text-[#D8D4BD]/60">
-              <div className="flex flex-col gap-3">
+            <nav aria-label="Navegação do rodapé">
+              <p className="text-xs uppercase tracking-[0.25em] font-bold font-extended text-[#D8D4BD]/40 mb-5">Navegação</p>
+              <div className="flex flex-col gap-3 text-sm font-bold uppercase tracking-widest font-extended text-[#D8D4BD]/60">
                 {navLinks.map((l) => (
-                  <a key={l.id} href={`#${l.id}`} className="hover:text-white transition-colors">{l.label}</a>
+                  <a key={l.id} href={`#${l.id}`} className="hover:text-white transition-colors w-fit">{l.label}</a>
                 ))}
               </div>
-              {(SOCIAL.instagram || SOCIAL.linkedin) && (
-                <div className="flex flex-col gap-3">
-                  {SOCIAL.instagram && <a href={SOCIAL.instagram} target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Instagram</a>}
-                  {SOCIAL.linkedin && <a href={SOCIAL.linkedin} target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">LinkedIn</a>}
-                </div>
-              )}
             </nav>
+            <div>
+              <p className="text-xs uppercase tracking-[0.25em] font-bold font-extended text-[#D8D4BD]/40 mb-5">Contato</p>
+              <div className="flex flex-col gap-3 text-sm font-bold uppercase tracking-widest font-extended text-[#D8D4BD]/60">
+                <a href={`https://wa.me/${WHATSAPP_NUMBER}`} target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors w-fit">WhatsApp</a>
+                <a href="#contato" className="hover:text-white transition-colors w-fit">Iniciar projeto</a>
+                {SOCIAL.instagram && <a href={SOCIAL.instagram} target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors w-fit">Instagram</a>}
+                {SOCIAL.linkedin && <a href={SOCIAL.linkedin} target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors w-fit">LinkedIn</a>}
+              </div>
+            </div>
           </div>
 
           <div className="w-full flex flex-col md:flex-row justify-between items-center gap-4 pt-8 border-t border-[#D8D4BD]/20 text-xs font-bold uppercase tracking-widest text-[#D8D4BD]/50 font-extended">
@@ -1007,6 +1040,24 @@ function GeminiSimulator() {
 }
 
 // --- COMPONENTES AUXILIARES ---
+// Faixa decorativa com o sistema de mensagens da marca.
+const MARQUEE_ITEMS = ['Propagar valor.', 'Propagar marcas.', 'Propagar ideias.', 'Propagar resultados.', 'Propagar conexões.', 'Propagar impacto.', 'Propagar o que importa.'];
+function MarqueeTrack() {
+  return (
+    <div className="marquee-track">
+      {MARQUEE_ITEMS.map((t) => (
+        <span key={t} className="flex items-center shrink-0">
+          <span className="font-mirano text-xs md:text-sm font-bold uppercase tracking-[0.2em] text-[#D8D4BD] whitespace-nowrap">{t}</span>
+          <span className="mx-6 md:mx-10 w-1.5 h-1.5 bg-[#D8D4BD]/40 rounded-full shrink-0"></span>
+        </span>
+      ))}
+    </div>
+  );
+}
+function Marquee() {
+  return <div className="marquee"><MarqueeTrack /><MarqueeTrack /></div>;
+}
+
 // Nome da marca: sempre em Mirano Extended, herdando cor e peso do contexto.
 function Proh() {
   return <span className="font-mirano">PROH</span>;
@@ -1036,7 +1087,10 @@ function SolutionCard({ icon, title, desc, items }) {
 function StepCard({ num, title, desc }) {
   return (
     <div className="h-full p-6 md:p-7 border border-[#D8D4BD]/15 rounded-[1.5rem] hover:border-[#D8D4BD]/40 hover:bg-white/[0.03] transition-all duration-500">
-      <div className="text-4xl md:text-5xl font-black text-white/10 font-extended mb-4 select-none" aria-hidden="true">{num}</div>
+      <div className="flex items-center gap-4 mb-5" aria-hidden="true">
+        <span className="text-3xl md:text-4xl font-black text-white/20 font-extended select-none leading-none">{num}</span>
+        <span className="h-[2px] flex-1 bg-[#D8D4BD]/15"></span>
+      </div>
       <h3 className="text-lg font-bold mb-3 uppercase tracking-wider text-white font-extended">{title}</h3>
       <p className="text-[#D8D4BD]/70 leading-relaxed font-medium text-sm">
         {desc}
