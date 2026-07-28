@@ -341,7 +341,7 @@ export default function App() {
         </div>
 
         {/* Faixa: sistema de mensagens da marca */}
-        <div className="absolute bottom-0 left-0 right-0 bg-[#0F0F15] pt-4 pb-16" aria-hidden="true">
+        <div className="absolute bottom-0 left-0 right-0 bg-white pt-4 pb-16" aria-hidden="true">
           <Marquee />
         </div>
       </section>
@@ -1098,8 +1098,8 @@ function MarqueeTrack() {
     <div className="marquee-track">
       {MARQUEE_ITEMS.map((t) => (
         <span key={t} className="flex items-center shrink-0">
-          <span className="font-mirano text-xs md:text-sm font-bold uppercase tracking-[0.2em] text-[#D8D4BD] whitespace-nowrap">{t}</span>
-          <span className="mx-6 md:mx-10 w-1.5 h-1.5 bg-[#D8D4BD]/40 rounded-full shrink-0"></span>
+          <span className="font-mirano text-xs md:text-sm font-bold uppercase tracking-[0.2em] text-[#0F0F15] whitespace-nowrap">{t}</span>
+          <span className="mx-6 md:mx-10 w-1.5 h-1.5 bg-[#0F0F15]/30 rounded-full shrink-0"></span>
         </span>
       ))}
     </div>
