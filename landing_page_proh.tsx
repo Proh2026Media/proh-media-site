@@ -90,7 +90,8 @@ export default function App() {
         html { scroll-behavior: smooth; scroll-padding-top: 5rem; }
         * { -webkit-tap-highlight-color: transparent; }
         body { overflow-x: hidden; }
-        .font-extended { font-family: 'Mirano Extended', 'Gotham', sans-serif; }
+        .font-extended { font-family: 'Gotham', sans-serif; }
+        .font-mirano { font-family: 'Mirano Extended', 'Gotham', sans-serif; }
 
         /* Destaque legível para palavras-chave sobre fundos claros */
         .mark-dark {
@@ -264,7 +265,7 @@ export default function App() {
               merece <span className="underline decoration-white decoration-[6px] underline-offset-8">alcançar mais.</span>
             </h1>
             <p className="text-base sm:text-lg md:text-2xl text-[#0F0F15]/80 max-w-2xl mb-10 font-medium leading-relaxed animate-on-scroll delay-200">
-              A PROH une branding, conteúdo, mídia e performance para transformar
+              A <Proh /> une branding, conteúdo, mídia e performance para transformar
               marcas, projetos e causas em presença, crescimento e impacto real.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 animate-on-scroll delay-300">
@@ -276,7 +277,7 @@ export default function App() {
                 Conhecer nosso método
               </a>
             </div>
-            <p className="mt-10 text-xs uppercase tracking-[0.3em] text-[#0F0F15]/50 font-bold font-extended animate-on-scroll delay-400">
+            <p className="mt-10 text-xs uppercase tracking-[0.3em] text-[#0F0F15]/50 font-bold font-mirano animate-on-scroll delay-400">
               PROH. Propagar valor.
             </p>
           </div>
@@ -298,7 +299,7 @@ export default function App() {
         <div className="max-w-7xl mx-auto px-6 md:px-12 relative z-10 w-full">
           <div className="grid md:grid-cols-2 gap-10 md:gap-16 items-center">
             <div className="animate-on-scroll">
-              <div className="text-6xl md:text-9xl font-black text-white/5 mb-6 leading-none font-extended select-none" aria-hidden="true">
+              <div className="text-6xl md:text-9xl font-black text-white/5 mb-6 leading-none font-mirano select-none" aria-hidden="true">
                 PROH
               </div>
               <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-6 leading-tight font-extended">
@@ -324,13 +325,13 @@ export default function App() {
               className="img-brand w-full h-52 md:h-64 rounded-[2rem] md:rounded-[2.5rem] shadow-2xl"
             />
             <div className="glass-panel p-8 sm:p-10 md:p-14 border-l-4 border-[#D8D4BD] rounded-[2rem] md:rounded-[2.5rem] shadow-[0_8px_32px_0_rgba(0,0,0,0.3)]">
-              <h3 className="text-xl font-bold uppercase tracking-widest text-white mb-6 font-extended">A PROH existe para resolver essa distância</h3>
+              <h3 className="text-xl font-bold uppercase tracking-widest text-white mb-6 font-extended">A <Proh /> existe para resolver essa distância</h3>
               <p className="text-lg md:text-xl font-medium leading-relaxed mb-8">
                 Identificamos o valor presente em uma marca, damos forma à sua mensagem
                 e criamos as condições para que ela alcance as pessoas certas e produza
                 efeitos reais.
               </p>
-              <p className="text-xl md:text-2xl font-black text-white font-extended leading-snug">
+              <p className="text-xl md:text-2xl font-black text-white font-mirano leading-snug">
                 PROH é o nome.<br />Propagar é a missão.
               </p>
             </div>
@@ -351,7 +352,7 @@ export default function App() {
           <div className="grid md:grid-cols-2 gap-6 md:gap-12 mb-12">
             {/* PRO */}
             <div className="glass-panel-light p-8 sm:p-10 md:p-14 rounded-[2rem] md:rounded-[2.5rem] animate-on-scroll delay-100">
-              <div className="text-5xl md:text-7xl font-black font-extended mb-6 tracking-tighter">PRO</div>
+              <div className="text-5xl md:text-7xl font-black font-mirano mb-6 tracking-tighter">PRO</div>
               <p className="text-base md:text-lg leading-relaxed mb-6">
                 Representa <strong>direção, progresso, propósito e construção</strong>.
               </p>
@@ -363,7 +364,7 @@ export default function App() {
 
             {/* H */}
             <div className="glass-panel-dark text-[#D8D4BD] p-8 sm:p-10 md:p-14 rounded-[2rem] md:rounded-[2.5rem] shadow-2xl animate-on-scroll delay-300">
-              <div className="text-5xl md:text-7xl font-black font-extended mb-6 tracking-tighter text-white">H</div>
+              <div className="text-5xl md:text-7xl font-black font-mirano mb-6 tracking-tighter text-white">H</div>
               <p className="text-base md:text-lg leading-relaxed mb-6 text-[#D8D4BD]/90">
                 Representa o <strong className="text-white">humano</strong> e o <strong className="text-white">hub</strong>.
               </p>
@@ -375,7 +376,7 @@ export default function App() {
           </div>
 
           <p className="text-center text-lg md:text-2xl font-bold font-extended animate-on-scroll delay-400">
-            PROH transforma valor em percepção, presença, crescimento e impacto.
+            <Proh /> transforma valor em percepção, presença, crescimento e impacto.
           </p>
         </div>
       </section>
@@ -471,7 +472,7 @@ export default function App() {
               Tudo o que uma marca precisa para se posicionar, comunicar e crescer com coerência.
             </h2>
             <p className="text-lg md:text-xl text-[#0F0F15]/70">
-              A PROH integra diferentes competências em uma única direção estratégica.
+              A <Proh /> integra diferentes competências em uma única direção estratégica.
             </p>
           </div>
 
@@ -501,7 +502,7 @@ export default function App() {
                 Antes de propagar, é preciso dar direção.
               </h2>
               <p className="text-lg md:text-xl text-[#D8D4BD]/70">
-                O Sistema PROH organiza estratégia e execução em cinco movimentos.
+                O Sistema <Proh /> organiza estratégia e execução em cinco movimentos.
               </p>
             </div>
             {/* Foto: bastidores de produção */}
@@ -526,7 +527,7 @@ export default function App() {
               Origem <span className="text-[#D8D4BD]/40 mx-1">→</span> Forma <span className="text-[#D8D4BD]/40 mx-1">→</span> Voz <span className="text-[#D8D4BD]/40 mx-1">→</span> Alcance <span className="text-[#D8D4BD]/40 mx-1">→</span> Efeito
             </p>
             <a href="#contato" className="inline-flex items-center justify-center gap-2 bg-[#D8D4BD] text-[#0F0F15] px-8 py-4 text-sm font-bold uppercase tracking-wider hover:bg-white transition-all duration-300 rounded-xl group font-extended shadow-lg">
-              Aplicar o Sistema PROH
+              Aplicar o Sistema <Proh />
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </a>
           </div>
@@ -572,7 +573,7 @@ export default function App() {
           </div>
 
           <div className="bg-white/60 border border-white p-8 md:p-12 rounded-[2rem] md:rounded-[2.5rem] animate-on-scroll delay-300">
-            <h3 className="text-lg font-bold uppercase tracking-widest font-extended mb-6">A PROH é para quem:</h3>
+            <h3 className="text-lg font-bold uppercase tracking-widest font-extended mb-6">A <Proh /> é para quem:</h3>
             <ul className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-3">
               {[
                 'Entende comunicação como investimento',
@@ -607,7 +608,7 @@ export default function App() {
                 confiança, distribuição e continuidade.
               </p>
               <p className="text-base md:text-lg text-[#D8D4BD]/70 mb-8">
-                A PROH aplica o mesmo padrão estratégico e criativo utilizado no
+                A <Proh /> aplica o mesmo padrão estratégico e criativo utilizado no
                 mercado para fortalecer organizações e iniciativas de impacto.
               </p>
               <ul className="space-y-3 mb-10">
@@ -679,10 +680,10 @@ export default function App() {
             <p>Para propagar, não basta falar mais alto.<br />É preciso ter <strong className="text-white">verdade. Forma. Direção. Consistência.</strong></p>
             <p>Acreditamos em marcas que constroem, empresas que geram oportunidades, pessoas que lideram e causas que transformam realidades.</p>
             <p>Acreditamos que estratégia e humanidade podem caminhar juntas. Que crescimento pode produzir valor. Que influência pode ser usada com responsabilidade. Que comunicação pode gerar negócios e, ao mesmo tempo, gerar significado.</p>
-            <p className="text-white font-bold">A PROH existe para fazer o que tem valor alcançar mais.</p>
+            <p className="text-white font-bold">A <Proh /> existe para fazer o que tem valor alcançar mais.</p>
           </div>
           <div className="h-divider justify-center text-[#D8D4BD] mt-12 animate-on-scroll delay-300" aria-hidden="true"><span></span></div>
-          <p className="mt-8 text-xl md:text-2xl font-black uppercase tracking-widest font-extended text-white animate-on-scroll delay-300">
+          <p className="mt-8 text-xl md:text-2xl font-black uppercase tracking-widest font-mirano text-white animate-on-scroll delay-300">
             PROH. Propagar valor.
           </p>
         </div>
@@ -699,12 +700,12 @@ export default function App() {
           </div>
 
           <div className="animate-on-scroll delay-100">
-            <FaqItem q="A PROH é uma agência de branding ou de performance?" a="A PROH trabalha com as duas dimensões. O branding organiza percepção, posicionamento e identidade. A performance amplia alcance, demanda e conversão. As estratégias são integradas para que o resultado imediato também fortaleça a marca no longo prazo." />
+            <FaqItem q={<>A <Proh /> é uma agência de branding ou de performance?</>} a={<>A <Proh /> trabalha com as duas dimensões. O branding organiza percepção, posicionamento e identidade. A performance amplia alcance, demanda e conversão. As estratégias são integradas para que o resultado imediato também fortaleça a marca no longo prazo.</>} />
             <FaqItem q="Os serviços podem ser contratados separadamente?" a="Sim. Os serviços podem ser organizados como projetos pontuais, sprints, consultorias ou parcerias recorrentes. A recomendação depende do momento, da estrutura e dos objetivos de cada cliente." />
-            <FaqItem q="A PROH atende empresas e organizações sociais?" a="Sim. A agência trabalha com marcas, negócios, profissionais, instituições e projetos de impacto. O ponto em comum é a existência de valor real e a necessidade de comunicá-lo com mais direção." />
-            <FaqItem q="A PROH também executa sites, campanhas e mídia paga?" a="Sim. A PROH integra estratégia, branding, conteúdo, design, experiências digitais, campanhas e mídia. O escopo é definido conforme a necessidade do projeto." />
-            <FaqItem q="Como um projeto começa?" a="Todo projeto começa por uma conversa de diagnóstico. A PROH busca compreender contexto, objetivos, desafios, público, momento da marca e resultado esperado. A partir disso, é apresentada uma recomendação de escopo e formato de parceria." />
-            <FaqItem q="A PROH trabalha apenas com projetos de alto padrão?" a="A PROH trabalha com alto padrão de pensamento, estratégia e execução. Isso não significa atender apenas marcas de luxo. Significa trabalhar com organizações que valorizam qualidade, clareza, consistência e responsabilidade." />
+            <FaqItem q={<>A <Proh /> atende empresas e organizações sociais?</>} a="Sim. A agência trabalha com marcas, negócios, profissionais, instituições e projetos de impacto. O ponto em comum é a existência de valor real e a necessidade de comunicá-lo com mais direção." />
+            <FaqItem q={<>A <Proh /> também executa sites, campanhas e mídia paga?</>} a={<>Sim. A <Proh /> integra estratégia, branding, conteúdo, design, experiências digitais, campanhas e mídia. O escopo é definido conforme a necessidade do projeto.</>} />
+            <FaqItem q="Como um projeto começa?" a={<>Todo projeto começa por uma conversa de diagnóstico. A <Proh /> busca compreender contexto, objetivos, desafios, público, momento da marca e resultado esperado. A partir disso, é apresentada uma recomendação de escopo e formato de parceria.</>} />
+            <FaqItem q={<>A <Proh /> trabalha apenas com projetos de alto padrão?</>} a={<>A <Proh /> trabalha com alto padrão de pensamento, estratégia e execução. Isso não significa atender apenas marcas de luxo. Significa trabalhar com organizações que valorizam qualidade, clareza, consistência e responsabilidade.</>} />
           </div>
         </div>
       </section>
@@ -723,7 +724,7 @@ export default function App() {
               <p className="text-base md:text-lg text-[#0F0F15]/70 max-w-xl">
                 Estratégia, marca, conteúdo e mídia trabalhando na mesma direção para
                 gerar crescimento, reputação e impacto. Conte brevemente sobre sua
-                marca, projeto ou causa — a PROH entrará em contato para compreender
+                marca, projeto ou causa — a <Proh /> entrará em contato para compreender
                 o momento e indicar o melhor caminho.
               </p>
             </div>
@@ -744,7 +745,7 @@ export default function App() {
               <p className="text-sm uppercase tracking-widest font-bold font-extended text-[#D8D4BD]/70">
                 Estratégia, marca, mídia e impacto.
               </p>
-              <p className="text-sm uppercase tracking-widest font-bold font-extended text-white mt-1">
+              <p className="text-sm uppercase tracking-widest font-bold font-mirano text-white mt-1">
                 Propagar valor.
               </p>
             </div>
@@ -765,7 +766,7 @@ export default function App() {
 
           <div className="w-full flex flex-col md:flex-row justify-between items-center gap-4 pt-8 border-t border-[#D8D4BD]/20 text-xs font-bold uppercase tracking-widest text-[#D8D4BD]/50 font-extended">
             <p>O que tem valor merece alcance.</p>
-            <p>© {new Date().getFullYear()} PROH Media. Todos os direitos reservados.</p>
+            <p>© {new Date().getFullYear()} <Proh /> Media. Todos os direitos reservados.</p>
           </div>
         </div>
       </footer>
@@ -928,7 +929,7 @@ function GeminiSimulator() {
       <div className="relative z-10 flex flex-col lg:flex-row gap-8 md:gap-10 items-center">
         <div className="lg:w-1/2 w-full">
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-[#0F0F15] text-[#D8D4BD] rounded-full text-xs font-bold uppercase tracking-widest mb-6 font-extended">
-            <Sparkles size={14} className="text-yellow-400" /> IA da PROH
+            <Sparkles size={14} className="text-yellow-400" /> IA da <Proh />
           </div>
           <h3 className="text-2xl sm:text-3xl md:text-4xl font-black mb-4 uppercase tracking-tighter font-extended text-[#0F0F15] leading-tight">
             Veja as duas dimensões<br />no seu mercado
@@ -936,7 +937,7 @@ function GeminiSimulator() {
           <p className="text-[#0F0F15]/70 mb-8 font-medium leading-relaxed max-w-md">
             Digite o segmento da sua empresa e receba, na hora, uma ideia de
             crescimento e uma ideia de impacto — as duas dimensões do valor que a
-            PROH propaga.
+            <Proh /> propaga.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-3">
@@ -999,6 +1000,11 @@ function GeminiSimulator() {
 }
 
 // --- COMPONENTES AUXILIARES ---
+// Nome da marca: sempre em Mirano Extended, herdando cor e peso do contexto.
+function Proh() {
+  return <span className="font-mirano">PROH</span>;
+}
+
 function SolutionCard({ icon, title, desc, items }) {
   return (
     <div className="h-full p-8 bg-white/60 border border-white hover:border-[#0F0F15]/10 transition-all duration-500 group rounded-[2rem] hover:-translate-y-2 shadow-sm hover:shadow-xl">

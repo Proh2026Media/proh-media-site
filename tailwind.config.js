@@ -8,11 +8,12 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        // Tipografia oficial (src/index.css): Mirano Extended = personalidade
-        // (títulos); Gotham = apoio e leitura.
+        // Tipografia oficial (src/index.css): Gotham em títulos e leitura;
+        // Mirano Extended reservada ao nome da marca (PROH/PH) e slogans.
         sans: ['Gotham', 'ui-sans-serif', 'system-ui', 'sans-serif'],
         gotham: ['Gotham', 'ui-sans-serif', 'system-ui', 'sans-serif'],
-        extended: ['Mirano Extended', 'Gotham', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        extended: ['Gotham', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        mirano: ['Mirano Extended', 'Gotham', 'ui-sans-serif', 'system-ui', 'sans-serif'],
       },
     },
   },
