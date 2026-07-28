@@ -99,6 +99,56 @@ export default function App() {
     };
   }, []);
 
+  // Reflexo do vidro do PROH: responde ao scroll e à proximidade do mouse.
+  // Nenhuma animação autônoma — em repouso, nada se move.
+  useEffect(() => {
+    const glass = document.querySelector('.glass-brand') as HTMLElement | null;
+    if (!glass) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    let ticking = false;
+    const updateReflect = () => {
+      ticking = false;
+      const r = glass.getBoundingClientRect();
+      const vh = window.innerHeight;
+      const progresso = Math.max(0, Math.min(1, (vh - r.top) / (vh + r.height)));
+      glass.style.setProperty('--gx', (((progresso - 0.5) * 44)).toFixed(2) + '%');
+    };
+    const onScroll = () => {
+      if (!ticking) { ticking = true; requestAnimationFrame(updateReflect); }
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    updateReflect();
+
+    const secao = document.getElementById('conceito');
+    const temMouse = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+    const onMove = (e) => {
+      const r = glass.getBoundingClientRect();
+      const px = Math.min(Math.max(e.clientX, r.left), r.right);
+      const py = Math.min(Math.max(e.clientY, r.top), r.bottom);
+      const dist = Math.hypot(e.clientX - px, e.clientY - py);
+      const intensidade = Math.max(0, 1 - dist / 260);
+      glass.style.setProperty('--mo', intensidade.toFixed(3));
+      if (intensidade > 0) {
+        glass.style.setProperty('--mx', (((e.clientX - r.left) / r.width) * 100).toFixed(2) + '%');
+        glass.style.setProperty('--my', (((e.clientY - r.top) / r.height) * 100).toFixed(2) + '%');
+      }
+    };
+    const onLeave = () => glass.style.setProperty('--mo', '0');
+    if (secao && temMouse) {
+      secao.addEventListener('mousemove', onMove);
+      secao.addEventListener('mouseleave', onLeave);
+    }
+
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      if (secao && temMouse) {
+        secao.removeEventListener('mousemove', onMove);
+        secao.removeEventListener('mouseleave', onLeave);
+      }
+    };
+  }, []);
+
   const navLinks = [
     { id: 'conceito', label: 'Conceito' },
     { id: 'solucoes', label: 'Soluções' },
@@ -177,9 +227,10 @@ export default function App() {
         }
         .img-brand:hover { filter: grayscale(0); }
 
-        /* Vidro líquido contido nas letras: máscara com o logo oficial
-           recorta tudo — base de vidro estática + um fluxo de luz contínuo
-           numa direção só (loop de esteira, sem emenda visível). */
+        /* Vidro transparente: as letras (máscara do logo) mostram o fundo
+           com leve desfoque. O reflexo interno NÃO tem animação própria —
+           ele responde só ao scroll (--gx) e à proximidade do mouse
+           (--mx/--my/--mo), calculados por JavaScript sob demanda. */
         .glass-brand {
           position: relative;
           width: min(100%, 34rem);
@@ -190,36 +241,43 @@ export default function App() {
           -webkit-mask-size: contain; mask-size: contain;
           -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
           -webkit-mask-position: left center; mask-position: left center;
-          background: linear-gradient(180deg,
-            rgba(255, 255, 255, 0.22) 0%,
-            rgba(255, 255, 255, 0.07) 45%,
-            rgba(216, 212, 189, 0.16) 100%);
+          -webkit-backdrop-filter: blur(10px) brightness(1.15);
+          backdrop-filter: blur(10px) brightness(1.15);
+          background: rgba(255, 255, 255, 0.05);
         }
-        /* Fio de luz no topo das letras: borda de vidro lapidado */
+        /* Fio de luz sutil no topo: contorno de vidro lapidado */
         .glass-brand::after {
           content: '';
           position: absolute;
           inset: 0;
-          background: linear-gradient(180deg, rgba(255, 255, 255, 0.35) 0%, transparent 24%);
+          background: linear-gradient(180deg, rgba(255, 255, 255, 0.22) 0%, transparent 20%);
         }
-        /* Fluxo contínuo: padrão repetido desliza sempre para a esquerda;
-           a translação equivale a exatamente um período do padrão. */
-        .glass-brand-flow {
+        /* Reflexo do ambiente (cores reais dos vizinhos: bege do hero,
+           branco da tarja, cinza da fotografia) — desliza APENAS via --gx */
+        .glass-brand-reflect {
           position: absolute;
-          top: 0; bottom: 0; left: 0;
+          top: 0; bottom: 0; left: -100%;
           width: 300%;
-          background: repeating-linear-gradient(100deg,
-            transparent 0%,
-            rgba(255, 255, 255, 0.14) 7%,
-            rgba(216, 212, 189, 0.10) 12%,
-            transparent 18%,
-            transparent 33.333%);
-          animation: glass-flow 16s linear infinite;
+          background: linear-gradient(100deg,
+            transparent 12%,
+            rgba(216, 212, 189, 0.22) 22%,
+            rgba(255, 255, 255, 0.16) 30%,
+            transparent 40%,
+            transparent 55%,
+            rgba(163, 161, 150, 0.14) 63%,
+            rgba(255, 255, 255, 0.10) 70%,
+            transparent 80%);
+          transform: translateX(var(--gx, 0%));
           will-change: transform;
         }
-        @keyframes glass-flow {
-          from { transform: translateX(0); }
-          to   { transform: translateX(-33.333%); }
+        /* Brilho que responde à aproximação do cursor (desktop) */
+        .glass-brand-glow {
+          position: absolute;
+          inset: 0;
+          background: radial-gradient(150px 95px at var(--mx, 50%) var(--my, 50%),
+            rgba(255, 255, 255, 0.30), transparent 70%);
+          opacity: var(--mo, 0);
+          transition: opacity 0.25s ease;
         }
 
         /* Pilha de cartas: cada seção pina (com top calculado via JS para
@@ -276,7 +334,7 @@ export default function App() {
           .animate-on-scroll { opacity: 1 !important; transform: none !important; transition: none !important; }
           .animate-spin-slow { animation: none !important; }
           .marquee-track { animation: none !important; }
-          .glass-brand-flow { animation: none !important; }
+          .glass-brand-glow { transition: none !important; }
         }
       `}} />
 
@@ -397,7 +455,8 @@ export default function App() {
           <div className="grid md:grid-cols-2 gap-10 md:gap-16 items-center">
             <div className="animate-on-scroll">
               <div className="glass-brand mb-8 select-none" aria-hidden="true">
-                <div className="glass-brand-flow"></div>
+                <div className="glass-brand-reflect"></div>
+                <div className="glass-brand-glow"></div>
               </div>
               <p className="flex items-center gap-3 uppercase text-sm font-bold tracking-widest font-extended text-[#D8D4BD]/60 mb-4"><span className="font-mirano">01</span><span className="w-8 h-[2px] bg-[#D8D4BD]/30" aria-hidden="true"></span>Conceito</p>
               <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-6 leading-tight font-extended">
