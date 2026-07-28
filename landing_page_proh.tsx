@@ -177,54 +177,49 @@ export default function App() {
         }
         .img-brand:hover { filter: grayscale(0); }
 
-        /* Texto "liquid glass": gradiente das cores do sistema recortado no
-           texto, com um reflexo que percorre lentamente a superfície. */
-        /* Vidro real: as letras são uma janela de backdrop-filter recortada
-           no formato do logo — desfocam, saturam e clareiam o que está atrás
-           (as luzes flutuantes), refletindo o ambiente como vidro líquido. */
+        /* Vidro líquido contido nas letras: máscara com o logo oficial
+           recorta tudo — base de vidro estática + um fluxo de luz contínuo
+           numa direção só (loop de esteira, sem emenda visível). */
         .glass-brand {
           position: relative;
           width: min(100%, 34rem);
           aspect-ratio: 755 / 139;
+          overflow: hidden;
           -webkit-mask-image: url('/brand/proh-glass.svg');
           mask-image: url('/brand/proh-glass.svg');
           -webkit-mask-size: contain; mask-size: contain;
           -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
           -webkit-mask-position: left center; mask-position: left center;
-          -webkit-backdrop-filter: blur(14px) saturate(180%) brightness(1.6);
-          backdrop-filter: blur(14px) saturate(180%) brightness(1.6);
-          background: rgba(255, 255, 255, 0.05);
+          background: linear-gradient(180deg,
+            rgba(255, 255, 255, 0.22) 0%,
+            rgba(255, 255, 255, 0.07) 45%,
+            rgba(216, 212, 189, 0.16) 100%);
         }
-        .glass-brand-sheen {
+        /* Fio de luz no topo das letras: borda de vidro lapidado */
+        .glass-brand::after {
+          content: '';
           position: absolute;
           inset: 0;
-          background: linear-gradient(115deg,
-            rgba(255, 255, 255, 0.35) 0%,
-            transparent 28%,
-            rgba(255, 255, 255, 0.22) 50%,
-            transparent 72%,
-            rgba(255, 255, 255, 0.30) 100%);
-          background-size: 260% 100%;
-          mix-blend-mode: screen;
-          animation: glass-shine 8s ease-in-out infinite;
+          background: linear-gradient(180deg, rgba(255, 255, 255, 0.35) 0%, transparent 24%);
         }
-        @keyframes glass-shine {
-          0%, 100% { background-position: 0% 50%; }
-          50% { background-position: 100% 50%; }
-        }
-
-        /* Luzes flutuantes atrás do vidro (o "ambiente" refletido) */
-        .glass-blob {
+        /* Fluxo contínuo: padrão repetido desliza sempre para a esquerda;
+           a translação equivale a exatamente um período do padrão. */
+        .glass-brand-flow {
           position: absolute;
-          border-radius: 9999px;
-          filter: blur(48px);
-          animation: blob-float 16s ease-in-out infinite alternate;
+          top: 0; bottom: 0; left: 0;
+          width: 300%;
+          background: repeating-linear-gradient(100deg,
+            transparent 0%,
+            rgba(255, 255, 255, 0.14) 7%,
+            rgba(216, 212, 189, 0.10) 12%,
+            transparent 18%,
+            transparent 33.333%);
+          animation: glass-flow 16s linear infinite;
           will-change: transform;
         }
-        @keyframes blob-float {
-          0%   { transform: translate3d(0, 0, 0) scale(1); }
-          50%  { transform: translate3d(4rem, -2rem, 0) scale(1.25); }
-          100% { transform: translate3d(-2rem, 2.5rem, 0) scale(0.95); }
+        @keyframes glass-flow {
+          from { transform: translateX(0); }
+          to   { transform: translateX(-33.333%); }
         }
 
         /* Pilha de cartas: cada seção pina (com top calculado via JS para
@@ -281,7 +276,7 @@ export default function App() {
           .animate-on-scroll { opacity: 1 !important; transform: none !important; transition: none !important; }
           .animate-spin-slow { animation: none !important; }
           .marquee-track { animation: none !important; }
-          .glass-brand-sheen, .glass-blob { animation: none !important; }
+          .glass-brand-flow { animation: none !important; }
         }
       `}} />
 
@@ -398,17 +393,11 @@ export default function App() {
 
       {/* SEÇÃO 2 — O CONCEITO */}
       <section id="conceito" className="stack-card z-[20] w-full md:min-h-screen flex flex-col md:justify-center py-20 md:py-24 rounded-t-[2.5rem] md:rounded-t-[3rem] bg-[#0F0F15] text-[#D8D4BD] overflow-hidden shadow-[0_-20px_50px_rgba(0,0,0,0.4)] mt-[-2.5rem] md:mt-[-3rem]">
-        {/* Ambiente refletido pelo vidro: luzes suaves em movimento */}
-        <div className="absolute inset-0 z-0 pointer-events-none" aria-hidden="true">
-          <div className="glass-blob w-72 h-72 bg-[#D8D4BD]/35 top-6 left-[-4rem]"></div>
-          <div className="glass-blob w-56 h-56 bg-white/20 top-40 left-52" style={{ animationDelay: '-6s' }}></div>
-          <div className="glass-blob w-64 h-64 bg-[#D8D4BD]/20 top-[-3rem] left-[24rem]" style={{ animationDelay: '-11s' }}></div>
-        </div>
         <div className="max-w-7xl mx-auto px-6 md:px-12 relative z-10 w-full">
           <div className="grid md:grid-cols-2 gap-10 md:gap-16 items-center">
             <div className="animate-on-scroll">
               <div className="glass-brand mb-8 select-none" aria-hidden="true">
-                <div className="glass-brand-sheen"></div>
+                <div className="glass-brand-flow"></div>
               </div>
               <p className="flex items-center gap-3 uppercase text-sm font-bold tracking-widest font-extended text-[#D8D4BD]/60 mb-4"><span className="font-mirano">01</span><span className="w-8 h-[2px] bg-[#D8D4BD]/30" aria-hidden="true"></span>Conceito</p>
               <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-6 leading-tight font-extended">
