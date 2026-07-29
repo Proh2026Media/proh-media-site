@@ -55,7 +55,9 @@ export default function App() {
       setHeaderDark(dark);
     };
     window.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener('load', handleScroll);
     handleScroll();
+    requestAnimationFrame(() => requestAnimationFrame(handleScroll));
 
     // Observer para menu ativo
     const observerOptions = { root: null, rootMargin: '-20% 0px -60% 0px', threshold: 0 };
@@ -106,6 +108,7 @@ export default function App() {
 
     return () => {
       window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('load', handleScroll);
       window.removeEventListener('resize', setStackTops);
       window.removeEventListener('load', setStackTops);
       if (stackRO) stackRO.disconnect();
