@@ -33,14 +33,28 @@ export default function App() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [activeSection, setActiveSection] = useState('');
   const [menuOpen, setMenuOpen] = useState(false);
+  const [headerDark, setHeaderDark] = useState(false);
 
   const closeMenu = () => setMenuOpen(false);
 
   useEffect(() => {
+    const themeSections = Array.from(document.querySelectorAll('section[id], footer'));
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50);
+      // Qual seção está sob a pílula? (última no DOM que cobre o ponto,
+      // pois as cartas posteriores ficam por cima). Tema pela cor de fundo.
+      const probeY = 64;
+      let dark = false;
+      for (const el of themeSections) {
+        const r = el.getBoundingClientRect();
+        if (r.top <= probeY && r.bottom > probeY) {
+          dark = el.className.includes('bg-[#0F0F15]');
+        }
+      }
+      setHeaderDark(dark);
     };
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll();
 
     // Observer para menu ativo
     const observerOptions = { root: null, rootMargin: '-20% 0px -60% 0px', threshold: 0 };
@@ -301,29 +315,31 @@ export default function App() {
         }
       `}} />
 
-      {/* HEADER: pílula flutuante */}
+      {/* HEADER: pílula flutuante que adapta o tema à seção sob ela */}
       <header className="fixed top-0 left-0 right-0 z-[100] px-4 sm:px-6 pt-4 md:pt-5">
         <div
-          className={`max-w-6xl mx-auto border transition-all duration-500 ${
+          className={`max-w-6xl mx-auto border overflow-hidden transition-all duration-300 ${
             menuOpen ? 'rounded-[1.75rem]' : 'rounded-full'
           } ${
-            isScrolled || menuOpen
-              ? 'bg-[#D8D4BD]/90 backdrop-blur-xl shadow-lg border-[#0F0F15]/10'
-              : 'bg-[#D8D4BD]/65 backdrop-blur-md shadow-md border-white/50'
+            headerDark
+              ? 'bg-[#0F0F15]/85 backdrop-blur-xl shadow-lg border-white/10'
+              : isScrolled || menuOpen
+                ? 'bg-[#D8D4BD]/90 backdrop-blur-xl shadow-lg border-[#0F0F15]/10'
+                : 'bg-[#D8D4BD]/65 backdrop-blur-md shadow-md border-white/50'
           }`}
         >
           <div className="flex items-center justify-between gap-4 px-5 sm:px-7 py-3">
-            {/* Logo oficial PROH */}
+            {/* Logo oficial: versão clara ou escura conforme o tema */}
             <div className="cursor-pointer transition-transform hover:scale-105 flex items-center shrink-0" onClick={() => { closeMenu(); window.scrollTo(0, 0); }}>
-              <img src={logoHeader} alt="PROH Media" className="h-7 md:h-9 w-auto drop-shadow-sm" />
+              <img src={headerDark ? logoFooter : logoHeader} alt="PROH Media" className="h-7 md:h-9 w-auto drop-shadow-sm" />
             </div>
 
-            <nav className="hidden lg:flex gap-8 text-sm font-bold tracking-wider uppercase text-[#0F0F15] font-extended">
+            <nav className={`hidden lg:flex gap-8 text-sm font-bold tracking-wider uppercase font-extended transition-colors duration-300 ${headerDark ? 'text-[#D8D4BD]' : 'text-[#0F0F15]'}`}>
               {navLinks.map((l) => (
                 <a
                   key={l.id}
                   href={`#${l.id}`}
-                  className={`transition-all border-b-2 pb-0.5 ${activeSection === l.id ? 'border-[#0F0F15]' : 'border-transparent opacity-70 hover:opacity-100'}`}
+                  className={`transition-all border-b-2 pb-0.5 ${activeSection === l.id ? (headerDark ? 'border-[#D8D4BD]' : 'border-[#0F0F15]') : 'border-transparent opacity-70 hover:opacity-100'}`}
                 >
                   {l.label}
                 </a>
@@ -331,7 +347,7 @@ export default function App() {
             </nav>
 
             <div className="flex items-center gap-3">
-              <a href="#contato" className="hidden lg:inline-flex whitespace-nowrap bg-[#0F0F15] text-[#D8D4BD] px-6 py-3 text-sm font-bold uppercase tracking-wider hover:bg-white hover:text-[#0F0F15] hover:shadow-[0_0_20px_rgba(255,255,255,0.3)] transition-all duration-300 rounded-full font-extended">
+              <a href="#contato" className={`hidden lg:inline-flex whitespace-nowrap px-6 py-3 text-sm font-bold uppercase tracking-wider transition-all duration-300 rounded-full font-extended ${headerDark ? 'bg-[#D8D4BD] text-[#0F0F15] hover:bg-white' : 'bg-[#0F0F15] text-[#D8D4BD] hover:bg-white hover:text-[#0F0F15] hover:shadow-[0_0_20px_rgba(255,255,255,0.3)]'}`}>
                 Começar um projeto
               </a>
 
@@ -341,27 +357,27 @@ export default function App() {
                 onClick={() => setMenuOpen((v) => !v)}
                 aria-label={menuOpen ? 'Fechar menu' : 'Abrir menu'}
                 aria-expanded={menuOpen}
-                className="lg:hidden inline-flex items-center justify-center w-11 h-11 rounded-full text-[#0F0F15] hover:bg-[#0F0F15]/5 transition-colors"
+                className={`lg:hidden inline-flex items-center justify-center w-11 h-11 rounded-full transition-colors duration-300 ${headerDark ? 'text-[#D8D4BD] hover:bg-white/10' : 'text-[#0F0F15] hover:bg-[#0F0F15]/5'}`}
               >
                 {menuOpen ? <X size={26} /> : <Menu size={26} />}
               </button>
             </div>
           </div>
 
-          {/* Menu mobile: expande dentro da própria pílula */}
-          <div
-            className={`lg:hidden overflow-hidden transition-all duration-300 ease-out ${
-              menuOpen ? 'max-h-[520px] opacity-100' : 'max-h-0 opacity-0'
-            }`}
-          >
-            <nav className="flex flex-col px-6 pb-6 pt-1">
-              {navLinks.map((l) => (
-                <a key={l.id} href={`#${l.id}`} onClick={closeMenu} className="py-4 text-lg font-bold uppercase tracking-wider text-[#0F0F15] border-b border-[#0F0F15]/10 font-extended">{l.label}</a>
-              ))}
-              <a href="#contato" onClick={closeMenu} className="mt-5 bg-[#0F0F15] text-[#D8D4BD] px-6 py-4 text-sm font-bold uppercase tracking-widest text-center rounded-full font-extended">
-                Começar um projeto
-              </a>
-            </nav>
+          {/* Menu mobile: expande dentro da própria pílula. Animação por
+              grid-template-rows (altura exata do conteúdo — sem o salto
+              e o vazamento do max-height). */}
+          <div className={`lg:hidden grid transition-[grid-template-rows] duration-300 ease-out ${menuOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'}`}>
+            <div className="overflow-hidden">
+              <nav className="flex flex-col px-6 pb-6 pt-1">
+                {navLinks.map((l) => (
+                  <a key={l.id} href={`#${l.id}`} onClick={closeMenu} className={`py-4 text-lg font-bold uppercase tracking-wider font-extended border-b transition-colors duration-300 ${headerDark ? 'text-[#D8D4BD] border-white/10' : 'text-[#0F0F15] border-[#0F0F15]/10'}`}>{l.label}</a>
+                ))}
+                <a href="#contato" onClick={closeMenu} className={`mt-5 px-6 py-4 text-sm font-bold uppercase tracking-widest text-center rounded-full font-extended ${headerDark ? 'bg-[#D8D4BD] text-[#0F0F15]' : 'bg-[#0F0F15] text-[#D8D4BD]'}`}>
+                  Começar um projeto
+                </a>
+              </nav>
+            </div>
           </div>
         </div>
       </header>
