@@ -6,10 +6,9 @@ import {
 } from 'lucide-react';
 
 // --- LOGOS OFICIAIS (pasta /SVG) ---
-import logoHeader from './SVG/proh-black.svg';
 import logoFooter from './SVG/proh-white-off.svg';
-// Header sobre fundo escuro: PRO preto + H branco, sem MEDIA.
-import logoHeaderDark from './SVG/proh-black-white-s-media.svg';
+// Header sobre fundo claro: PRO preto + H branco (com MEDIA).
+import logoHeaderLight from './SVG/proh-black-white.svg';
 
 // --- CONFIGURAÇÃO ---
 // WhatsApp que recebe os projetos do formulário (somente dígitos, com DDI).
@@ -328,16 +327,20 @@ export default function App() {
                 : 'bg-[#D8D4BD]/65 backdrop-blur-md shadow-md border-white/50'
           }`}
         >
-          <div className="flex items-center justify-between gap-4 px-5 sm:px-7 py-3">
-            {/* Logo oficial. O contêiner tem a altura do PROH: no logo claro
-                (com MEDIA), a imagem ancora pelo topo e o MEDIA pende abaixo
-                sem participar da centralização. No escuro, versão sem MEDIA
-                (PRO preto + H branco). */}
+          {/* Respiros no desktop: o PROH fica à mesma distância do topo,
+              fundo e esquerda (pl = respiro vertical do PROH) e o botão do
+              topo, fundo e direita (pr = respiro vertical do botão). No
+              modo hambúrguer, padding padrão. */}
+          <div className="flex items-center justify-between gap-4 py-3 px-5 lg:pl-4 lg:pr-3">
+            {/* Logo oficial (claro: PRO preto + H branco; escuro: PRO branco
+                + H bege). O contêiner tem a altura do PROH e a imagem ancora
+                pelo topo: o MEDIA pende abaixo sem participar da
+                centralização. */}
             <div className="h-7 md:h-9 flex items-start shrink-0 cursor-pointer transition-transform hover:scale-105" onClick={() => { closeMenu(); window.scrollTo(0, 0); }}>
               <img
-                src={headerDark ? logoHeaderDark : logoHeader}
+                src={headerDark ? logoFooter : logoHeaderLight}
                 alt="PROH Media"
-                className={`w-auto drop-shadow-sm ${headerDark ? 'h-full' : 'h-[131%]'}`}
+                className="h-[131%] w-auto drop-shadow-sm"
               />
             </div>
 
