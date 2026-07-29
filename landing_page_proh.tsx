@@ -144,7 +144,7 @@ export default function App() {
   return (
     <div className="text-[#0F0F15] bg-[#D8D4BD] selection:bg-[#0F0F15] selection:text-[#D8D4BD] overflow-x-hidden" style={{ fontFamily: "'Gotham', sans-serif" }}>
       <style dangerouslySetInnerHTML={{__html: `
-        html { scroll-behavior: smooth; scroll-padding-top: 5rem; }
+        html { scroll-behavior: smooth; scroll-padding-top: 6.5rem; }
         * { -webkit-tap-highlight-color: transparent; }
         body { overflow-x: hidden; }
         .font-extended { font-family: 'Gotham', sans-serif; }
@@ -301,62 +301,68 @@ export default function App() {
         }
       `}} />
 
-      {/* HEADER */}
-      <header
-        className={`fixed w-full z-[100] transition-all duration-500 ${
-          isScrolled || menuOpen ? 'bg-[#D8D4BD]/95 backdrop-blur-md py-3 md:py-4 shadow-sm' : 'bg-transparent py-5 md:py-6'
-        }`}
-      >
-        <div className="max-w-7xl mx-auto px-6 md:px-12 flex justify-between items-center">
-          {/* Logo oficial PROH */}
-          <div className="cursor-pointer transition-transform hover:scale-105 flex items-center" onClick={() => { closeMenu(); window.scrollTo(0, 0); }}>
-            <img src={logoHeader} alt="PROH Media" className="h-7 md:h-10 w-auto drop-shadow-sm" />
-          </div>
-
-          <nav className="hidden lg:flex gap-8 text-sm font-bold tracking-wider uppercase text-[#0F0F15] font-extended">
-            {navLinks.map((l) => (
-              <a
-                key={l.id}
-                href={`#${l.id}`}
-                className={`transition-all border-b-2 pb-0.5 ${activeSection === l.id ? 'border-[#0F0F15]' : 'border-transparent opacity-70 hover:opacity-100'}`}
-              >
-                {l.label}
-              </a>
-            ))}
-          </nav>
-
-          <div className="flex items-center gap-3">
-            <a href="#contato" className="hidden lg:inline-flex whitespace-nowrap bg-[#0F0F15] text-[#D8D4BD] px-6 py-3 text-sm font-bold uppercase tracking-wider hover:bg-white hover:text-[#0F0F15] hover:shadow-[0_0_20px_rgba(255,255,255,0.3)] transition-all duration-300 rounded-full font-extended">
-              Começar um projeto
-            </a>
-
-            {/* Botão do menu mobile */}
-            <button
-              type="button"
-              onClick={() => setMenuOpen((v) => !v)}
-              aria-label={menuOpen ? 'Fechar menu' : 'Abrir menu'}
-              aria-expanded={menuOpen}
-              className="lg:hidden inline-flex items-center justify-center w-11 h-11 rounded-full text-[#0F0F15] hover:bg-[#0F0F15]/5 transition-colors"
-            >
-              {menuOpen ? <X size={26} /> : <Menu size={26} />}
-            </button>
-          </div>
-        </div>
-
-        {/* Menu mobile (dropdown) */}
+      {/* HEADER: pílula flutuante */}
+      <header className="fixed top-0 left-0 right-0 z-[100] px-4 sm:px-6 pt-4 md:pt-5">
         <div
-          className={`lg:hidden overflow-hidden transition-all duration-300 ease-out ${
-            menuOpen ? 'max-h-[520px] opacity-100' : 'max-h-0 opacity-0'
+          className={`max-w-6xl mx-auto border transition-all duration-500 ${
+            menuOpen ? 'rounded-[1.75rem]' : 'rounded-full'
+          } ${
+            isScrolled || menuOpen
+              ? 'bg-[#D8D4BD]/90 backdrop-blur-xl shadow-lg border-[#0F0F15]/10'
+              : 'bg-[#D8D4BD]/65 backdrop-blur-md shadow-md border-white/50'
           }`}
         >
-          <nav className="flex flex-col px-6 pt-2 pb-6">
-            {navLinks.map((l) => (
-              <a key={l.id} href={`#${l.id}`} onClick={closeMenu} className="py-4 text-lg font-bold uppercase tracking-wider text-[#0F0F15] border-b border-[#0F0F15]/10 font-extended">{l.label}</a>
-            ))}
-            <a href="#contato" onClick={closeMenu} className="mt-5 bg-[#0F0F15] text-[#D8D4BD] px-6 py-4 text-sm font-bold uppercase tracking-widest text-center rounded-full font-extended">
-              Começar um projeto
-            </a>
-          </nav>
+          <div className="flex items-center justify-between gap-4 px-5 sm:px-7 py-3">
+            {/* Logo oficial PROH */}
+            <div className="cursor-pointer transition-transform hover:scale-105 flex items-center shrink-0" onClick={() => { closeMenu(); window.scrollTo(0, 0); }}>
+              <img src={logoHeader} alt="PROH Media" className="h-7 md:h-9 w-auto drop-shadow-sm" />
+            </div>
+
+            <nav className="hidden lg:flex gap-8 text-sm font-bold tracking-wider uppercase text-[#0F0F15] font-extended">
+              {navLinks.map((l) => (
+                <a
+                  key={l.id}
+                  href={`#${l.id}`}
+                  className={`transition-all border-b-2 pb-0.5 ${activeSection === l.id ? 'border-[#0F0F15]' : 'border-transparent opacity-70 hover:opacity-100'}`}
+                >
+                  {l.label}
+                </a>
+              ))}
+            </nav>
+
+            <div className="flex items-center gap-3">
+              <a href="#contato" className="hidden lg:inline-flex whitespace-nowrap bg-[#0F0F15] text-[#D8D4BD] px-6 py-3 text-sm font-bold uppercase tracking-wider hover:bg-white hover:text-[#0F0F15] hover:shadow-[0_0_20px_rgba(255,255,255,0.3)] transition-all duration-300 rounded-full font-extended">
+                Começar um projeto
+              </a>
+
+              {/* Botão do menu mobile */}
+              <button
+                type="button"
+                onClick={() => setMenuOpen((v) => !v)}
+                aria-label={menuOpen ? 'Fechar menu' : 'Abrir menu'}
+                aria-expanded={menuOpen}
+                className="lg:hidden inline-flex items-center justify-center w-11 h-11 rounded-full text-[#0F0F15] hover:bg-[#0F0F15]/5 transition-colors"
+              >
+                {menuOpen ? <X size={26} /> : <Menu size={26} />}
+              </button>
+            </div>
+          </div>
+
+          {/* Menu mobile: expande dentro da própria pílula */}
+          <div
+            className={`lg:hidden overflow-hidden transition-all duration-300 ease-out ${
+              menuOpen ? 'max-h-[520px] opacity-100' : 'max-h-0 opacity-0'
+            }`}
+          >
+            <nav className="flex flex-col px-6 pb-6 pt-1">
+              {navLinks.map((l) => (
+                <a key={l.id} href={`#${l.id}`} onClick={closeMenu} className="py-4 text-lg font-bold uppercase tracking-wider text-[#0F0F15] border-b border-[#0F0F15]/10 font-extended">{l.label}</a>
+              ))}
+              <a href="#contato" onClick={closeMenu} className="mt-5 bg-[#0F0F15] text-[#D8D4BD] px-6 py-4 text-sm font-bold uppercase tracking-widest text-center rounded-full font-extended">
+                Começar um projeto
+              </a>
+            </nav>
+          </div>
         </div>
       </header>
 
