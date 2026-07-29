@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   ArrowRight, CheckCircle2, Sparkles, Loader2, Menu, X, ChevronDown,
   Compass, Fingerprint, PenLine, TrendingUp, MonitorSmartphone, HeartHandshake,
@@ -99,61 +99,15 @@ export default function App() {
     };
   }, []);
 
-  // Reflexo do vidro do PROH: responde ao scroll e à proximidade do mouse.
-  // Nenhuma animação autônoma — em repouso, nada se move.
+  // Brilho do PROH em baixo-relevo: responde apenas à proximidade do
+  // cursor (desktop). Nenhuma animação autônoma — parado, nada se move.
   useEffect(() => {
     const glass = document.querySelector('.glass-brand') as HTMLElement | null;
     if (!glass) return;
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-
-    let ticking = false;
-    const updateReflect = () => {
-      ticking = false;
-      const r = glass.getBoundingClientRect();
-      const vh = window.innerHeight;
-      const progresso = Math.max(0, Math.min(1, (vh - r.top) / (vh + r.height)));
-      glass.style.setProperty('--gx', (((progresso - 0.5) * 44)).toFixed(2) + '%');
-    };
-    const onScroll = () => {
-      if (!ticking) { ticking = true; requestAnimationFrame(updateReflect); }
-    };
-    window.addEventListener('scroll', onScroll, { passive: true });
-    updateReflect();
-
-    // Reflexo ambiente: amostra as cores REAIS dos vizinhos — o texto
-    // abaixo (computed color) e a imagem ao lado (média via canvas).
-    const foto = document.querySelector('#conceito img') as HTMLImageElement | null;
-    const textoAbaixo = document.querySelector('#conceito h2');
-    const setAmbient = () => {
-      if (textoAbaixo) {
-        const cor = getComputedStyle(textoAbaixo).color;
-        const m = cor.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
-        if (m) glass.style.setProperty('--c-baixo', `rgba(${m[1]}, ${m[2]}, ${m[3]}, 0.24)`);
-      }
-      if (foto && foto.complete && foto.naturalWidth) {
-        try {
-          const cv = document.createElement('canvas');
-          cv.width = 8; cv.height = 8;
-          const ctx = cv.getContext('2d');
-          ctx.drawImage(foto, 0, 0, 8, 8);
-          const d = ctx.getImageData(0, 0, 8, 8).data;
-          let r = 0, gg = 0, b = 0;
-          const n = d.length / 4;
-          for (let i = 0; i < d.length; i += 4) { r += d[i]; gg += d[i + 1]; b += d[i + 2]; }
-          glass.style.setProperty('--c-lado',
-            `rgba(${Math.round(r / n)}, ${Math.round(gg / n)}, ${Math.round(b / n)}, 0.28)`);
-        } catch (e) { /* canvas bloqueado por CORS: mantém a cor padrão */ }
-      }
-    };
-    setAmbient();
-    if (foto) foto.addEventListener('load', setAmbient);
-    // Se a imagem ou o estilo do texto mudarem, o reflexo re-amostra sozinho
-    const ambientObserver = new MutationObserver(setAmbient);
-    if (foto) ambientObserver.observe(foto, { attributes: true, attributeFilter: ['src', 'class', 'style'] });
-    if (textoAbaixo) ambientObserver.observe(textoAbaixo, { attributes: true, attributeFilter: ['class', 'style'] });
+    if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
 
     const secao = document.getElementById('conceito');
-    const temMouse = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
     const onMove = (e) => {
       const r = glass.getBoundingClientRect();
       const px = Math.min(Math.max(e.clientX, r.left), r.right);
@@ -167,16 +121,12 @@ export default function App() {
       }
     };
     const onLeave = () => glass.style.setProperty('--mo', '0');
-    if (secao && temMouse) {
+    if (secao) {
       secao.addEventListener('mousemove', onMove);
       secao.addEventListener('mouseleave', onLeave);
     }
-
     return () => {
-      window.removeEventListener('scroll', onScroll);
-      if (foto) foto.removeEventListener('load', setAmbient);
-      ambientObserver.disconnect();
-      if (secao && temMouse) {
+      if (secao) {
         secao.removeEventListener('mousemove', onMove);
         secao.removeEventListener('mouseleave', onLeave);
       }
@@ -261,10 +211,9 @@ export default function App() {
         }
         .img-brand:hover { filter: grayscale(0); }
 
-        /* Vidro transparente: as letras (máscara do logo) mostram o fundo
-           com leve desfoque. O reflexo interno NÃO tem animação própria —
-           ele responde só ao scroll (--gx) e à proximidade do mouse
-           (--mx/--my/--mo), calculados por JavaScript sob demanda. */
+        /* PROH em baixo-relevo: tom sobre tom, como relevo seco de
+           papelaria premium. Estático — só um brilho sutil responde à
+           proximidade do cursor (sem nenhuma animação autônoma). */
         .glass-brand {
           position: relative;
           width: min(100%, 34rem);
@@ -275,55 +224,23 @@ export default function App() {
           -webkit-mask-size: contain; mask-size: contain;
           -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
           -webkit-mask-position: left center; mask-position: left center;
-          -webkit-backdrop-filter: blur(10px) brightness(1.15);
-          backdrop-filter: blur(10px) brightness(1.15);
-          background: rgba(255, 255, 255, 0.05);
+          background: linear-gradient(180deg, #24242B 0%, #1B1B21 55%, #17171C 100%);
         }
-        /* Fio de luz sutil no topo: contorno de vidro lapidado */
+        /* Fio de luz na borda superior: o relevo pegando a luz */
         .glass-brand::after {
           content: '';
           position: absolute;
           inset: 0;
-          background: linear-gradient(180deg, rgba(255, 255, 255, 0.22) 0%, transparent 20%);
+          background: linear-gradient(180deg, rgba(255, 255, 255, 0.10) 0%, transparent 18%);
         }
-        /* Reflexo do ambiente (cores reais dos vizinhos: bege do hero,
-           branco da tarja, cinza da fotografia) — desliza APENAS via --gx */
-        .glass-brand-reflect {
-          position: absolute;
-          top: 0; bottom: 0; left: -100%;
-          width: 300%;
-          background: linear-gradient(100deg,
-            transparent 12%,
-            rgba(216, 212, 189, 0.22) 22%,
-            rgba(255, 255, 255, 0.16) 30%,
-            transparent 40%,
-            transparent 55%,
-            rgba(163, 161, 150, 0.14) 63%,
-            rgba(255, 255, 255, 0.10) 70%,
-            transparent 80%);
-          transform: translateX(var(--gx, 0%));
-          will-change: transform;
-        }
-        /* Reflexo ambiente: cores AMOSTRADAS dos vizinhos reais.
-           A cor do texto abaixo entra por baixo; a cor da imagem ao lado
-           entra pela direita. Se os vizinhos mudarem, o JS re-amostra. */
-        .glass-brand-ambient {
-          position: absolute;
-          inset: 0;
-          background:
-            linear-gradient(90deg, transparent 45%, var(--c-lado, rgba(163, 161, 150, 0.16)) 100%),
-            linear-gradient(180deg, transparent 40%, var(--c-baixo, rgba(216, 212, 189, 0.20)) 100%);
-        }
-        /* Brilho que responde à aproximação do cursor (desktop) */
+        /* Clarão discreto que acompanha o cursor (desktop) */
         .glass-brand-glow {
           position: absolute;
           inset: 0;
-          background: radial-gradient(250px 155px at var(--mx, 50%) var(--my, 50%),
-            rgba(255, 255, 255, 0.48),
-            rgba(255, 255, 255, 0.14) 55%,
-            transparent 78%);
+          background: radial-gradient(220px 140px at var(--mx, 50%) var(--my, 50%),
+            rgba(216, 212, 189, 0.16), transparent 75%);
           opacity: var(--mo, 0);
-          transition: opacity 0.25s ease;
+          transition: opacity 0.3s ease;
         }
 
         /* Pilha de cartas: cada seção pina (com top calculado via JS para
@@ -501,8 +418,6 @@ export default function App() {
           <div className="grid md:grid-cols-2 gap-10 md:gap-16 items-center">
             <div className="animate-on-scroll">
               <div className="glass-brand mb-8 select-none" aria-hidden="true">
-                <div className="glass-brand-ambient"></div>
-                <div className="glass-brand-reflect"></div>
                 <div className="glass-brand-glow"></div>
               </div>
               <p className="flex items-center gap-3 uppercase text-sm font-bold tracking-widest font-extended text-[#D8D4BD]/60 mb-4"><span className="font-mirano">01</span><span className="w-8 h-[2px] bg-[#D8D4BD]/30" aria-hidden="true"></span>Conceito</p>
@@ -525,7 +440,6 @@ export default function App() {
             <img
               src="https://images.unsplash.com/photo-1704579924216-31ef96f7e008?q=80&w=1200&auto=format&fit=crop"
               alt="Retrato de uma mulher de cabelos cacheados sorrindo"
-              crossOrigin="anonymous"
               loading="lazy"
               className="img-brand w-full h-52 md:h-64 rounded-[2rem] md:rounded-[2.5rem] shadow-2xl"
             />
@@ -1018,11 +932,17 @@ function ContactForm() {
     nome: '', empresa: '', email: '', whatsapp: '', tipo: '', desafio: '', momento: '',
   });
   const [sent, setSent] = useState(false);
+  const [formError, setFormError] = useState(null);
 
   const update = (field) => (e) => setForm((f) => ({ ...f, [field]: e.target.value }));
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (!form.tipo || !form.momento) {
+      setFormError('Selecione o tipo e o momento do projeto.');
+      return;
+    }
+    setFormError(null);
     // Monta a mensagem e abre o WhatsApp da PROH com o texto pronto para envio.
     const body = [
       `Olá, PROH! Quero propagar valor. 🚀`,
@@ -1041,7 +961,8 @@ function ContactForm() {
     setSent(true);
   };
 
-  const inputClass = "w-full px-5 py-4 rounded-xl bg-white/80 border border-[#0F0F15]/10 focus:outline-none focus:border-[#0F0F15]/40 text-[#0F0F15] placeholder:text-[#0F0F15]/40 font-medium";
+  const inputClass = "w-full px-6 py-4 rounded-full bg-white/80 border border-[#0F0F15]/10 focus:outline-none focus:border-[#0F0F15]/40 text-[#0F0F15] placeholder:text-[#0F0F15]/40 font-medium";
+  const textareaClass = "w-full px-6 py-4 rounded-[1.75rem] bg-white/80 border border-[#0F0F15]/10 focus:outline-none focus:border-[#0F0F15]/40 text-[#0F0F15] placeholder:text-[#0F0F15]/40 font-medium";
   const labelClass = "block text-xs font-bold uppercase tracking-widest font-extended mb-2 text-[#0F0F15]/70";
 
   return (
@@ -1069,27 +990,29 @@ function ContactForm() {
 
       <div className="mb-5">
         <label htmlFor="f-tipo" className={labelClass}>Tipo de projeto</label>
-        <select id="f-tipo" required className={inputClass} value={form.tipo} onChange={update('tipo')}>
-          <option value="" disabled>Selecione uma opção</option>
-          {['Estratégia', 'Branding', 'Conteúdo', 'Social media', 'Mídia e performance', 'Site ou landing page', 'Comunicação de impacto', 'Projeto completo', 'Ainda não sei'].map((o) => (
-            <option key={o} value={o}>{o}</option>
-          ))}
-        </select>
+        <SelectField
+          id="f-tipo"
+          placeholder="Selecione uma opção"
+          value={form.tipo}
+          onChange={(v) => setForm((f) => ({ ...f, tipo: v }))}
+          options={['Estratégia', 'Branding', 'Conteúdo', 'Social media', 'Mídia e performance', 'Site ou landing page', 'Comunicação de impacto', 'Projeto completo', 'Ainda não sei']}
+        />
       </div>
 
       <div className="mb-5">
         <label htmlFor="f-desafio" className={labelClass}>Principal desafio</label>
-        <textarea id="f-desafio" required rows={4} placeholder="Conte brevemente o que precisa ser resolvido." className={inputClass} value={form.desafio} onChange={update('desafio')} />
+        <textarea id="f-desafio" required rows={4} placeholder="Conte brevemente o que precisa ser resolvido." className={textareaClass} value={form.desafio} onChange={update('desafio')} />
       </div>
 
       <div className="mb-8">
         <label htmlFor="f-momento" className={labelClass}>Momento do projeto</label>
-        <select id="f-momento" required className={inputClass} value={form.momento} onChange={update('momento')}>
-          <option value="" disabled>Selecione uma opção</option>
-          {['Preciso começar imediatamente', 'Dentro dos próximos 30 dias', 'Dentro dos próximos três meses', 'Estou pesquisando possibilidades'].map((o) => (
-            <option key={o} value={o}>{o}</option>
-          ))}
-        </select>
+        <SelectField
+          id="f-momento"
+          placeholder="Selecione uma opção"
+          value={form.momento}
+          onChange={(v) => setForm((f) => ({ ...f, momento: v }))}
+          options={['Preciso começar imediatamente', 'Dentro dos próximos 30 dias', 'Dentro dos próximos três meses', 'Estou pesquisando possibilidades']}
+        />
       </div>
 
       <button type="submit" className="w-full bg-[#0F0F15] text-[#D8D4BD] px-8 py-5 text-sm font-bold uppercase tracking-widest hover:bg-black transition-all rounded-full font-extended shadow-lg flex items-center justify-center gap-2 group">
@@ -1100,6 +1023,10 @@ function ContactForm() {
       <p className="mt-3 text-xs font-medium text-[#0F0F15]/50 text-center">
         Ao enviar, o WhatsApp abre com sua mensagem pronta — é só confirmar.
       </p>
+
+      {formError && (
+        <p className="mt-4 text-sm font-bold text-red-600 text-center">{formError}</p>
+      )}
 
       {sent && (
         <p className="mt-4 text-sm font-medium text-[#0F0F15]/80 text-center">
@@ -1187,7 +1114,7 @@ function GeminiSimulator() {
             <input
               type="text"
               placeholder="Ex: Clínica de Estética, Marca de Roupas..."
-              className="flex-1 min-w-0 px-6 py-4 rounded-xl bg-white/80 border border-[#0F0F15]/10 focus:outline-none focus:border-[#0F0F15]/30 text-[#0F0F15] placeholder:text-[#0F0F15]/40 shadow-inner font-medium"
+              className="flex-1 min-w-0 px-6 py-4 rounded-full bg-white/80 border border-[#0F0F15]/10 focus:outline-none focus:border-[#0F0F15]/30 text-[#0F0F15] placeholder:text-[#0F0F15]/40 shadow-inner font-medium"
               value={businessNiche}
               onChange={(e) => setBusinessNiche(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && generateIdeas()}
@@ -1243,6 +1170,60 @@ function GeminiSimulator() {
 }
 
 // --- COMPONENTES AUXILIARES ---
+// Dropdown com o visual do site (substitui o <select> nativo do sistema).
+function SelectField({ id, placeholder, value, onChange, options }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+
+  useEffect(() => {
+    const onDoc = (e) => {
+      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+    };
+    const onKey = (e) => { if (e.key === 'Escape') setOpen(false); };
+    document.addEventListener('mousedown', onDoc);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('mousedown', onDoc);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, []);
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        type="button"
+        id={id}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        onClick={() => setOpen((v) => !v)}
+        className="w-full px-6 py-4 rounded-full bg-white/80 border border-[#0F0F15]/10 focus:outline-none focus:border-[#0F0F15]/40 text-left font-medium flex items-center justify-between gap-3"
+      >
+        <span className={value ? 'text-[#0F0F15]' : 'text-[#0F0F15]/40'}>{value || placeholder}</span>
+        <ChevronDown className={`w-5 h-5 shrink-0 text-[#0F0F15]/50 transition-transform duration-200 ${open ? 'rotate-180' : ''}`} />
+      </button>
+
+      {open && (
+        <ul
+          role="listbox"
+          className="absolute z-30 mt-2 w-full bg-white rounded-[1.5rem] border border-[#0F0F15]/10 shadow-2xl py-2 max-h-72 overflow-auto"
+        >
+          {options.map((o) => (
+            <li key={o} role="option" aria-selected={o === value}>
+              <button
+                type="button"
+                onClick={() => { onChange(o); setOpen(false); }}
+                className={`w-full text-left px-6 py-3 font-medium transition-colors hover:bg-[#D8D4BD]/40 ${o === value ? 'bg-[#D8D4BD]/50 font-bold' : 'text-[#0F0F15]/80'}`}
+              >
+                {o}
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
 // Faixa decorativa com o sistema de mensagens da marca.
 const MARQUEE_ITEMS = ['Propagar valor.', 'Propagar marcas.', 'Propagar ideias.', 'Propagar resultados.', 'Propagar conexões.', 'Propagar impacto.', 'Propagar o que importa.'];
 function MarqueeTrack() {
