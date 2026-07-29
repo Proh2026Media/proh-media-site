@@ -8,6 +8,8 @@ import {
 // --- LOGOS OFICIAIS (pasta /SVG) ---
 import logoHeader from './SVG/proh-black.svg';
 import logoFooter from './SVG/proh-white-off.svg';
+// Header sobre fundo escuro: PRO preto + H branco, sem MEDIA.
+import logoHeaderDark from './SVG/proh-black-white-s-media.svg';
 
 // --- CONFIGURAÇÃO ---
 // WhatsApp que recebe os projetos do formulário (somente dígitos, com DDI).
@@ -316,11 +318,9 @@ export default function App() {
       `}} />
 
       {/* HEADER: pílula flutuante que adapta o tema à seção sob ela */}
-      <header className="fixed top-0 left-0 right-0 z-[100] px-4 sm:px-6 pt-4 md:pt-5">
+      <header className="fixed top-0 left-0 right-0 z-[100] px-6 md:px-12 pt-4 md:pt-5">
         <div
-          className={`max-w-6xl mx-auto border overflow-hidden transition-all duration-300 ${
-            menuOpen ? 'rounded-[1.75rem]' : 'rounded-full'
-          } ${
+          className={`max-w-7xl mx-auto border overflow-hidden rounded-[2rem] transition-all duration-300 ${
             headerDark
               ? 'bg-[#0F0F15]/85 backdrop-blur-xl shadow-lg border-white/10'
               : isScrolled || menuOpen
@@ -329,9 +329,16 @@ export default function App() {
           }`}
         >
           <div className="flex items-center justify-between gap-4 px-5 sm:px-7 py-3">
-            {/* Logo oficial: versão clara ou escura conforme o tema */}
-            <div className="cursor-pointer transition-transform hover:scale-105 flex items-center shrink-0" onClick={() => { closeMenu(); window.scrollTo(0, 0); }}>
-              <img src={headerDark ? logoFooter : logoHeader} alt="PROH Media" className="h-7 md:h-9 w-auto drop-shadow-sm" />
+            {/* Logo oficial. O contêiner tem a altura do PROH: no logo claro
+                (com MEDIA), a imagem ancora pelo topo e o MEDIA pende abaixo
+                sem participar da centralização. No escuro, versão sem MEDIA
+                (PRO preto + H branco). */}
+            <div className="h-7 md:h-9 flex items-start shrink-0 cursor-pointer transition-transform hover:scale-105" onClick={() => { closeMenu(); window.scrollTo(0, 0); }}>
+              <img
+                src={headerDark ? logoHeaderDark : logoHeader}
+                alt="PROH Media"
+                className={`w-auto drop-shadow-sm ${headerDark ? 'h-full' : 'h-[131%]'}`}
+              />
             </div>
 
             <nav className={`hidden lg:flex gap-8 text-sm font-bold tracking-wider uppercase font-extended transition-colors duration-300 ${headerDark ? 'text-[#D8D4BD]' : 'text-[#0F0F15]'}`}>
