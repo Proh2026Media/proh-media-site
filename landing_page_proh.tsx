@@ -331,12 +331,12 @@ export default function App() {
               fundo e esquerda (pl = respiro vertical do PROH) e o botão do
               topo, fundo e direita (pr = respiro vertical do botão). No
               modo hambúrguer, padding padrão. */}
-          <div className="flex items-center justify-between gap-4 py-3 px-5 lg:pl-4 lg:pr-3">
+          <div className="flex items-center justify-between gap-4 py-3 px-5 lg:pl-[19px] lg:pr-3">
             {/* Logo oficial (claro: PRO preto + H branco; escuro: PRO branco
                 + H bege). O contêiner tem a altura do PROH e a imagem ancora
                 pelo topo: o MEDIA pende abaixo sem participar da
                 centralização. */}
-            <div className="h-7 md:h-9 flex items-start shrink-0 cursor-pointer transition-transform hover:scale-105" onClick={() => { closeMenu(); window.scrollTo(0, 0); }}>
+            <div className="h-[1.9rem] flex items-start shrink-0 cursor-pointer transition-transform hover:scale-105" onClick={() => { closeMenu(); window.scrollTo(0, 0); }}>
               <img
                 src={headerDark ? logoFooter : logoHeaderLight}
                 alt="PROH Media"
@@ -344,12 +344,17 @@ export default function App() {
               />
             </div>
 
-            <nav className={`hidden lg:flex gap-8 text-sm font-bold tracking-wider uppercase font-extended transition-colors duration-300 ${headerDark ? 'text-[#D8D4BD]' : 'text-[#0F0F15]'}`}>
+            {/* Seção ativa marcada por pílula de seleção (sem linha) */}
+            <nav className={`hidden lg:flex items-center gap-1 text-sm font-bold tracking-wider uppercase font-extended transition-colors duration-300 ${headerDark ? 'text-[#D8D4BD]' : 'text-[#0F0F15]'}`}>
               {navLinks.map((l) => (
                 <a
                   key={l.id}
                   href={`#${l.id}`}
-                  className={`transition-all border-b-2 pb-0.5 ${activeSection === l.id ? (headerDark ? 'border-[#D8D4BD]' : 'border-[#0F0F15]') : 'border-transparent opacity-70 hover:opacity-100'}`}
+                  className={`px-4 py-2 rounded-full transition-all duration-300 ${
+                    activeSection === l.id
+                      ? (headerDark ? 'bg-white/10' : 'bg-[#0F0F15]/10')
+                      : (headerDark ? 'opacity-70 hover:opacity-100 hover:bg-white/5' : 'opacity-70 hover:opacity-100 hover:bg-[#0F0F15]/5')
+                  }`}
                 >
                   {l.label}
                 </a>
