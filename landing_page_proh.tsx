@@ -586,25 +586,25 @@ export default function App() {
               />
             </div>
 
-            {/* PRO */}
-            <div className="glass-panel-light p-8 sm:p-10 md:p-14 rounded-[2rem] md:rounded-[2.5rem] animate-on-scroll delay-100">
-              <div className="text-5xl md:text-7xl font-black font-mirano mb-6 tracking-tighter">PRO</div>
-              <p className="text-base md:text-lg leading-relaxed mb-6">
-                Representa <strong>direção, progresso, propósito e construção</strong>.
+            {/* PRO (escuro) */}
+            <div className="glass-panel-dark text-[#D8D4BD] p-8 sm:p-10 md:p-14 rounded-[2rem] md:rounded-[2.5rem] shadow-2xl animate-on-scroll delay-100">
+              <div className="text-5xl md:text-7xl font-black font-mirano mb-6 tracking-tighter text-white">PRO</div>
+              <p className="text-base md:text-lg leading-relaxed mb-6 text-[#D8D4BD]/90">
+                Representa <strong className="text-white">direção, progresso, propósito e construção</strong>.
               </p>
-              <p className="text-base md:text-lg leading-relaxed text-[#0F0F15]/70">
+              <p className="text-base md:text-lg leading-relaxed text-[#D8D4BD]/70">
                 É comunicação a favor do que precisa avançar: uma marca, um negócio,
                 uma ideia, um projeto ou uma causa.
               </p>
             </div>
 
-            {/* H */}
-            <div className="glass-panel-dark text-[#D8D4BD] p-8 sm:p-10 md:p-14 rounded-[2rem] md:rounded-[2.5rem] shadow-2xl animate-on-scroll delay-300">
-              <div className="text-5xl md:text-7xl font-black font-mirano mb-6 tracking-tighter text-white">H</div>
-              <p className="text-base md:text-lg leading-relaxed mb-6 text-[#D8D4BD]/90">
-                Representa o <strong className="text-white">humano</strong> e o <strong className="text-white">hub</strong>.
+            {/* H (claro) */}
+            <div className="glass-panel-light p-8 sm:p-10 md:p-14 rounded-[2rem] md:rounded-[2.5rem] animate-on-scroll delay-300">
+              <div className="text-5xl md:text-7xl font-black font-mirano mb-6 tracking-tighter">H</div>
+              <p className="text-base md:text-lg leading-relaxed mb-6">
+                Representa o <strong>humano</strong> e o <strong>hub</strong>.
               </p>
-              <p className="text-base md:text-lg leading-relaxed text-[#D8D4BD]/70">
+              <p className="text-base md:text-lg leading-relaxed text-[#0F0F15]/70">
                 Pessoas estão no centro de toda decisão, enquanto conexões ampliam
                 o alcance e transformam mensagens em movimentos.
               </p>
