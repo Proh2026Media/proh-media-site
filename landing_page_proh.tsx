@@ -376,9 +376,11 @@ export default function App() {
           border-radius: 1.25rem;
           height: 13rem;
           margin-bottom: 2rem;
-          transition: height 1.1s cubic-bezier(0.16, 1, 0.3, 1),
-                      margin-bottom 1.1s cubic-bezier(0.16, 1, 0.3, 1),
-                      opacity 0.9s ease-out;
+          /* curva simétrica (senoidal): sai devagar, atravessa sem solavanco
+             e assenta devagar — a foto some no fim, não no começo */
+          transition: height 1.6s cubic-bezier(0.45, 0, 0.55, 1),
+                      margin-bottom 1.6s cubic-bezier(0.45, 0, 0.55, 1),
+                      opacity 1.1s ease-in 0.35s;
         }
         .ia-palco.is-aberto .ia-foto { height: 0; margin-bottom: 0; opacity: 0; }
         .ia-foto img {
@@ -397,9 +399,9 @@ export default function App() {
           max-height: 0;
           opacity: 0;
           overflow: hidden;
-          transition: max-height 1.1s cubic-bezier(0.16, 1, 0.3, 1),
-                      margin-top 1.1s cubic-bezier(0.16, 1, 0.3, 1),
-                      opacity 0.9s ease-out;
+          transition: max-height 1.6s cubic-bezier(0.45, 0, 0.55, 1),
+                      margin-top 1.6s cubic-bezier(0.45, 0, 0.55, 1),
+                      opacity 1s ease-out 0.55s;
         }
         .ia-palco.is-aberto .ia-resultados { max-height: 80rem; margin-top: 2rem; opacity: 1; }
 
@@ -408,14 +410,14 @@ export default function App() {
             display: grid;
             grid-template-columns: 1fr 1fr 0fr;
             align-items: center;
-            transition: grid-template-columns 1.1s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: grid-template-columns 1.6s cubic-bezier(0.45, 0, 0.55, 1);
           }
           .ia-palco.is-aberto { grid-template-columns: 0fr 1fr 1fr; }
           /* o respiro entre colunas mora na coluna do meio e troca de lado
              junto com a abertura, para nunca sobrar vão de uma coluna vazia */
           .ia-interacao {
             padding-left: 2.5rem;
-            transition: padding 1.1s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: padding 1.6s cubic-bezier(0.45, 0, 0.55, 1);
           }
           .ia-palco.is-aberto .ia-interacao { padding-left: 0; padding-right: 2.5rem; }
           .ia-foto {
@@ -433,11 +435,12 @@ export default function App() {
         /* Caixas de resposta: saem do desfoque quando o palco abre */
         .ia-caixa {
           filter: blur(2px);
-          transition: filter 0.8s ease-out;
+          transition: filter 0.9s ease-out;
           will-change: filter;
         }
-        .ia-palco.is-aberto .ia-caixa { filter: blur(0); }
-        .ia-palco.is-aberto .ia-caixa.ia-caixa-2 { transition-delay: 140ms; }
+        /* saem do desfoque depois que o espaço já abriu */
+        .ia-palco.is-aberto .ia-caixa { filter: blur(0); transition-delay: 0.6s; }
+        .ia-palco.is-aberto .ia-caixa.ia-caixa-2 { transition-delay: 0.75s; }
 
         /* Loader Animation */
         @keyframes spin {
@@ -1358,7 +1361,9 @@ function GeminiSimulator() {
           </div>
 
           {/* Card Impacto */}
-          <div className={`ia-caixa ia-caixa-2 p-6 rounded-2xl border ${result ? 'bg-[#0F0F15] border-[#0F0F15] text-[#D8D4BD] shadow-xl' : 'bg-[#0F0F15]/10 border-transparent'}`}>
+          {/* sempre escuro: o texto claro precisa de fundo escuro mesmo quando
+              o palco abre sem resposta (erro), senão some dentro do card */}
+          <div className={`ia-caixa ia-caixa-2 p-6 rounded-2xl border bg-[#0F0F15] border-[#0F0F15] text-[#D8D4BD] ${result ? 'shadow-xl' : ''}`}>
             <h4 className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest mb-3 font-extended text-white">
               <HeartHandshake size={16} /> 2. Propagar impacto
             </h4>
