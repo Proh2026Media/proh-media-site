@@ -20,8 +20,8 @@
   Header always set Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=()"
   # HTTPS obrigatório por 1 ano (HSTS)
   Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
-  # Content Security Policy: só o próprio site + imagens do Unsplash
-  Header always set Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://images.unsplash.com; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'; upgrade-insecure-requests"
+  # Content Security Policy: apenas recursos do próprio site
+  Header always set Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'; upgrade-insecure-requests"
 </IfModule>
 
 # Cache longo para assets com hash no nome (js/css/fontes/imagens)

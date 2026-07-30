@@ -586,7 +586,7 @@ export default function App() {
             <div className="flex flex-col gap-6 animate-on-scroll delay-200">
             {/* Foto: rosto real — comunicação existe para fazer sentido para pessoas */}
             <img
-              src="https://images.unsplash.com/photo-1704579924216-31ef96f7e008?q=80&w=1200&auto=format&fit=crop"
+              src="/img/retrato-sorriso.jpg"
               alt="Retrato de uma mulher de cabelos cacheados sorrindo"
               loading="lazy"
               className="img-brand w-full h-52 md:h-64 rounded-[2rem] md:rounded-[2.5rem] shadow-2xl"
@@ -669,7 +669,7 @@ export default function App() {
             <div className="bg-[#D8D4BD]/50 border border-[#0F0F15]/5 p-8 sm:p-10 md:p-14 transition-all hover:-translate-y-2 duration-500 rounded-[2rem] md:rounded-[2.5rem] animate-on-scroll delay-100">
               {/* Foto: performance na prática — painel de métricas e dados */}
               <img
-                src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=1000&auto=format&fit=crop"
+                src="/img/dashboard-metricas.jpg"
                 alt="Tela de laptop com painel de métricas e gráficos de desempenho"
                 loading="lazy"
                 className="img-brand w-full h-44 md:h-52 rounded-2xl shadow-lg mb-8"
@@ -699,7 +699,7 @@ export default function App() {
             <div className="bg-[#0F0F15] text-[#D8D4BD] p-8 sm:p-10 md:p-14 transition-all hover:-translate-y-2 duration-500 rounded-[2rem] md:rounded-[2.5rem] shadow-2xl animate-on-scroll delay-300">
               {/* Foto: causa social real — educação e oportunidade */}
               <img
-                src="https://images.unsplash.com/photo-1610500796385-3ffc1ae2f046?q=80&w=1000&auto=format&fit=crop"
+                src="/img/meninos-lendo.jpg"
                 alt="Meninos lendo livros juntos em uma atividade educativa"
                 loading="lazy"
                 className="img-brand w-full h-44 md:h-52 rounded-2xl shadow-lg mb-8"
@@ -776,7 +776,7 @@ export default function App() {
             </div>
             {/* Foto: bastidores de produção */}
             <img
-              src="https://images.unsplash.com/photo-1632187981988-40f3cbaeef5e?q=80&w=1200&auto=format&fit=crop"
+              src="/img/bastidores-producao.jpg"
               alt="Equipe de produção reunida em volta de uma câmera nos bastidores"
               loading="lazy"
               className="img-brand w-full h-56 md:h-72 rounded-[2rem] md:rounded-[2.5rem] shadow-2xl animate-on-scroll delay-200"
@@ -896,7 +896,7 @@ export default function App() {
             <div className="flex flex-col gap-6 animate-on-scroll delay-200">
               {/* Foto: comunidade real — participação e pertencimento */}
               <img
-                src="https://images.unsplash.com/photo-1694286068561-3233c946e9be?q=80&w=1200&auto=format&fit=crop"
+                src="/img/criancas-comunidade.jpg"
                 alt="Crianças reunidas em uma atividade comunitária ao ar livre"
                 loading="lazy"
                 className="img-brand w-full h-56 md:h-72 rounded-[2rem] md:rounded-[2.5rem] shadow-2xl"
