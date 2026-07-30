@@ -643,7 +643,7 @@ export default function App() {
             </div>
           </div>
 
-          <p className="text-lg md:text-2xl font-bold font-extended border-l-4 border-[#0F0F15] pl-5 max-w-3xl animate-on-scroll delay-400">
+          <p className="text-lg md:text-2xl font-bold font-extended border-l-4 border-[#0F0F15] pl-5 animate-on-scroll delay-400">
             <Proh /> transforma valor em percepção, presença, crescimento e impacto.
           </p>
         </div>
@@ -726,7 +726,7 @@ export default function App() {
             </div>
           </div>
 
-          <p className="text-base md:text-xl font-bold mt-12 border-l-4 border-[#0F0F15] pl-5 max-w-3xl animate-on-scroll delay-400">
+          <p className="text-base md:text-xl font-bold mt-12 border-l-4 border-[#0F0F15] pl-5 animate-on-scroll delay-400">
             O resultado não precisa ser apenas um número. Ele também pode ser relevância.
           </p>
         </div>
@@ -973,7 +973,7 @@ export default function App() {
                 <p>Acreditamos que estratégia e humanidade podem caminhar juntas. Que crescimento pode produzir valor. Que influência pode ser usada com responsabilidade. Que comunicação pode gerar negócios e, ao mesmo tempo, gerar significado.</p>
               </div>
 
-              <p className="mt-10 text-lg md:text-xl font-bold text-white border-l-4 border-[#D8D4BD] pl-5 animate-on-scroll delay-300">
+              <p className="mt-10 text-lg md:text-xl font-bold text-white border-l-4 border-[#D8D4BD] pl-5 [text-wrap:balance] animate-on-scroll delay-300">
                 A <Proh /> existe para fazer o que tem valor alcançar mais.
               </p>
             </div>
