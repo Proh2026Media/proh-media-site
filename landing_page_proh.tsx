@@ -584,10 +584,10 @@ export default function App() {
               </ul>
             </div>
             <div className="flex flex-col gap-6 animate-on-scroll delay-200">
-            {/* Foto: rosto real — comunicação existe para fazer sentido para pessoas */}
+            {/* Foto: destacar-se na multidão — propagar é fazer sentido, não aparecer */}
             <img
-              src="/img/retrato-sorriso.jpg"
-              alt="Retrato de uma mulher de cabelos cacheados sorrindo"
+              src="/img/multidao-destaque.jpg"
+              alt="Vista aérea de uma multidão em movimento com algumas pessoas paradas em destaque"
               loading="lazy"
               className="img-brand w-full h-52 md:h-64 rounded-[2rem] md:rounded-[2.5rem] shadow-2xl"
             />
