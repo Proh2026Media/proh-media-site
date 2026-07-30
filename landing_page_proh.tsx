@@ -635,10 +635,10 @@ export default function App() {
           <div className="grid md:grid-cols-2 gap-6 md:gap-12">
             {/* Valor de negócio */}
             <div className="bg-[#D8D4BD]/50 border border-[#0F0F15]/5 p-8 sm:p-10 md:p-14 transition-all hover:-translate-y-2 duration-500 rounded-[2rem] md:rounded-[2.5rem] animate-on-scroll delay-100">
-              {/* Foto: performance na prática — painel de métricas e dados */}
+              {/* Foto: equipe cocriando em volta da mesa — crescimento construído junto */}
               <img
-                src="/img/dashboard-metricas.jpg"
-                alt="Tela de laptop com painel de métricas e gráficos de desempenho"
+                src="/img/cocriacao-em-equipe.jpg"
+                alt="Equipe diversa reunida em volta de uma mesa cocriando um projeto com impressos e anotações"
                 loading="lazy"
                 className="img-brand w-full h-44 md:h-52 rounded-2xl shadow-lg mb-8"
               />
@@ -665,10 +665,10 @@ export default function App() {
 
             {/* Valor humano */}
             <div className="bg-[#0F0F15] text-[#D8D4BD] p-8 sm:p-10 md:p-14 transition-all hover:-translate-y-2 duration-500 rounded-[2rem] md:rounded-[2.5rem] shadow-2xl animate-on-scroll delay-300">
-              {/* Foto: causa social real — educação e oportunidade */}
+              {/* Foto: grupo abraçado contemplando a cidade — impacto e pertencimento */}
               <img
-                src="/img/meninos-lendo.jpg"
-                alt="Meninos lendo livros juntos em uma atividade educativa"
+                src="/img/comunidade-horizonte-cidade.jpg"
+                alt="Grupo de pessoas abraçadas de costas contemplando a cidade ao entardecer"
                 loading="lazy"
                 className="img-brand w-full h-44 md:h-52 rounded-2xl shadow-lg mb-8"
               />
