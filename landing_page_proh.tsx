@@ -306,6 +306,13 @@ export default function App() {
         }
         .foto-cor-pulso { animation: cor-vai-vem 104s ease-in-out infinite; }
 
+        /* Zoom lento respirando, em loop — harmônico do ritmo de 104s */
+        @keyframes zoom-lento {
+          0%, 100% { transform: scale(1); }
+          50% { transform: scale(1.07); }
+        }
+        .foto-zoom-lento { animation: zoom-lento 52s ease-in-out infinite; will-change: transform; }
+
         /* Fundo do Conceito: a foto cobre a seção inteira de forma sutil,
            dissolvendo nas bordas para fundir no preto (sem card/recorte). */
         .foto-fundo-conceito {
@@ -374,6 +381,7 @@ export default function App() {
           .animate-spin-slow { animation: none !important; }
           .marquee-track { animation: none !important; }
           .foto-cor-pulso { animation: none !important; }
+          .foto-zoom-lento { animation: none !important; }
           .hero-img.hero-anim { animation: none !important; }
         }
       `}} />
@@ -567,7 +575,17 @@ export default function App() {
             </h2>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-6 md:gap-12 mb-12">
+          <div className="grid md:grid-cols-3 gap-6 md:gap-8 mb-12">
+            {/* Foto: a multidão de onde o valor se destaca */}
+            <div className="rounded-[2rem] md:rounded-[2.5rem] overflow-hidden shadow-2xl animate-on-scroll min-h-[16rem]">
+              <img
+                src="/img/multidao-destaque.jpg"
+                alt="Vista aérea de uma multidão em movimento com algumas pessoas paradas em destaque"
+                loading="lazy"
+                className="img-brand foto-zoom-lento w-full h-full"
+              />
+            </div>
+
             {/* PRO */}
             <div className="glass-panel-light p-8 sm:p-10 md:p-14 rounded-[2rem] md:rounded-[2.5rem] animate-on-scroll delay-100">
               <div className="text-5xl md:text-7xl font-black font-mirano mb-6 tracking-tighter">PRO</div>
