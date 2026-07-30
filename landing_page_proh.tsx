@@ -735,10 +735,10 @@ export default function App() {
       {/* SEÇÃO 5 — SOLUÇÕES */}
       <section id="solucoes" className="stack-card z-[50] w-full py-20 md:py-28 bg-[#D8D4BD] text-[#0F0F15] rounded-t-[2.5rem] md:rounded-t-[3rem] shadow-[0_-20px_50px_rgba(0,0,0,0.15)] mt-[-2.5rem] md:mt-[-3rem] overflow-hidden">
         <div className="max-w-7xl mx-auto px-6 md:px-12 w-full">
-          <div className="max-w-3xl mb-12 md:mb-16 animate-on-scroll">
+          <div className="mb-12 md:mb-16 animate-on-scroll">
             <p className="flex items-center gap-3 uppercase text-sm font-bold tracking-widest font-extended text-[#0F0F15]/60 mb-4"><span className="font-mirano">04</span><span className="w-8 h-[2px] bg-[#0F0F15]/30" aria-hidden="true"></span>Soluções</p>
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-black uppercase tracking-tighter font-extended leading-tight mb-4">
-              Tudo o que uma marca precisa para se posicionar, comunicar e crescer com coerência.
+              Tudo o que uma marca precisa para<span className="hidden md:inline"><br /></span> se posicionar, comunicar e crescer<span className="hidden md:inline"><br /></span> com coerência.
             </h2>
             <p className="text-lg md:text-xl text-[#0F0F15]/70">
               A <Proh /> integra diferentes competências em uma única direção estratégica.
@@ -827,10 +827,10 @@ export default function App() {
       {/* SEÇÃO 8 — PARA QUEM É A PROH */}
       <section id="publicos" className="stack-card z-[80] w-full py-20 md:py-28 bg-[#D8D4BD] text-[#0F0F15] rounded-t-[2.5rem] md:rounded-t-[3rem] shadow-[0_-20px_50px_rgba(0,0,0,0.15)] mt-[-2.5rem] md:mt-[-3rem] overflow-hidden">
         <div className="max-w-7xl mx-auto px-6 md:px-12 w-full">
-          <div className="max-w-3xl mb-12 md:mb-16 animate-on-scroll">
+          <div className="max-w-4xl mb-12 md:mb-16 animate-on-scroll">
             <p className="flex items-center gap-3 uppercase text-sm font-bold tracking-widest font-extended text-[#0F0F15]/60 mb-4"><span className="font-mirano">07</span><span className="w-8 h-[2px] bg-[#0F0F15]/30" aria-hidden="true"></span>Para quem</p>
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-black uppercase tracking-tighter font-extended leading-tight">
-              Trabalhamos com quem possui valor real e deseja comunicá-lo com mais direção.
+              Trabalhamos com quem<span className="hidden md:inline"><br /></span> possui valor real e deseja<span className="hidden md:inline"><br /></span> comunicá-lo com mais direção.
             </h2>
           </div>
 
