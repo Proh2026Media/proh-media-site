@@ -343,7 +343,7 @@ export default function App() {
           display: flex;
           flex-shrink: 0;
           align-items: center;
-          animation: marquee-scroll 38s linear infinite;
+          animation: marquee-scroll 76s linear infinite;
         }
         @keyframes marquee-scroll {
           from { transform: translateX(0); }
@@ -477,13 +477,12 @@ export default function App() {
       {/* SEÇÃO 1 — HERO */}
       <section id="hero" className="stack-card z-[10] w-full min-h-screen flex flex-col justify-center overflow-hidden bg-[#D8D4BD]">
         <div className="max-w-7xl w-full mx-auto px-6 md:px-12 relative z-10 pt-28 pb-32 md:pt-32 md:pb-36">
-          {/* Kicker fora do grid: no desktop, a foto vai do topo do título
-              à base do slogan */}
-          <h2 className="text-[#0F0F15] font-bold uppercase tracking-widest text-xs sm:text-sm md:text-base mb-6 border-l-4 border-[#0F0F15] pl-4 font-extended animate-on-scroll">
-            Estratégia, marca, mídia e impacto
-          </h2>
           <div className="grid lg:grid-cols-[1.15fr_0.85fr] gap-10 lg:gap-16">
           <div className="max-w-4xl">
+            {/* No desktop, a foto ao lado nasce no topo deste kicker */}
+            <h2 className="text-[#0F0F15] font-bold uppercase tracking-widest text-xs sm:text-sm md:text-base mb-6 border-l-4 border-[#0F0F15] pl-4 font-extended animate-on-scroll">
+              Estratégia, marca, mídia e impacto
+            </h2>
             <h1 className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter leading-[0.95] md:leading-[0.9] mb-8 text-[#0F0F15] font-extended animate-on-scroll delay-100">
               O que tem valor<br />
               merece <span className="underline decoration-white decoration-[6px] underline-offset-8">alcançar mais.</span>
