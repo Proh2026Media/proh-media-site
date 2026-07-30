@@ -742,13 +742,17 @@ export default function App() {
                 O Sistema <Proh /> organiza estratégia e execução em cinco movimentos.
               </p>
             </div>
-            {/* Foto: direção no set — equipe analisando o monitor entre câmera e luz */}
-            <img
-              src="/img/equipe-set-de-filmagem.jpg"
-              alt="Equipe de produção em um estúdio analisando o monitor ao lado da câmera de cinema"
-              loading="lazy"
-              className="img-brand w-full h-56 md:h-72 rounded-[2rem] md:rounded-[2.5rem] shadow-2xl animate-on-scroll delay-200"
-            />
+            {/* Foto: direção no set — equipe analisando o monitor entre câmera e luz.
+                A animação de entrada fica no contêiner para não sobrescrever a
+                transição de cor do hover (.img-brand). */}
+            <div className="animate-on-scroll delay-200">
+              <img
+                src="/img/equipe-set-de-filmagem.jpg"
+                alt="Equipe de produção em um estúdio analisando o monitor ao lado da câmera de cinema"
+                loading="lazy"
+                className="img-brand w-full h-56 md:h-72 rounded-[2rem] md:rounded-[2.5rem] shadow-2xl"
+              />
+            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-12">
