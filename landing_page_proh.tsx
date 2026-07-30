@@ -433,13 +433,13 @@ export default function App() {
             </p>
           </div>
 
-          {/* Foto: apresentação de resultados — marketing e B2B com pessoas reais */}
+          {/* Foto oficial da marca: retrato editorial de pessoas diversas */}
           <div className="animate-on-scroll delay-300 relative">
             {/* Moldura deslocada: profundidade editorial */}
             <div className="absolute top-6 -bottom-4 -right-3 left-10 md:top-8 md:-bottom-6 md:-right-5 rounded-[2rem] md:rounded-[2.5rem] border-2 border-[#0F0F15]/15" aria-hidden="true"></div>
             <img
-              src="https://images.unsplash.com/photo-1758691736490-03d39c292d7a?q=80&w=1200&auto=format&fit=crop"
-              alt="Profissional apresentando gráficos de resultados para a equipe em uma reunião"
+              src="/img/equipe-diversa.jpg"
+              alt="Cinco pessoas diversas em retrato editorial, olhando em direções diferentes"
               loading="eager"
               className="img-brand relative w-full h-64 sm:h-80 lg:h-[30rem] rounded-[2rem] md:rounded-[2.5rem] shadow-2xl"
             />
