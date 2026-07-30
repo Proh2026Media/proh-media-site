@@ -610,7 +610,7 @@ export default function App() {
       {/* SEÇÃO 3 — O SIGNIFICADO */}
       <section id="significado" className="stack-card z-[30] w-full md:min-h-screen flex flex-col md:justify-center py-20 md:py-24 bg-[#D8D4BD] text-[#0F0F15] rounded-t-[2.5rem] md:rounded-t-[3rem] shadow-[0_-20px_50px_rgba(0,0,0,0.3)] mt-[-2.5rem] md:mt-[-3rem] overflow-hidden">
         <div className="max-w-7xl mx-auto px-6 md:px-12 relative z-10 w-full">
-          <div className="max-w-3xl mb-12 md:mb-16 animate-on-scroll">
+          <div className="mb-12 md:mb-16 animate-on-scroll">
             <p className="flex items-center gap-3 uppercase text-sm font-bold tracking-widest font-extended text-[#0F0F15]/60 mb-4"><span className="font-mirano">02</span><span className="w-8 h-[2px] bg-[#0F0F15]/30" aria-hidden="true"></span>O significado</p>
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-black uppercase tracking-tighter font-extended leading-tight">
               <span className="md:whitespace-nowrap">Comunicação a favor do progresso,</span> <span className="md:whitespace-nowrap">com o <span className="mark-dark">humano</span> no centro.</span>
@@ -652,12 +652,12 @@ export default function App() {
       {/* SEÇÃO 4 — DUAS DIMENSÕES DO VALOR */}
       <section id="dimensoes" className="stack-card z-[40] w-full md:min-h-screen flex flex-col md:justify-center py-20 md:py-24 bg-white text-[#0F0F15] rounded-t-[2.5rem] md:rounded-t-[3rem] shadow-[0_-20px_50px_rgba(0,0,0,0.15)] mt-[-2.5rem] md:mt-[-3rem] overflow-hidden">
         <div className="max-w-7xl mx-auto px-6 md:px-12 relative z-10 w-full">
-          <div className="max-w-3xl mb-12 md:mb-16 animate-on-scroll">
+          <div className="mb-12 md:mb-16 animate-on-scroll">
             <p className="flex items-center gap-3 uppercase text-sm font-bold tracking-widest font-extended text-[#0F0F15]/60 mb-4"><span className="font-mirano">03</span><span className="w-8 h-[2px] bg-[#0F0F15]/30" aria-hidden="true"></span>Duas dimensões do valor</p>
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-black mb-4 uppercase tracking-tighter font-extended leading-tight">
               Resultado e humanidade não precisam caminhar <span className="mark-dark">separados</span>.
             </h2>
-            <p className="text-lg md:text-xl text-[#0F0F15]/70">
+            <p className="text-lg md:text-xl text-[#0F0F15]/70 max-w-3xl">
               A comunicação pode gerar crescimento sem se tornar fria. Pode falar de
               impacto sem perder estratégia. Pode construir desejo sem abrir mão da
               responsabilidade.
@@ -738,7 +738,7 @@ export default function App() {
           <div className="mb-12 md:mb-16 animate-on-scroll">
             <p className="flex items-center gap-3 uppercase text-sm font-bold tracking-widest font-extended text-[#0F0F15]/60 mb-4"><span className="font-mirano">04</span><span className="w-8 h-[2px] bg-[#0F0F15]/30" aria-hidden="true"></span>Soluções</p>
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-black uppercase tracking-tighter font-extended leading-tight mb-4">
-              Tudo o que uma marca precisa para<span className="hidden md:inline"><br /></span> se posicionar, comunicar e crescer<span className="hidden md:inline"><br /></span> com coerência.
+              Tudo o que uma marca precisa para se posicionar, comunicar e crescer com coerência.
             </h2>
             <p className="text-lg md:text-xl text-[#0F0F15]/70">
               A <Proh /> integra diferentes competências em uma única direção estratégica.
@@ -806,7 +806,7 @@ export default function App() {
       {/* SEÇÃO 7 — DIFERENCIAIS */}
       <section id="diferenciais" className="stack-card z-[70] w-full py-20 md:py-28 bg-white text-[#0F0F15] rounded-t-[2.5rem] md:rounded-t-[3rem] shadow-[0_-20px_50px_rgba(0,0,0,0.15)] mt-[-2.5rem] md:mt-[-3rem] overflow-hidden">
         <div className="max-w-7xl mx-auto px-6 md:px-12 w-full">
-          <div className="max-w-3xl mb-12 md:mb-16 animate-on-scroll">
+          <div className="mb-12 md:mb-16 animate-on-scroll">
             <p className="flex items-center gap-3 uppercase text-sm font-bold tracking-widest font-extended text-[#0F0F15]/60 mb-4"><span className="font-mirano">06</span><span className="w-8 h-[2px] bg-[#0F0F15]/30" aria-hidden="true"></span>Diferenciais</p>
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-black uppercase tracking-tighter font-extended leading-tight">
               Não entregamos peças isoladas. Construímos <span className="mark-dark">sistemas de propagação</span>.
@@ -827,10 +827,10 @@ export default function App() {
       {/* SEÇÃO 8 — PARA QUEM É A PROH */}
       <section id="publicos" className="stack-card z-[80] w-full py-20 md:py-28 bg-[#D8D4BD] text-[#0F0F15] rounded-t-[2.5rem] md:rounded-t-[3rem] shadow-[0_-20px_50px_rgba(0,0,0,0.15)] mt-[-2.5rem] md:mt-[-3rem] overflow-hidden">
         <div className="max-w-7xl mx-auto px-6 md:px-12 w-full">
-          <div className="max-w-4xl mb-12 md:mb-16 animate-on-scroll">
+          <div className="mb-12 md:mb-16 animate-on-scroll">
             <p className="flex items-center gap-3 uppercase text-sm font-bold tracking-widest font-extended text-[#0F0F15]/60 mb-4"><span className="font-mirano">07</span><span className="w-8 h-[2px] bg-[#0F0F15]/30" aria-hidden="true"></span>Para quem</p>
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-black uppercase tracking-tighter font-extended leading-tight">
-              Trabalhamos com quem<span className="hidden md:inline"><br /></span> possui valor real e deseja<span className="hidden md:inline"><br /></span> comunicá-lo com mais direção.
+              Trabalhamos com quem possui valor real e deseja comunicá-lo com mais direção.
             </h2>
           </div>
 
@@ -914,10 +914,10 @@ export default function App() {
       {/* SEÇÃO 10 — MODELOS DE PARCERIA */}
       <section id="modelos" className="stack-card z-[100] w-full py-20 md:py-28 bg-[#D8D4BD] text-[#0F0F15] rounded-t-[2.5rem] md:rounded-t-[3rem] shadow-[0_-20px_50px_rgba(0,0,0,0.15)] mt-[-2.5rem] md:mt-[-3rem] overflow-hidden">
         <div className="max-w-7xl mx-auto px-6 md:px-12 w-full">
-          <div className="max-w-3xl mb-12 md:mb-16 animate-on-scroll">
+          <div className="mb-12 md:mb-16 animate-on-scroll">
             <p className="flex items-center gap-3 uppercase text-sm font-bold tracking-widest font-extended text-[#0F0F15]/60 mb-4"><span className="font-mirano">09</span><span className="w-8 h-[2px] bg-[#0F0F15]/30" aria-hidden="true"></span>Modelos de parceria</p>
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-black uppercase tracking-tighter font-extended leading-tight">
-              Diferentes<span className="hidden md:inline"><br /></span> formas de começar.<span className="hidden md:inline"><br /></span> Uma mesma direção.
+              <span className="md:whitespace-nowrap">Diferentes formas de começar.</span> <span className="md:whitespace-nowrap">Uma mesma direção.</span>
             </h2>
           </div>
 
