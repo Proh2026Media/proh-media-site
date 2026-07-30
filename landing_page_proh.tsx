@@ -374,7 +374,11 @@ export default function App() {
           position: relative;
           overflow: hidden;
           border-radius: 1.25rem;
-          height: 13rem;
+          /* mesma altura reservada para os resultados: quando a foto sai e as
+             caixas entram, o bloco não muda de altura e nada abaixo se mexe
+             (no empilhado a seção é sticky a partir de 768px e um salto de
+             altura reposicionaria a carta inteira) */
+          height: 23rem;
           margin-bottom: 2rem;
           /* curva simétrica (senoidal): sai devagar, atravessa sem solavanco
              e assenta devagar — a foto some no fim, não no começo */
@@ -403,7 +407,15 @@ export default function App() {
                       margin-top 1.6s cubic-bezier(0.45, 0, 0.55, 1),
                       opacity 1s ease-out 0.55s;
         }
-        .ia-palco.is-aberto .ia-resultados { max-height: 80rem; margin-top: 2rem; opacity: 1; }
+        .ia-palco.is-aberto .ia-resultados {
+          max-height: 80rem;
+          /* a reserva é maior que a altura natural das duas caixas em qualquer
+             largura (a IA responde em até 25 palavras por campo), então os dois
+             estados têm exatamente a mesma altura */
+          min-height: 23rem;
+          margin-top: 2rem;
+          opacity: 1;
+        }
 
         @media (min-width: 1024px) {
           .ia-palco {
@@ -428,8 +440,10 @@ export default function App() {
             margin-bottom: 0;
           }
           .ia-palco.is-aberto .ia-foto { height: 0; min-height: 0; margin-bottom: 0; }
+          /* no lado a lado a altura é ditada pela coluna do meio; a reserva do
+             empilhado não é necessária */
           .ia-resultados { min-width: 0; margin-top: 0; }
-          .ia-palco.is-aberto .ia-resultados { margin-top: 0; }
+          .ia-palco.is-aberto .ia-resultados { margin-top: 0; min-height: 0; }
         }
 
         /* Caixas de resposta: saem do desfoque quando o palco abre */
@@ -1374,7 +1388,16 @@ function GeminiSimulator() {
               {loading ? 'Gerando...' : 'Gerar Ideias'}
             </button>
           </div>
-          {error && <p className="text-red-600 text-sm mt-3 font-medium">{error}</p>}
+          {/* Espaço reservado para o aviso: a coluna mantém a mesma altura com
+              ou sem erro, então nada abaixo se desloca quando ele aparece.
+              A pílula usa o amarelo da estrela do selo "IA da PROH". */}
+          <div className="min-h-[3.25rem] pt-4">
+            {error && (
+              <p className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-yellow-400 text-[#0F0F15] text-sm font-bold">
+                <Sparkles size={14} className="shrink-0" aria-hidden="true" /> {error}
+              </p>
+            )}
+          </div>
         </div>
 
         <div className="ia-resultados">
