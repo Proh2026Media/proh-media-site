@@ -1238,6 +1238,20 @@ function ContactForm() {
   );
 }
 
+// TESTE TEMPORÁRIO — atalhos para conferir o palco sem chamar a IA:
+// "PROH2026" simula uma geração bem-sucedida, "PROH2026*" simula o erro.
+// Cada uso refecha o palco antes de abrir, então dá para repetir à vontade.
+// Para desativar, basta apagar esta constante e o bloco marcado em generateIdeas.
+const TESTE_SIMULACAO = {
+  ok: 'PROH2026',
+  erro: 'PROH2026*',
+  espera: 2000,
+  resposta: {
+    resultado: 'Estruturar uma oferta de entrada com prova social e campanha de busca local, para captar a demanda que já existe na região antes de investir em alcance amplo.',
+    valor: 'Criar um mutirão mensal de atendimento gratuito em parceria com escolas do bairro, documentado em relatório aberto de impacto para apoiadores.'
+  }
+};
+
 // --- SIMULADOR COM IA (GEMINI VIA PROXY) ---
 function GeminiSimulator() {
   const [businessNiche, setBusinessNiche] = useState('');
@@ -1250,6 +1264,26 @@ function GeminiSimulator() {
 
   const generateIdeas = async () => {
     if (!businessNiche.trim()) return;
+
+    // --- INÍCIO DO BLOCO DE TESTE TEMPORÁRIO (remover junto com TESTE_SIMULACAO) ---
+    const codigo = businessNiche.trim().toUpperCase();
+    if (codigo === TESTE_SIMULACAO.ok || codigo === TESTE_SIMULACAO.erro) {
+      const simularErro = codigo === TESTE_SIMULACAO.erro;
+      setAberto(false);   // refecha para a animação poder ser vista de novo
+      setError(null);
+      setResult(null);
+      setLoading(true);
+      await new Promise((resolve) => setTimeout(resolve, TESTE_SIMULACAO.espera));
+      if (simularErro) {
+        setError('Simulação de erro: nenhuma estratégia foi gerada.');
+      } else {
+        setResult(TESTE_SIMULACAO.resposta);
+      }
+      setLoading(false);
+      setAberto(true);
+      return;
+    }
+    // --- FIM DO BLOCO DE TESTE TEMPORÁRIO ---
 
     if (!geminiProxyUrl) {
       setError("Configure VITE_GEMINI_PROXY_URL (URL do proxy) para ativar o simulador.");
