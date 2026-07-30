@@ -151,6 +151,36 @@ export default function App() {
     };
   }, []);
 
+  // Foto do hero: calcula o percurso do pan (desktop) e liga a animação
+  // apenas quando a imagem está decodificada — sem engasgo no carregamento.
+  useEffect(() => {
+    const img = document.querySelector('.hero-img') as HTMLImageElement | null;
+    if (!img) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    const medirPan = () => {
+      if (!window.matchMedia('(min-width: 1024px)').matches) return;
+      const quadro = img.parentElement ? img.parentElement.getBoundingClientRect().width : 0;
+      const largura = img.getBoundingClientRect().width;
+      const sobra = Math.max(0, largura - quadro);
+      img.style.setProperty('--pan-c', `${(-sobra / 2).toFixed(1)}px`);
+      img.style.setProperty('--pan-r', `${(-sobra).toFixed(1)}px`);
+    };
+    const ligar = () => {
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        medirPan();
+        img.classList.add('hero-anim');
+      }));
+    };
+    if (img.complete && img.naturalWidth) ligar();
+    else img.addEventListener('load', ligar, { once: true });
+    window.addEventListener('resize', medirPan);
+    return () => {
+      img.removeEventListener('load', ligar);
+      window.removeEventListener('resize', medirPan);
+    };
+  }, []);
+
   const navLinks = [
     { id: 'conceito', label: 'Conceito' },
     { id: 'solucoes', label: 'Soluções' },
@@ -229,14 +259,44 @@ export default function App() {
         }
         .img-brand:hover { filter: grayscale(0); }
 
-        /* Pan do hero: uma unica passada suave — comeca no centro, vai a
-           direita, volta ate a esquerda e permanece la. */
-        @keyframes hero-pan {
-          0%   { object-position: 50% 50%; }
-          40%  { object-position: 100% 50%; }
-          100% { object-position: 0% 50%; }
+        /* Foto do hero — animações leves por transform (GPU), ligadas pelo
+           JS somente quando a imagem já está decodificada (sem engasgo).
+           Desktop: pan único centro -> direita -> esquerda (e permanece).
+           Tablet: estática, enquadrada do topo ao meio.
+           Mobile: zoom sutil em loop contínuo. */
+        .hero-img {
+          position: absolute;
+          inset: 0;
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          object-position: 50% 30%;
         }
-        .hero-pan { animation: hero-pan 52s ease-in-out 1 forwards; }
+        @keyframes hero-zoom {
+          0%, 100% { transform: scale(1); }
+          50% { transform: scale(1.05); }
+        }
+        @media (max-width: 767px) {
+          .hero-img.hero-anim { animation: hero-zoom 36s ease-in-out infinite; will-change: transform; }
+        }
+        @media (min-width: 768px) and (max-width: 1023px) {
+          .hero-img { object-position: 50% 25%; }
+        }
+        @keyframes hero-pan {
+          0%   { transform: translateX(var(--pan-c, 0px)); }
+          40%  { transform: translateX(var(--pan-r, 0px)); }
+          100% { transform: translateX(0px); }
+        }
+        @media (min-width: 1024px) {
+          .hero-img {
+            inset: auto;
+            top: 0; left: 0;
+            width: auto;
+            max-width: none;
+            height: 100%;
+          }
+          .hero-img.hero-anim { animation: hero-pan 104s ease-in-out 1 forwards; will-change: transform; }
+        }
 
         /* PROH em baixo-relevo: tom sobre tom, como relevo seco de
            papelaria premium. Estático — só um brilho sutil responde à
@@ -325,7 +385,7 @@ export default function App() {
           .animate-spin-slow { animation: none !important; }
           .marquee-track { animation: none !important; }
           .glass-brand-glow { transition: none !important; }
-          .hero-pan { animation: none !important; }
+          .hero-img.hero-anim { animation: none !important; }
         }
       `}} />
 
@@ -448,12 +508,15 @@ export default function App() {
 
           {/* Foto oficial da marca: retrato editorial de pessoas diversas */}
           <div className="animate-on-scroll delay-300 relative">
-            <img
-              src="/img/equipe-diversa.jpg"
-              alt="Cinco pessoas diversas em retrato editorial, olhando em direções diferentes"
-              loading="eager"
-              className="img-brand hero-pan relative w-full h-64 sm:h-80 lg:h-full lg:absolute lg:inset-0 rounded-[2rem] md:rounded-[2.5rem] shadow-2xl"
-            />
+            <div className="relative w-full h-64 sm:h-80 lg:absolute lg:inset-0 lg:h-full rounded-[2rem] md:rounded-[2.5rem] shadow-2xl overflow-hidden">
+              <img
+                src="/img/equipe-diversa.jpg"
+                alt="Cinco pessoas diversas em retrato editorial, olhando em direções diferentes"
+                loading="eager"
+                decoding="async"
+                className="hero-img img-brand"
+              />
+            </div>
           </div>
           </div>
         </div>
