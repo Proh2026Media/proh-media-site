@@ -368,25 +368,28 @@ export default function App() {
         /* Palco da IA — três colunas que se revezam:
            fechado: [foto | interação]   aberto: [interação | resultados].
            Mobile empilha; a foto recolhe e os resultados abrem no lugar. */
-        .ia-palco { display: flex; flex-direction: column; }
+        /* No empilhado a foto e os resultados dividem A MESMA CÉLULA do grid:
+           a altura do palco é sempre a maior das duas e não muda em momento
+           algum da troca — nem no início, nem durante, nem no fim. Nada de
+           animar altura aqui: qualquer transição de altura (ou um min-height
+           que entra de uma vez) empurra a seção de baixo enquanto corre. */
+        .ia-trilho {
+          display: grid;
+          grid-template-columns: minmax(0, 1fr);
+          row-gap: 2rem;
+        }
+        .ia-interacao { grid-area: 1 / 1; min-width: 0; }
 
         .ia-foto {
+          grid-area: 2 / 1;
           position: relative;
           overflow: hidden;
           border-radius: 1.25rem;
-          /* mesma altura reservada para os resultados: quando a foto sai e as
-             caixas entram, o bloco não muda de altura e nada abaixo se mexe
-             (no empilhado a seção é sticky a partir de 768px e um salto de
-             altura reposicionaria a carta inteira) */
-          height: 23rem;
-          margin-bottom: 2rem;
-          /* curva simétrica (senoidal): sai devagar, atravessa sem solavanco
-             e assenta devagar — a foto some no fim, não no começo */
-          transition: height 1.6s cubic-bezier(0.45, 0, 0.55, 1),
-                      margin-bottom 1.6s cubic-bezier(0.45, 0, 0.55, 1),
-                      opacity 1.1s ease-in 0.35s;
+          height: 24rem;
+          transition: opacity 0.8s ease-out,
+                      transform 1.1s cubic-bezier(0.45, 0, 0.55, 1);
         }
-        .ia-palco.is-aberto .ia-foto { height: 0; margin-bottom: 0; opacity: 0; }
+        .ia-palco.is-aberto .ia-foto { opacity: 0; transform: scale(0.985); }
         .ia-foto img {
           position: absolute;
           inset: 0;
@@ -397,53 +400,67 @@ export default function App() {
         }
 
         .ia-resultados {
+          grid-area: 2 / 1;
+          align-self: start;
+          /* acompanha a altura da foto; se a resposta for mais longa que isso,
+             a célula cresce — mas cresce igual nos dois estados */
+          min-height: 24rem;
           display: flex;
           flex-direction: column;
           gap: 1rem;
-          max-height: 0;
           opacity: 0;
-          overflow: hidden;
-          transition: max-height 1.6s cubic-bezier(0.45, 0, 0.55, 1),
-                      margin-top 1.6s cubic-bezier(0.45, 0, 0.55, 1),
-                      opacity 1s ease-out 0.55s;
+          transform: translateY(14px);
+          transition: opacity 0.9s ease-out 0.3s,
+                      transform 1.1s cubic-bezier(0.45, 0, 0.55, 1) 0.3s;
         }
-        .ia-palco.is-aberto .ia-resultados {
-          max-height: 80rem;
-          /* a reserva é maior que a altura natural das duas caixas em qualquer
-             largura (a IA responde em até 25 palavras por campo), então os dois
-             estados têm exatamente a mesma altura */
-          min-height: 23rem;
-          margin-top: 2rem;
-          opacity: 1;
-        }
+        .ia-palco.is-aberto .ia-resultados { opacity: 1; transform: none; }
 
+        /* Lado a lado: o palco é uma janela e o trilho tem TRÊS colunas de
+           meia janela cada — [foto | interação | resultados]. Abrir desliza o
+           trilho meia janela para a esquerda: mostra-se [interação | resultados]
+           no lugar de [foto | interação].
+
+           Por que deslizar em vez de animar a largura das colunas: uma coluna
+           que cresce de zero obriga o texto das caixas a re-quebrar a cada
+           quadro — com a coluna estreita ele vira uma letra por linha e estica
+           a linha do grid em mais de mil pixels, empurrando a seção de baixo e
+           trazendo-a de volta conforme alarga. Com larguras fixas, nada
+           re-quebra e a altura do bloco é constante o tempo todo. */
         @media (min-width: 1024px) {
-          .ia-palco {
-            display: grid;
-            grid-template-columns: 1fr 1fr 0fr;
+          .ia-palco { overflow: hidden; }
+          .ia-trilho {
+            grid-template-columns: repeat(3, 33.3333%);
+            width: 150%;
+            row-gap: 0;
             align-items: center;
-            transition: grid-template-columns 1.6s cubic-bezier(0.45, 0, 0.55, 1);
+            transition: transform 1.6s cubic-bezier(0.45, 0, 0.55, 1);
           }
-          .ia-palco.is-aberto { grid-template-columns: 0fr 1fr 1fr; }
-          /* o respiro entre colunas mora na coluna do meio e troca de lado
-             junto com a abertura, para nunca sobrar vão de uma coluna vazia */
-          .ia-interacao {
-            padding-left: 2.5rem;
-            transition: padding 1.6s cubic-bezier(0.45, 0, 0.55, 1);
-          }
-          .ia-palco.is-aberto .ia-interacao { padding-left: 0; padding-right: 2.5rem; }
+          .ia-palco.is-aberto .ia-trilho { transform: translateX(-33.3333%); }
+
+          .ia-interacao { grid-area: auto; }
           .ia-foto {
+            grid-area: auto;
             align-self: stretch;
             min-width: 0;
             min-height: 20rem;
             height: auto;
-            margin-bottom: 0;
+            opacity: 1;
+            transform: none;
           }
-          .ia-palco.is-aberto .ia-foto { height: 0; min-height: 0; margin-bottom: 0; }
-          /* no lado a lado a altura é ditada pela coluna do meio; a reserva do
-             empilhado não é necessária */
-          .ia-resultados { min-width: 0; margin-top: 0; }
-          .ia-palco.is-aberto .ia-resultados { margin-top: 0; min-height: 0; }
+          /* o respiro entre colunas mora nas colunas das pontas, para a
+             interação encostar na borda do painel quando vira a primeira */
+          .ia-foto img { width: calc(100% - 2.5rem); border-radius: 1.25rem; }
+          .ia-resultados {
+            grid-area: auto;
+            align-self: center;
+            min-width: 0;
+            /* estabiliza a linha quando o texto de exemplo vira a resposta */
+            min-height: 22rem;
+            padding-left: 2.5rem;
+            opacity: 1;
+            transform: none;
+            transition: none;
+          }
         }
 
         /* Caixas de resposta: saem do desfoque quando o palco abre */
@@ -474,7 +491,7 @@ export default function App() {
           .foto-cor-pulso { animation: none !important; }
           .foto-zoom-lento { animation: none !important; }
           .hero-img.hero-anim { animation: none !important; }
-          .ia-palco, .ia-interacao, .ia-resultados { transition: none !important; }
+          .ia-trilho, .ia-interacao, .ia-resultados { transition: none !important; }
           .ia-foto { transition: opacity 0.4s linear !important; }
           .ia-palco.is-aberto .ia-caixa { transition-delay: 0ms !important; }
         }
@@ -1353,6 +1370,7 @@ function GeminiSimulator() {
       {/* Palco: fechado mostra [foto | interação]; quando a geração termina,
           a foto recolhe e os resultados abrem: [interação | resultados]. */}
       <div className={`relative z-10 ia-palco ${aberto ? 'is-aberto' : ''}`}>
+        <div className="ia-trilho">
         <div className="ia-foto" aria-hidden="true">
           <img src="/img/equipe-ia-laptop.jpg" alt="" loading="lazy" className="img-brand" />
         </div>
@@ -1434,6 +1452,7 @@ function GeminiSimulator() {
               )}
             </p>
           </div>
+        </div>
         </div>
       </div>
     </div>
