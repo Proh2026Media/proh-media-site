@@ -22,6 +22,17 @@
   Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
   # Content Security Policy: apenas recursos do próprio site
   Header always set Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'; upgrade-insecure-requests"
+  # Isola a janela de outros sites e impede uso dos recursos por terceiros
+  Header always set Cross-Origin-Opener-Policy "same-origin"
+  Header always set Cross-Origin-Resource-Policy "same-origin"
+  Header always set X-Permitted-Cross-Domain-Policies "none"
+</IfModule>
+
+# Bloqueia acesso a arquivos e pastas ocultos (exceto .well-known)
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteCond %{REQUEST_URI} !^/\.well-known/
+  RewriteRule (^|/)\.(?!well-known) - [F]
 </IfModule>
 
 # Cache longo para assets com hash no nome (js/css/fontes/imagens)

@@ -11,6 +11,8 @@
 // ============================================================================
 
 header('Content-Type: application/json; charset=utf-8');
+header('X-Content-Type-Options: nosniff');
+header('Cache-Control: no-store');
 
 // CORS: o site publicado usa o mesmo domínio (não precisa), mas liberamos o
 // dev local e o www explicitamente.
@@ -58,7 +60,9 @@ if ($apiKey === '') {
     exit;
 }
 
-$input = json_decode((string) file_get_contents('php://input'), true);
+$corpo = (string) file_get_contents('php://input', false, null, 0, 4096);
+if (strlen($corpo) >= 4096) { http_response_code(413); echo json_encode(['error' => 'Requisição muito grande.']); exit; }
+$input = json_decode($corpo, true);
 $niche = trim((string) ($input['niche'] ?? ''));
 if (function_exists('mb_substr')) { $niche = mb_substr($niche, 0, 200); } else { $niche = substr($niche, 0, 200); }
 if ($niche === '') { http_response_code(400); echo json_encode(['error' => 'Informe o segmento do negócio.']); exit; }
