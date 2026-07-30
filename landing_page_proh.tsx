@@ -229,6 +229,15 @@ export default function App() {
         }
         .img-brand:hover { filter: grayscale(0); }
 
+        /* Pan do hero: uma unica passada suave — comeca no centro, vai a
+           direita, volta ate a esquerda e permanece la. */
+        @keyframes hero-pan {
+          0%   { object-position: 50% 50%; }
+          40%  { object-position: 100% 50%; }
+          100% { object-position: 0% 50%; }
+        }
+        .hero-pan { animation: hero-pan 52s ease-in-out 1 forwards; }
+
         /* PROH em baixo-relevo: tom sobre tom, como relevo seco de
            papelaria premium. Estático — só um brilho sutil responde à
            proximidade do cursor (sem nenhuma animação autônoma). */
@@ -316,6 +325,7 @@ export default function App() {
           .animate-spin-slow { animation: none !important; }
           .marquee-track { animation: none !important; }
           .glass-brand-glow { transition: none !important; }
+          .hero-pan { animation: none !important; }
         }
       `}} />
 
@@ -406,11 +416,14 @@ export default function App() {
 
       {/* SEÇÃO 1 — HERO */}
       <section id="hero" className="stack-card z-[10] w-full min-h-screen flex flex-col justify-center overflow-hidden bg-[#D8D4BD]">
-        <div className="max-w-7xl w-full mx-auto px-6 md:px-12 relative z-10 pt-28 pb-32 md:pt-32 md:pb-36 grid lg:grid-cols-[1.15fr_0.85fr] gap-10 lg:gap-16 items-center">
+        <div className="max-w-7xl w-full mx-auto px-6 md:px-12 relative z-10 pt-28 pb-32 md:pt-32 md:pb-36">
+          {/* Kicker fora do grid: no desktop, a foto vai do topo do título
+              à base do slogan */}
+          <h2 className="text-[#0F0F15] font-bold uppercase tracking-widest text-xs sm:text-sm md:text-base mb-6 border-l-4 border-[#0F0F15] pl-4 font-extended animate-on-scroll">
+            Estratégia, marca, mídia e impacto
+          </h2>
+          <div className="grid lg:grid-cols-[1.15fr_0.85fr] gap-10 lg:gap-16">
           <div className="max-w-4xl">
-            <h2 className="text-[#0F0F15] font-bold uppercase tracking-widest text-xs sm:text-sm md:text-base mb-6 border-l-4 border-[#0F0F15] pl-4 font-extended animate-on-scroll">
-              Estratégia, marca, mídia e impacto
-            </h2>
             <h1 className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter leading-[0.95] md:leading-[0.9] mb-8 text-[#0F0F15] font-extended animate-on-scroll delay-100">
               O que tem valor<br />
               merece <span className="underline decoration-white decoration-[6px] underline-offset-8">alcançar mais.</span>
@@ -435,14 +448,13 @@ export default function App() {
 
           {/* Foto oficial da marca: retrato editorial de pessoas diversas */}
           <div className="animate-on-scroll delay-300 relative">
-            {/* Moldura deslocada: profundidade editorial */}
-            <div className="absolute top-6 -bottom-4 -right-3 left-10 md:top-8 md:-bottom-6 md:-right-5 rounded-[2rem] md:rounded-[2.5rem] border-2 border-[#0F0F15]/15" aria-hidden="true"></div>
             <img
               src="/img/equipe-diversa.jpg"
               alt="Cinco pessoas diversas em retrato editorial, olhando em direções diferentes"
               loading="eager"
-              className="img-brand relative w-full h-64 sm:h-80 lg:h-[30rem] rounded-[2rem] md:rounded-[2.5rem] shadow-2xl"
+              className="img-brand hero-pan relative w-full h-64 sm:h-80 lg:h-full lg:absolute lg:inset-0 rounded-[2rem] md:rounded-[2.5rem] shadow-2xl"
             />
+          </div>
           </div>
         </div>
 
