@@ -507,7 +507,7 @@ export default function App() {
           <div className="animate-on-scroll delay-300 relative">
             <div className="relative w-full h-64 sm:h-80 lg:absolute lg:inset-0 lg:h-full rounded-[2rem] md:rounded-[2.5rem] shadow-2xl overflow-hidden">
               <img
-                src="/img/equipe-diversa.jpg"
+                src="/img/retrato-editorial-diverso.jpg"
                 alt="Cinco pessoas diversas em retrato editorial, olhando em direções diferentes"
                 loading="eager"
                 decoding="async"
@@ -866,10 +866,10 @@ export default function App() {
               </a>
             </div>
             <div className="flex flex-col gap-6 animate-on-scroll delay-200">
-              {/* Foto: comunidade real — participação e pertencimento */}
+              {/* Foto: comunidade real — refeição coletiva de um projeto social */}
               <img
-                src="/img/criancas-comunidade.jpg"
-                alt="Crianças reunidas em uma atividade comunitária ao ar livre"
+                src="/img/refeicao-comunitaria-criancas.jpg"
+                alt="Crianças sorrindo durante uma refeição coletiva em um projeto comunitário ao ar livre"
                 loading="lazy"
                 className="img-brand w-full h-56 md:h-72 rounded-[2rem] md:rounded-[2.5rem] shadow-2xl"
               />
