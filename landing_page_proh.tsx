@@ -181,6 +181,37 @@ export default function App() {
     };
   }, []);
 
+  // Tipografia: palavras de 1–2 letras nunca ficam soltas no fim da linha.
+  // O espaço depois delas vira espaço inseparável (NBSP), grudando-as à
+  // palavra seguinte. Passada única sobre os textos estáticos do site.
+  useEffect(() => {
+    const raiz = document.getElementById('root') || document.body;
+    const walker = document.createTreeWalker(raiz, NodeFilter.SHOW_TEXT, {
+      acceptNode: (n) => {
+        if (!n.nodeValue || !n.nodeValue.trim()) return NodeFilter.FILTER_REJECT;
+        const pai = n.parentElement;
+        if (!pai || pai.closest('script, style, textarea, input, select, option')) return NodeFilter.FILTER_REJECT;
+        return NodeFilter.FILTER_ACCEPT;
+      },
+    });
+    const curtas = /(^|[\s\u00A0])([A-Za-zÀ-ÿ]{1,2})[ ]+/g;
+    // Palavra de 3 letras antes de um grupo curto (ate 4 letras no total):
+    // tambem gruda, para a linha seguinte nao ficar com um fragmento minusculo.
+    const tresLetras = /(^|[\s\u00A0])([A-Za-zÀ-ÿ]{3})[ ]+(?=((?:[A-Za-zÀ-ÿ]{1,2}\u00A0)*[A-Za-zÀ-ÿ]{1,2})(?![A-Za-zÀ-ÿ]))/g;
+    const nos = [];
+    let no;
+    while ((no = walker.nextNode())) nos.push(no);
+    nos.forEach((t) => {
+      const v = t.nodeValue;
+      let novo = v.replace(curtas, (m, antes, palavra) => antes + palavra + '\u00A0');
+      novo = novo.replace(tresLetras, (m, antes, w3, grupo) => {
+        const letras = grupo.replace(/\u00A0/g, '').length;
+        return letras <= 4 ? antes + w3 + '\u00A0' : m;
+      });
+      if (novo !== v) t.nodeValue = novo;
+    });
+  }, []);
+
   const navLinks = [
     { id: 'conceito', label: 'Conceito' },
     { id: 'solucoes', label: 'Soluções' },
@@ -193,6 +224,8 @@ export default function App() {
     <div className="text-[#0F0F15] bg-[#D8D4BD] selection:bg-[#0F0F15] selection:text-[#D8D4BD] overflow-x-hidden" style={{ fontFamily: "'Gotham', sans-serif" }}>
       <style dangerouslySetInnerHTML={{__html: `
         html { scroll-behavior: smooth; scroll-padding-top: 6.5rem; }
+        /* Quebras de linha tipograficamente equilibradas (quando suportado) */
+        h1, h2, h3, h4, p, li, blockquote { text-wrap: pretty; }
         * { -webkit-tap-highlight-color: transparent; }
         body { overflow-x: hidden; }
         .font-extended { font-family: 'Gotham', sans-serif; }
