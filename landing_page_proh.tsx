@@ -117,39 +117,6 @@ export default function App() {
     };
   }, []);
 
-  // Brilho do PROH em baixo-relevo: responde apenas à proximidade do
-  // cursor (desktop). Nenhuma animação autônoma — parado, nada se move.
-  useEffect(() => {
-    const glass = document.querySelector('.glass-brand') as HTMLElement | null;
-    if (!glass) return;
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
-
-    const secao = document.getElementById('conceito');
-    const onMove = (e) => {
-      const r = glass.getBoundingClientRect();
-      const px = Math.min(Math.max(e.clientX, r.left), r.right);
-      const py = Math.min(Math.max(e.clientY, r.top), r.bottom);
-      const dist = Math.hypot(e.clientX - px, e.clientY - py);
-      const intensidade = Math.max(0, 1 - dist / 260);
-      glass.style.setProperty('--mo', intensidade.toFixed(3));
-      if (intensidade > 0) {
-        glass.style.setProperty('--mx', (((e.clientX - r.left) / r.width) * 100).toFixed(2) + '%');
-        glass.style.setProperty('--my', (((e.clientY - r.top) / r.height) * 100).toFixed(2) + '%');
-      }
-    };
-    const onLeave = () => glass.style.setProperty('--mo', '0');
-    if (secao) {
-      secao.addEventListener('mousemove', onMove);
-      secao.addEventListener('mouseleave', onLeave);
-    }
-    return () => {
-      if (secao) {
-        secao.removeEventListener('mousemove', onMove);
-        secao.removeEventListener('mouseleave', onLeave);
-      }
-    };
-  }, []);
 
   // Foto do hero: calcula o percurso do pan (desktop) e liga a animação
   // apenas quando a imagem está decodificada — sem engasgo no carregamento.
@@ -331,37 +298,13 @@ export default function App() {
           .hero-img.hero-anim { animation: hero-pan 104s ease-in-out 1 forwards; will-change: transform; }
         }
 
-        /* PROH em baixo-relevo: tom sobre tom, como relevo seco de
-           papelaria premium. Estático — só um brilho sutil responde à
-           proximidade do cursor (sem nenhuma animação autônoma). */
-        .glass-brand {
-          position: relative;
-          width: min(100%, 34rem);
-          aspect-ratio: 755 / 139;
-          overflow: hidden;
-          -webkit-mask-image: url('/brand/proh-glass.svg');
-          mask-image: url('/brand/proh-glass.svg');
-          -webkit-mask-size: contain; mask-size: contain;
-          -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
-          -webkit-mask-position: left center; mask-position: left center;
-          background: linear-gradient(180deg, #24242B 0%, #1B1B21 55%, #17171C 100%);
+        /* Foto do Conceito: a cor vai e vem num ciclo lento — mesma
+           velocidade do pan da foto do hero (104s por ciclo completo). */
+        @keyframes cor-vai-vem {
+          0%, 100% { filter: grayscale(1); }
+          50% { filter: grayscale(0); }
         }
-        /* Fio de luz na borda superior: o relevo pegando a luz */
-        .glass-brand::after {
-          content: '';
-          position: absolute;
-          inset: 0;
-          background: linear-gradient(180deg, rgba(255, 255, 255, 0.10) 0%, transparent 18%);
-        }
-        /* Clarão discreto que acompanha o cursor (desktop) */
-        .glass-brand-glow {
-          position: absolute;
-          inset: 0;
-          background: radial-gradient(220px 140px at var(--mx, 50%) var(--my, 50%),
-            rgba(216, 212, 189, 0.16), transparent 75%);
-          opacity: var(--mo, 0);
-          transition: opacity 0.3s ease;
-        }
+        .foto-cor-pulso { animation: cor-vai-vem 104s ease-in-out infinite; }
 
         /* Pilha de cartas: cada seção pina (com top calculado via JS para
            seções mais altas que a tela) e a seguinte desliza por cima. */
@@ -417,7 +360,7 @@ export default function App() {
           .animate-on-scroll { opacity: 1 !important; transform: none !important; transition: none !important; }
           .animate-spin-slow { animation: none !important; }
           .marquee-track { animation: none !important; }
-          .glass-brand-glow { transition: none !important; }
+          .foto-cor-pulso { animation: none !important; }
           .hero-img.hero-anim { animation: none !important; }
         }
       `}} />
@@ -565,9 +508,6 @@ export default function App() {
         <div className="max-w-7xl mx-auto px-6 md:px-12 relative z-10 w-full">
           <div className="grid md:grid-cols-2 gap-10 md:gap-16 items-center">
             <div className="animate-on-scroll">
-              <div className="glass-brand mb-8 select-none" aria-hidden="true">
-                <div className="glass-brand-glow"></div>
-              </div>
               <p className="flex items-center gap-3 uppercase text-sm font-bold tracking-widest font-extended text-[#D8D4BD]/60 mb-4"><span className="font-mirano">01</span><span className="w-8 h-[2px] bg-[#D8D4BD]/30" aria-hidden="true"></span>Conceito</p>
               <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-6 leading-tight font-extended">
                 Propagar não é aparecer mais. É <span className="text-white">fazer sentido</span> para mais pessoas.
@@ -589,7 +529,7 @@ export default function App() {
               src="/img/multidao-destaque.jpg"
               alt="Vista aérea de uma multidão em movimento com algumas pessoas paradas em destaque"
               loading="lazy"
-              className="img-brand w-full h-52 md:h-64 rounded-[2rem] md:rounded-[2.5rem] shadow-2xl"
+              className="img-brand foto-cor-pulso w-full h-52 md:h-64 rounded-[2rem] md:rounded-[2.5rem] shadow-2xl"
             />
             <div className="glass-panel p-8 sm:p-10 md:p-14 border-l-4 border-[#D8D4BD] rounded-[2rem] md:rounded-[2.5rem] shadow-[0_8px_32px_0_rgba(0,0,0,0.3)]">
               <h3 className="text-xl font-bold uppercase tracking-widest text-white mb-6 font-extended">A <Proh /> existe para resolver essa distância</h3>
