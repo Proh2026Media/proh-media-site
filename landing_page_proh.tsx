@@ -306,6 +306,19 @@ export default function App() {
         }
         .foto-cor-pulso { animation: cor-vai-vem 104s ease-in-out infinite; }
 
+        /* Fundo do Conceito: a foto cobre a seção inteira de forma sutil,
+           dissolvendo nas bordas para fundir no preto (sem card/recorte). */
+        .foto-fundo-conceito {
+          position: absolute;
+          inset: 0;
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          opacity: 0.25;
+          -webkit-mask-image: radial-gradient(ellipse 80% 75% at 55% 45%, black 30%, transparent 80%);
+          mask-image: radial-gradient(ellipse 80% 75% at 55% 45%, black 30%, transparent 80%);
+        }
+
         /* Pilha de cartas: cada seção pina (com top calculado via JS para
            seções mais altas que a tela) e a seguinte desliza por cima. */
         .stack-card { position: relative; }
@@ -505,6 +518,10 @@ export default function App() {
 
       {/* SEÇÃO 2 — O CONCEITO */}
       <section id="conceito" className="stack-card z-[20] w-full md:min-h-screen flex flex-col md:justify-center py-20 md:py-24 rounded-t-[2.5rem] md:rounded-t-[3rem] bg-[#0F0F15] text-[#D8D4BD] overflow-hidden shadow-[0_-20px_50px_rgba(0,0,0,0.4)] mt-[-2.5rem] md:mt-[-3rem]">
+        {/* Foto de fundo mesclada ao preto, com pulso de cor lento */}
+        <div className="absolute inset-0 z-0 pointer-events-none" aria-hidden="true">
+          <img src="/img/multidao-destaque.jpg" alt="" loading="lazy" className="foto-fundo-conceito foto-cor-pulso" />
+        </div>
         <div className="max-w-7xl mx-auto px-6 md:px-12 relative z-10 w-full">
           <div className="grid md:grid-cols-2 gap-10 md:gap-16 items-center">
             <div className="animate-on-scroll">
@@ -523,14 +540,7 @@ export default function App() {
                 <li className="flex items-start gap-3"><span className="mt-2.5 w-6 h-[2px] bg-[#D8D4BD]/40 shrink-0"></span>Investem em mídia, mas não possuem uma mensagem forte.</li>
               </ul>
             </div>
-            <div className="flex flex-col gap-6 animate-on-scroll delay-200">
-            {/* Foto: destacar-se na multidão — propagar é fazer sentido, não aparecer */}
-            <img
-              src="/img/multidao-destaque.jpg"
-              alt="Vista aérea de uma multidão em movimento com algumas pessoas paradas em destaque"
-              loading="lazy"
-              className="img-brand foto-cor-pulso w-full h-52 md:h-64 rounded-[2rem] md:rounded-[2.5rem] shadow-2xl"
-            />
+            <div className="animate-on-scroll delay-200">
             <div className="glass-panel p-8 sm:p-10 md:p-14 border-l-4 border-[#D8D4BD] rounded-[2rem] md:rounded-[2.5rem] shadow-[0_8px_32px_0_rgba(0,0,0,0.3)]">
               <h3 className="text-xl font-bold uppercase tracking-widest text-white mb-6 font-extended">A <Proh /> existe para resolver essa distância</h3>
               <p className="text-lg md:text-xl font-medium leading-relaxed mb-8">
