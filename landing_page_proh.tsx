@@ -365,6 +365,80 @@ export default function App() {
         .delay-400 { transition-delay: 400ms; }
         .delay-500 { transition-delay: 500ms; }
 
+        /* Palco da IA — três colunas que se revezam:
+           fechado: [foto | interação]   aberto: [interação | resultados].
+           Mobile empilha; a foto recolhe e os resultados abrem no lugar. */
+        .ia-palco { display: flex; flex-direction: column; }
+
+        .ia-foto {
+          position: relative;
+          overflow: hidden;
+          border-radius: 1.25rem;
+          height: 13rem;
+          margin-bottom: 2rem;
+          transition: height 1.1s cubic-bezier(0.16, 1, 0.3, 1),
+                      margin-bottom 1.1s cubic-bezier(0.16, 1, 0.3, 1),
+                      opacity 0.9s ease-out;
+        }
+        .ia-palco.is-aberto .ia-foto { height: 0; margin-bottom: 0; opacity: 0; }
+        .ia-foto img {
+          position: absolute;
+          inset: 0;
+          width: 100%;
+          max-width: none;
+          height: 100%;
+          object-fit: cover;
+        }
+
+        .ia-resultados {
+          display: flex;
+          flex-direction: column;
+          gap: 1rem;
+          max-height: 0;
+          opacity: 0;
+          overflow: hidden;
+          transition: max-height 1.1s cubic-bezier(0.16, 1, 0.3, 1),
+                      margin-top 1.1s cubic-bezier(0.16, 1, 0.3, 1),
+                      opacity 0.9s ease-out;
+        }
+        .ia-palco.is-aberto .ia-resultados { max-height: 80rem; margin-top: 2rem; opacity: 1; }
+
+        @media (min-width: 1024px) {
+          .ia-palco {
+            display: grid;
+            grid-template-columns: 1fr 1fr 0fr;
+            align-items: center;
+            transition: grid-template-columns 1.1s cubic-bezier(0.16, 1, 0.3, 1);
+          }
+          .ia-palco.is-aberto { grid-template-columns: 0fr 1fr 1fr; }
+          /* o respiro entre colunas mora na coluna do meio e troca de lado
+             junto com a abertura, para nunca sobrar vão de uma coluna vazia */
+          .ia-interacao {
+            padding-left: 2.5rem;
+            transition: padding 1.1s cubic-bezier(0.16, 1, 0.3, 1);
+          }
+          .ia-palco.is-aberto .ia-interacao { padding-left: 0; padding-right: 2.5rem; }
+          .ia-foto {
+            align-self: stretch;
+            min-width: 0;
+            min-height: 20rem;
+            height: auto;
+            margin-bottom: 0;
+          }
+          .ia-palco.is-aberto .ia-foto { height: 0; min-height: 0; margin-bottom: 0; }
+          .ia-resultados { min-width: 0; margin-top: 0; }
+          .ia-palco.is-aberto .ia-resultados { margin-top: 0; }
+        }
+
+        /* Caixas de resposta: saem do desfoque quando o palco abre */
+        .ia-caixa {
+          filter: blur(2px);
+          transition: filter 0.8s ease-out;
+          will-change: filter;
+        }
+        .ia-palco.is-aberto .ia-caixa { filter: blur(0); }
+        .ia-palco.is-aberto .ia-caixa.ia-caixa-2 { transition-delay: 140ms; }
+
         /* Loader Animation */
         @keyframes spin {
           from { transform: rotate(0deg); }
@@ -383,6 +457,9 @@ export default function App() {
           .foto-cor-pulso { animation: none !important; }
           .foto-zoom-lento { animation: none !important; }
           .hero-img.hero-anim { animation: none !important; }
+          .ia-palco, .ia-interacao, .ia-resultados { transition: none !important; }
+          .ia-foto { transition: opacity 0.4s linear !important; }
+          .ia-palco.is-aberto .ia-caixa { transition-delay: 0ms !important; }
         }
       `}} />
 
@@ -1164,6 +1241,9 @@ function GeminiSimulator() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
+  // Uma vez aberta, a cortina não fecha: um erro ou uma nova consulta não
+  // devolvem a foto para cima das respostas.
+  const [aberto, setAberto] = useState(false);
 
   const generateIdeas = async () => {
     if (!businessNiche.trim()) return;
@@ -1207,6 +1287,9 @@ function GeminiSimulator() {
 
     await fetchWithBackoff();
     setLoading(false);
+    // A abertura acontece ao terminar de gerar (inclusive em caso de erro,
+    // para o usuário nunca ficar preso com a foto sobre as respostas).
+    setAberto(true);
   };
 
   return (
@@ -1216,8 +1299,14 @@ function GeminiSimulator() {
         <Sparkles size={200} />
       </div>
 
-      <div className="relative z-10 flex flex-col lg:flex-row gap-8 md:gap-10 items-center">
-        <div className="lg:w-1/2 w-full">
+      {/* Palco: fechado mostra [foto | interação]; quando a geração termina,
+          a foto recolhe e os resultados abrem: [interação | resultados]. */}
+      <div className={`relative z-10 ia-palco ${aberto ? 'is-aberto' : ''}`}>
+        <div className="ia-foto" aria-hidden="true">
+          <img src="/img/equipe-ia-laptop.jpg" alt="" loading="lazy" className="img-brand" />
+        </div>
+
+        <div className="ia-interacao min-w-0">
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-[#0F0F15] text-[#D8D4BD] rounded-full text-xs font-bold uppercase tracking-widest mb-6 font-extended">
             <Sparkles size={14} className="text-yellow-400" /> IA da <Proh />
           </div>
@@ -1251,9 +1340,9 @@ function GeminiSimulator() {
           {error && <p className="text-red-600 text-sm mt-3 font-medium">{error}</p>}
         </div>
 
-        <div className="lg:w-1/2 w-full flex flex-col gap-4">
+        <div className="ia-resultados">
           {/* Card Crescimento */}
-          <div className={`p-6 rounded-2xl transition-all duration-500 border ${result ? 'bg-white/90 border-[#0F0F15]/10 shadow-xl' : 'bg-white/30 border-transparent blur-[2px] opacity-60'}`}>
+          <div className={`ia-caixa p-6 rounded-2xl border ${result ? 'bg-white/90 border-[#0F0F15]/10 shadow-xl' : 'bg-white/30 border-transparent'}`}>
             <h4 className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-[#0F0F15] mb-3 font-extended">
               <TrendingUp size={16} /> 1. Propagar crescimento
             </h4>
@@ -1269,7 +1358,7 @@ function GeminiSimulator() {
           </div>
 
           {/* Card Impacto */}
-          <div className={`p-6 rounded-2xl transition-all duration-500 border ${result ? 'bg-[#0F0F15] border-[#0F0F15] text-[#D8D4BD] shadow-xl' : 'bg-[#0F0F15]/10 border-transparent blur-[2px] opacity-60'}`}>
+          <div className={`ia-caixa ia-caixa-2 p-6 rounded-2xl border ${result ? 'bg-[#0F0F15] border-[#0F0F15] text-[#D8D4BD] shadow-xl' : 'bg-[#0F0F15]/10 border-transparent'}`}>
             <h4 className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest mb-3 font-extended text-white">
               <HeartHandshake size={16} /> 2. Propagar impacto
             </h4>
