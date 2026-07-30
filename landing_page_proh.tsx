@@ -517,8 +517,9 @@ export default function App() {
               Estratégia, marca, mídia e impacto
             </h2>
             <h1 className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter leading-[0.95] md:leading-[0.9] mb-8 text-[#0F0F15] font-extended animate-on-scroll delay-100">
-              O que tem valor<br />
-              merece <span className="underline decoration-white decoration-[6px] underline-offset-8">alcançar mais.</span>
+              O que tem<br />
+              valor merece<br />
+              <span className="underline decoration-white decoration-[6px] underline-offset-8">alcançar mais.</span>
             </h1>
             <p className="text-base sm:text-lg md:text-2xl text-[#0F0F15]/80 max-w-2xl mb-10 font-medium leading-relaxed animate-on-scroll delay-200">
               A <Proh /> une branding, conteúdo, mídia e performance para transformar
@@ -612,7 +613,7 @@ export default function App() {
           <div className="max-w-3xl mb-12 md:mb-16 animate-on-scroll">
             <p className="flex items-center gap-3 uppercase text-sm font-bold tracking-widest font-extended text-[#0F0F15]/60 mb-4"><span className="font-mirano">02</span><span className="w-8 h-[2px] bg-[#0F0F15]/30" aria-hidden="true"></span>O significado</p>
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-black uppercase tracking-tighter font-extended leading-tight">
-              Comunicação a favor do progresso, com o <span className="mark-dark">humano</span> no centro.
+              <span className="md:whitespace-nowrap">Comunicação a favor do progresso,</span> <span className="md:whitespace-nowrap">com o <span className="mark-dark">humano</span> no centro.</span>
             </h2>
           </div>
 
@@ -867,7 +868,7 @@ export default function App() {
             <div className="animate-on-scroll">
               <p className="flex items-center gap-3 uppercase text-sm font-bold tracking-widest font-extended text-[#D8D4BD]/60 mb-4"><span className="font-mirano">08</span><span className="w-8 h-[2px] bg-[#D8D4BD]/30" aria-hidden="true"></span>Impacto</p>
               <h2 className="text-3xl sm:text-4xl md:text-5xl font-black uppercase tracking-tighter font-extended leading-tight mb-6 text-white">
-                Propósito também precisa de estratégia.
+                Propósito<span className="hidden md:inline"><br /></span> também precisa<span className="hidden md:inline"><br /></span> de estratégia.
               </h2>
               <p className="text-base md:text-lg text-[#D8D4BD]/70 mb-6">
                 Projetos sociais não devem depender apenas de boas intenções. Para
@@ -916,7 +917,7 @@ export default function App() {
           <div className="max-w-3xl mb-12 md:mb-16 animate-on-scroll">
             <p className="flex items-center gap-3 uppercase text-sm font-bold tracking-widest font-extended text-[#0F0F15]/60 mb-4"><span className="font-mirano">09</span><span className="w-8 h-[2px] bg-[#0F0F15]/30" aria-hidden="true"></span>Modelos de parceria</p>
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-black uppercase tracking-tighter font-extended leading-tight">
-              Diferentes formas de começar. Uma mesma direção.
+              Diferentes<span className="hidden md:inline"><br /></span> formas de começar.<span className="hidden md:inline"><br /></span> Uma mesma direção.
             </h2>
           </div>
 
