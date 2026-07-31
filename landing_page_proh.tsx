@@ -926,7 +926,7 @@ export default function App() {
       <section id="conceito" className="stack-card z-[20] w-full md:min-h-screen flex flex-col md:justify-center py-20 md:py-24 rounded-t-[2.5rem] md:rounded-t-[3rem] bg-[#0F0F15] text-[#D8D4BD] overflow-hidden shadow-[0_-20px_50px_rgba(0,0,0,0.4)] mt-[-2.5rem] md:mt-[-3rem]">
         {/* Foto de fundo mesclada ao preto, com pulso de cor lento */}
         <div className="absolute inset-0 z-0 pointer-events-none" aria-hidden="true">
-          <img src="/img/multidao-cruzamento.jpg" alt="" loading="lazy" className="foto-fundo-conceito foto-cor-pulso" />
+          <img src="/img/multidao-travessia-dourada.jpg" alt="" loading="lazy" className="foto-fundo-conceito foto-cor-pulso" />
         </div>
         <div className="max-w-7xl mx-auto px-6 md:px-12 relative z-10 w-full">
           <div className="grid md:grid-cols-2 gap-10 md:gap-16 items-center">
