@@ -128,14 +128,13 @@ export default function App() {
     };
     mirarNoCard();
 
-    // Cada passo leva 2s: escrita → PROPAGAR vira PRO → entra o H → a foto
-    // viaja até o card.
-    const PASSO = 2000;
+    // Roteiro: a marca se escreve; PROPAGAR vira PRO em 3s; o H entra em 2s;
+    // 1,5s de respiro e a foto recolhe até o card (2s).
     const relogios = [];
-    relogios.push(setTimeout(() => setIntroFase('pro'), PASSO));
-    relogios.push(setTimeout(() => setIntroFase('proh'), PASSO * 2));
-    relogios.push(setTimeout(() => { mirarNoCard(); setIntroFase('saindo'); }, PASSO * 3));
-    relogios.push(setTimeout(() => setIntroFase('pronto'), PASSO * 4));
+    relogios.push(setTimeout(() => setIntroFase('pro'), 2000));
+    relogios.push(setTimeout(() => setIntroFase('proh'), 5000));
+    relogios.push(setTimeout(() => { mirarNoCard(); setIntroFase('saindo'); }, 8500));
+    relogios.push(setTimeout(() => setIntroFase('pronto'), 10500));
 
     // Qualquer intenção de navegar adianta para o fim.
     const pular = () => {
@@ -354,17 +353,21 @@ export default function App() {
         }
         .img-brand:hover { filter: grayscale(0); }
 
-        /* Foto do hero: enquadramento fixo, sem animação. */
+        /* Foto do hero: enquadramento fixo, sem animação.
+           Os três rostos centrais ficam em 24%, 45% e 66% da largura da
+           imagem — o centro deles é 45%, não 50%. Recortar em 50% jogava o
+           conjunto para a direita; 38% de object-position põe exatamente
+           esses 45% no meio do card em retrato. */
         .hero-img {
           position: absolute;
           inset: 0;
           width: 100%;
           height: 100%;
           object-fit: cover;
-          object-position: 50% 30%;
+          object-position: 38% 30%;
         }
         @media (min-width: 768px) and (max-width: 1023px) {
-          .hero-img { object-position: 50% 25%; }
+          .hero-img { object-position: 38% 25%; }
         }
 
         /* Foto do Conceito: a cor vai e vem num ciclo lento — mesma
@@ -682,13 +685,14 @@ export default function App() {
           opacity: 0;
           filter: blur(10px);
           width: 0;
-          transition-duration: 0.45s, 0.9s, 0.45s, 0.5s;
+          transition-duration: 0.6s, 0.9s, 0.6s, 0.66s;
           /* --r é o índice contado da direita: a última letra sai primeiro.
-             A largura espera a letra já ter sumido para começar a fechar. */
-          transition-delay: calc(var(--r, 0) * 260ms),
+             A largura espera a letra já ter sumido para começar a fechar.
+             Somando: 4 × 440ms + 600ms + 660ms ≈ 3s do PROPAGAR ao PRO. */
+          transition-delay: calc(var(--r, 0) * 440ms),
                             0s,
-                            calc(var(--r, 0) * 260ms),
-                            calc(var(--r, 0) * 260ms + 0.45s);
+                            calc(var(--r, 0) * 440ms),
+                            calc(var(--r, 0) * 440ms + 0.6s);
         }
         /* PRO → PROH: o H entra com o mesmo efeito, no sentido inverso, e no
            off-white da marca (o H é a letra que pode destoar em cor) */
@@ -699,16 +703,17 @@ export default function App() {
           opacity: 0;
           filter: blur(10px);
           transition-property: opacity, filter, width;
-          transition-duration: 0.45s, 0.45s, 0.5s;
+          transition-duration: 0.9s, 0.9s, 1.1s;
           transition-timing-function: ease-out, ease-out, cubic-bezier(0.45, 0, 0.55, 1);
         }
-        /* o inverso da saída: o espaço abre primeiro, a letra aparece inteira
-           depois — nunca meia letra revelada por uma máscara */
+        /* o inverso da saída: o espaço abre primeiro (1,1s), a letra aparece
+           inteira depois (0,9s) — 2s do PRO ao PROH, e nunca meia letra
+           revelada por uma máscara */
         .hero-marca-palavra.fase-proh .hero-marca-h {
           width: var(--w, auto);
           opacity: 1;
           filter: blur(0);
-          transition-delay: 0.5s, 0.5s, 0s;
+          transition-delay: 1.1s, 1.1s, 0s;
         }
 
         /* enquanto a marca se escreve, o conteúdo do hero espera — menos a
