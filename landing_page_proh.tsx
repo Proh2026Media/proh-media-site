@@ -245,20 +245,28 @@ export default function App() {
 
   // Foto do hero: calcula o percurso do pan (desktop) e liga a animação
   // apenas quando a imagem está decodificada — sem engasgo no carregamento.
-  // A aproximação só começa quando a abertura termina: enquanto o card viaja,
-  // qualquer movimento dentro dele competiria com o próprio percurso.
+  // Corte de câmera nas fotos: cada vez que uma delas volta a aparecer,
+  // começa um fechamento novo. Ao sair de vista a classe cai, então o retorno
+  // ao plano aberto acontece sempre fora do campo de visão — nunca se vê a
+  // imagem "desfazendo" a aproximação. No hero a classe só existe depois que
+  // a foto se encaixa no card (nada se mexe enquanto o card viaja).
   useEffect(() => {
-    if (introFase !== 'pronto') return;
-    const img = document.querySelector('.hero-img') as HTMLImageElement | null;
-    if (!img) return;
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const fotos = Array.from(document.querySelectorAll('.foto-corte'));
+    if (!fotos.length) return;
 
-    const ligar = () => {
-      requestAnimationFrame(() => requestAnimationFrame(() => img.classList.add('hero-anim')));
-    };
-    if (img.complete && img.naturalWidth) ligar();
-    else img.addEventListener('load', ligar, { once: true });
-    return () => { img.removeEventListener('load', ligar); };
+    const observador = new IntersectionObserver((entradas) => {
+      entradas.forEach(({ target, isIntersecting }) => {
+        const el = target as HTMLElement;
+        if (!isIntersecting) { el.classList.remove('is-fechando'); return; }
+        el.classList.remove('is-fechando');
+        void el.offsetWidth; // reinicia a passada do zero
+        el.classList.add('is-fechando');
+      });
+    }, { threshold: 0.25 });
+
+    fotos.forEach((f) => observador.observe(f));
+    return () => observador.disconnect();
   }, [introFase]);
 
   // Tipografia: palavras de 1–2 letras nunca ficam soltas no fim da linha.
@@ -383,12 +391,16 @@ export default function App() {
           object-fit: cover;
           object-position: 50% 30%;
         }
-        @keyframes hero-close {
+        /* Corte de câmera: uma passada só, do plano aberto ao fechado. O
+           visitante nunca vê a imagem desfazendo a aproximação — o retorno ao
+           plano aberto acontece com a seção fora da tela, e cada vez que ela
+           reaparece começa um corte novo. */
+        @keyframes corte-fecha {
           from { transform: scale(1); }
-          to   { transform: scale(1.14); }
+          to   { transform: scale(var(--fecha, 1.1)); }
         }
-        .hero-img.hero-anim {
-          animation: hero-close 104s cubic-bezier(0.45, 0, 0.55, 1) 1 forwards;
+        .foto-corte.is-fechando {
+          animation: corte-fecha var(--corte-tempo, 40s) cubic-bezier(0.45, 0, 0.55, 1) 1 forwards;
           will-change: transform;
         }
         @media (min-width: 768px) and (max-width: 1023px) {
@@ -402,13 +414,6 @@ export default function App() {
           50% { filter: grayscale(0); }
         }
         .foto-cor-pulso { animation: cor-vai-vem 104s ease-in-out infinite; }
-
-        /* Zoom lento respirando, em loop — harmônico do ritmo de 104s */
-        @keyframes zoom-lento {
-          0%, 100% { transform: scale(1); }
-          50% { transform: scale(1.07); }
-        }
-        .foto-zoom-lento { animation: zoom-lento 52s ease-in-out infinite; will-change: transform; }
 
         /* Fundo do Conceito: a foto cobre a seção inteira de forma sutil,
            dissolvendo nas bordas para fundir no preto (sem card/recorte). */
@@ -762,8 +767,7 @@ export default function App() {
           .animate-spin-slow { animation: none !important; }
           .marquee-track { animation: none !important; }
           .foto-cor-pulso { animation: none !important; }
-          .foto-zoom-lento { animation: none !important; }
-          .hero-img.hero-anim { animation: none !important; }
+          .foto-corte.is-fechando { animation: none !important; }
           .ia-trilho, .ia-interacao, .ia-resultados { transition: none !important; }
           .ia-foto { transition: opacity 0.4s linear !important; }
           .ia-palco.is-aberto .ia-foto { filter: none !important; }
@@ -924,7 +928,8 @@ export default function App() {
                 alt="Cinco pessoas diversas em retrato editorial, olhando em direções diferentes"
                 loading="eager"
                 decoding="async"
-                className="hero-img img-brand"
+                className={`hero-img img-brand ${introFase === 'pronto' ? 'foto-corte' : ''}`}
+                style={{ '--corte-tempo': '40s', '--fecha': 1.1 } as React.CSSProperties}
               />
             </div>
           </div>
@@ -995,7 +1000,8 @@ export default function App() {
                 src="/img/multidao-destaque.jpg"
                 alt="Vista aérea de uma multidão em movimento com algumas pessoas paradas em destaque"
                 loading="lazy"
-                className="img-brand foto-zoom-lento w-full h-full"
+                className="img-brand foto-corte w-full h-full"
+                style={{ '--corte-tempo': '34s', '--fecha': 1.08 } as React.CSSProperties}
               />
             </div>
 
