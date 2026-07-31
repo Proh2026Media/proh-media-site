@@ -656,10 +656,13 @@ export default function App() {
           filter: blur(14px);
           transition-property: opacity, transform, filter, width;
           transition-duration: 0.9s, 0.9s, 0.9s, 0.5s;
+          /* a largura fecha em ritmo constante: como vários fechamentos se
+             sobrepõem, é a soma deles que o olho vê — qualquer aceleração
+             por letra viraria ondulação no conjunto */
           transition-timing-function: ease-out,
                                       cubic-bezier(0.16, 1, 0.3, 1),
                                       ease-out,
-                                      cubic-bezier(0.45, 0, 0.55, 1);
+                                      linear;
           transition-delay: calc(var(--i, 0) * 70ms),
                             calc(var(--i, 0) * 70ms),
                             calc(var(--i, 0) * 70ms),
@@ -683,14 +686,17 @@ export default function App() {
           opacity: 0;
           filter: blur(10px);
           width: 0;
-          transition-duration: 0.6s, 0.9s, 0.6s, 0.66s;
+          transition-duration: 0.76s, 0.9s, 0.76s, 1.05s;
           /* --r é o índice contado da direita: a última letra sai primeiro.
-             A largura espera a letra já ter sumido para começar a fechar.
-             Somando: 4 × 440ms + 600ms + 660ms ≈ 3s do PROPAGAR ao PRO. */
-          transition-delay: calc(var(--r, 0) * 440ms),
+             O fecho de cada espaço dura mais que o intervalo entre as letras
+             (1,05s contra 380ms), então há sempre dois ou três fechando ao
+             mesmo tempo — é isso que faz a palavra andar de forma contínua em
+             vez de dar um solavanco por letra. Somando: 4 × 380ms + 480ms +
+             1,05s ≈ 3s do PROPAGAR ao PRO. */
+          transition-delay: calc(var(--r, 0) * 380ms),
                             0s,
-                            calc(var(--r, 0) * 440ms),
-                            calc(var(--r, 0) * 440ms + 0.6s);
+                            calc(var(--r, 0) * 380ms),
+                            calc(var(--r, 0) * 380ms + 0.48s);
         }
         /* PRO → PROH: o H entra com o mesmo efeito, no sentido inverso, e no
            off-white da marca (o H é a letra que pode destoar em cor) */
@@ -701,17 +707,18 @@ export default function App() {
           opacity: 0;
           filter: blur(10px);
           transition-property: opacity, filter, width;
-          transition-duration: 0.9s, 0.9s, 1.1s;
-          transition-timing-function: ease-out, ease-out, cubic-bezier(0.45, 0, 0.55, 1);
+          transition-duration: 1.2s, 1.2s, 1.2s;
+          transition-timing-function: ease-out, ease-out, linear;
         }
-        /* o inverso da saída: o espaço abre primeiro (1,1s), a letra aparece
-           inteira depois (0,9s) — 2s do PRO ao PROH, e nunca meia letra
-           revelada por uma máscara */
+        /* o inverso da saída, e pelo mesmo motivo sobreposto: o espaço começa
+           a abrir e a letra já vem aparecendo por cima dele (a partir de
+           0,8s), em vez de esperar o espaço terminar — 2s do PRO ao PROH sem
+           a pausa que separava os dois movimentos */
         .hero-marca-palavra.fase-proh .hero-marca-h {
           width: var(--w, auto);
           opacity: 1;
           filter: blur(0);
-          transition-delay: 1.1s, 1.1s, 0s;
+          transition-delay: 0.8s, 0.8s, 0s;
         }
 
         /* enquanto a marca se escreve, o conteúdo do hero espera — menos a
