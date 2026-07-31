@@ -79,12 +79,7 @@ export default function App() {
   // Roteiro da abertura
   useEffect(() => {
     if (introFase === 'pronto') return;
-
-    // A escrita começa no quadro seguinte, para as transições de entrada
-    // saírem do estado inicial em vez de já nascerem prontas.
-    const quadro = requestAnimationFrame(() =>
-      requestAnimationFrame(() => setLetrasDentro(true))
-    );
+    let quadro = 0;
 
     // Onde o card nasce, medido com ele momentaneamente de volta ao lugar.
     // Métricas de layout (offset*) porque o getBoundingClientRect traria o
@@ -134,10 +129,29 @@ export default function App() {
     //   +1,0s de pausa  →  o H entra (1,2s)
     //   +2,0s de pausa  →  a foto recolhe até o card (2,0s)
     const relogios = [];
-    relogios.push(setTimeout(() => setIntroFase('pro'), 2000));
-    relogios.push(setTimeout(() => setIntroFase('proh'), 5900));
-    relogios.push(setTimeout(() => { mirarNoCard(); setIntroFase('saindo'); }, 9100));
-    relogios.push(setTimeout(() => setIntroFase('pronto'), 11100));
+    const iniciarRoteiro = () => {
+      // A escrita começa no quadro seguinte, para as transições de entrada
+      // saírem do estado inicial em vez de já nascerem prontas.
+      quadro = requestAnimationFrame(() =>
+        requestAnimationFrame(() => setLetrasDentro(true))
+      );
+      relogios.push(setTimeout(() => setIntroFase('pro'), 2000));
+      relogios.push(setTimeout(() => setIntroFase('proh'), 5900));
+      relogios.push(setTimeout(() => { mirarNoCard(); setIntroFase('saindo'); }, 9100));
+      relogios.push(setTimeout(() => setIntroFase('pronto'), 11100));
+    };
+
+    // Aba em segundo plano não roda requestAnimationFrame e estrangula os
+    // relógios: se o site abre numa aba oculta, a escrita nunca acontecia e
+    // só o H aparecia. A abertura é uma cena única — ela espera a aba ficar
+    // visível e só então começa, do zero, diante de quem vai assistir.
+    const aoFicarVisivel = () => {
+      if (document.visibilityState !== 'visible') return;
+      document.removeEventListener('visibilitychange', aoFicarVisivel);
+      iniciarRoteiro();
+    };
+    if (document.visibilityState === 'visible') iniciarRoteiro();
+    else document.addEventListener('visibilitychange', aoFicarVisivel);
 
     // Qualquer intenção de navegar adianta para o fim.
     const pular = () => {
@@ -157,6 +171,7 @@ export default function App() {
     return () => {
       cancelAnimationFrame(quadro);
       relogios.forEach(clearTimeout);
+      document.removeEventListener('visibilitychange', aoFicarVisivel);
       window.removeEventListener('wheel', pular);
       window.removeEventListener('touchmove', pular);
       window.removeEventListener('keydown', pular);
