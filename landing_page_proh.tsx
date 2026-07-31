@@ -49,7 +49,9 @@ export default function App() {
     return 'propagar';
   });
   const introAtiva = introFase === 'propagar' || introFase === 'pro' || introFase === 'proh';
+  const [letrasDentro, setLetrasDentro] = useState(false);
   const palavraRef = useRef(null);
+  const aberturaRef = useRef(null);
 
   const closeMenu = () => setMenuOpen(false);
 
@@ -78,13 +80,42 @@ export default function App() {
   useEffect(() => {
     if (introFase === 'pronto') return;
 
+    // A escrita começa no quadro seguinte, para as transições de entrada
+    // saírem do estado inicial em vez de já nascerem prontas.
+    const quadro = requestAnimationFrame(() =>
+      requestAnimationFrame(() => setLetrasDentro(true))
+    );
+
+    // Guarda o retângulo real do card: é para lá que a foto vai.
+    const mirarNoCard = () => {
+      const secao = document.getElementById('hero');
+      const card = document.querySelector('.hero-foto-card');
+      const camada = aberturaRef.current;
+      if (!secao || !card || !camada) return;
+      // Medir por getBoundingClientRect erraria o alvo: nesse instante o card
+      // ainda carrega o transform da entrada em cascata (40px deslocado, em
+      // escala 0,98) e ele não pode ser desligado na hora — o elemento tem
+      // transition, então zerá-lo apenas dispara outra animação. As métricas
+      // de layout (offset*) ignoram transform e dão o retângulo verdadeiro.
+      let x = 0, y = 0, no = card;
+      while (no && no !== secao) { x += no.offsetLeft; y += no.offsetTop; no = no.offsetParent; }
+      const largura = card.offsetWidth;
+      const altura = card.offsetHeight;
+      if (no !== secao || !largura || !altura) return; // fora do esperado: sem recolhimento
+      camada.style.setProperty('--card-top', y.toFixed(1) + 'px');
+      camada.style.setProperty('--card-left', x.toFixed(1) + 'px');
+      camada.style.setProperty('--card-right', (secao.offsetWidth - (x + largura)).toFixed(1) + 'px');
+      camada.style.setProperty('--card-bottom', (secao.offsetHeight - (y + altura)).toFixed(1) + 'px');
+      camada.style.setProperty('--card-radius', getComputedStyle(card).borderRadius);
+    };
+
     // Cada passo leva 2s: escrita → PROPAGAR vira PRO → entra o H → a foto
-    // dá lugar ao hero.
+    // viaja até o card.
     const PASSO = 2000;
     const relogios = [];
     relogios.push(setTimeout(() => setIntroFase('pro'), PASSO));
     relogios.push(setTimeout(() => setIntroFase('proh'), PASSO * 2));
-    relogios.push(setTimeout(() => setIntroFase('saindo'), PASSO * 3));
+    relogios.push(setTimeout(() => { mirarNoCard(); setIntroFase('saindo'); }, PASSO * 3));
     relogios.push(setTimeout(() => setIntroFase('pronto'), PASSO * 4));
 
     // Qualquer intenção de navegar adianta para o fim.
@@ -103,6 +134,7 @@ export default function App() {
     window.addEventListener('pointerdown', pular);
 
     return () => {
+      cancelAnimationFrame(quadro);
       relogios.forEach(clearTimeout);
       window.removeEventListener('wheel', pular);
       window.removeEventListener('touchmove', pular);
@@ -194,7 +226,12 @@ export default function App() {
 
   // Foto do hero: calcula o percurso do pan (desktop) e liga a animação
   // apenas quando a imagem está decodificada — sem engasgo no carregamento.
+  // O pan entra junto com o recolhimento da foto, não depois: no quadro zero
+  // ele deixa a imagem centralizada, que é exatamente o enquadramento da
+  // camada de abertura — é isso que faz a entrega ao card não ter salto.
+  // (Sem ele a imagem do card fica alinhada à esquerda e a troca pula.)
   useEffect(() => {
+    if (introAtiva) return;
     const img = document.querySelector('.hero-img') as HTMLImageElement | null;
     if (!img) return;
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
@@ -220,7 +257,7 @@ export default function App() {
       img.removeEventListener('load', ligar);
       window.removeEventListener('resize', medirPan);
     };
-  }, []);
+  }, [introAtiva]);
 
   // Tipografia: palavras de 1–2 letras nunca ficam soltas no fim da linha.
   // O espaço depois delas vira espaço inseparável (NBSP), grudando-as à
@@ -350,11 +387,19 @@ export default function App() {
           0%, 100% { transform: scale(1); }
           50% { transform: scale(1.05); }
         }
+        /* A foto do hero também faz o vai e vem de cor (P&B ↔ cor), no mesmo
+           ciclo de 104s das demais — por isso a cor entra na mesma declaração
+           de animação do movimento, senão uma substituiria a outra. */
         @media (max-width: 767px) {
-          .hero-img.hero-anim { animation: hero-zoom 36s ease-in-out infinite; will-change: transform; }
+          .hero-img.hero-anim {
+            animation: hero-zoom 36s ease-in-out infinite,
+                       cor-vai-vem 104s ease-in-out infinite;
+            will-change: transform;
+          }
         }
         @media (min-width: 768px) and (max-width: 1023px) {
           .hero-img { object-position: 50% 25%; }
+          .hero-img.hero-anim { animation: cor-vai-vem 104s ease-in-out infinite; }
         }
         @keyframes hero-pan {
           0%   { transform: translateX(var(--pan-c, 0px)); }
@@ -369,7 +414,11 @@ export default function App() {
             max-width: none;
             height: 100%;
           }
-          .hero-img.hero-anim { animation: hero-pan 104s ease-in-out 1 forwards; will-change: transform; }
+          .hero-img.hero-anim {
+            animation: hero-pan 104s ease-in-out 1 forwards,
+                       cor-vai-vem 104s ease-in-out infinite;
+            will-change: transform;
+          }
         }
 
         /* Foto do Conceito: a cor vai e vem num ciclo lento — mesma
@@ -560,24 +609,37 @@ export default function App() {
         .ia-palco.is-aberto .ia-caixa { filter: blur(0); transition-delay: 0.55s; }
         .ia-palco.is-aberto .ia-caixa.ia-caixa-2 { transition-delay: 0.75s; }
 
-        /* ABERTURA DO HERO — roda uma vez por sessão.
-           A foto entra ocupando a seção inteira, a marca se escreve por cima
-           (PROPAGAR → PRO → PROH) e no fim a foto recolhe até o retângulo
-           exato do card, enquanto o conteúdo entra em cascata. */
+        /* ABERTURA DO HERO. A foto entra ocupando a seção inteira, a marca se
+           escreve por cima (PROPAGAR → PRO → PROH) e no fim a foto recolhe
+           até o retângulo exato do card, enquanto o conteúdo entra em cascata.
+           O recorte usa exatamente as mesmas regras da foto do card, para o
+           enquadramento no fim do percurso ser idêntico e a troca não pular. */
         .hero-abertura {
           position: absolute;
           inset: 0;
           z-index: 30;
           overflow: hidden;
-          /* a saída é a mesma linguagem das entradas do site: desvanece e
-             o hero assume, sem morfar a foto até o recorte do card */
-          transition: opacity 2s cubic-bezier(0.16, 1, 0.3, 1);
+          pointer-events: none;
         }
-        .hero-abertura.is-recolhendo { opacity: 0; pointer-events: none; }
         .hero-abertura-foto {
           position: absolute;
           inset: 0;
           overflow: hidden;
+          border-radius: 0;
+          transition: top 2s cubic-bezier(0.45, 0, 0.55, 1),
+                      right 2s cubic-bezier(0.45, 0, 0.55, 1),
+                      bottom 2s cubic-bezier(0.45, 0, 0.55, 1),
+                      left 2s cubic-bezier(0.45, 0, 0.55, 1),
+                      border-radius 2s cubic-bezier(0.45, 0, 0.55, 1),
+                      box-shadow 2s ease-out;
+        }
+        .hero-abertura.is-recolhendo .hero-abertura-foto {
+          top: var(--card-top, 0px);
+          right: var(--card-right, 0px);
+          bottom: var(--card-bottom, 0px);
+          left: var(--card-left, 0px);
+          border-radius: var(--card-radius, 2.5rem);
+          box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
         }
         .hero-abertura-foto img {
           position: absolute;
@@ -586,12 +648,18 @@ export default function App() {
           max-width: none;
           height: 100%;
           object-fit: cover;
+          object-position: 50% 30%;
+        }
+        @media (min-width: 768px) and (max-width: 1023px) {
+          .hero-abertura-foto img { object-position: 50% 25%; }
         }
         .hero-abertura-veu {
           position: absolute;
           inset: 0;
           background: linear-gradient(180deg, rgba(15, 15, 21, 0.55), rgba(15, 15, 21, 0.72));
+          transition: opacity 1.4s ease-out;
         }
+        .hero-abertura.is-recolhendo .hero-abertura-veu { opacity: 0; }
 
         .hero-abertura-marca {
           position: absolute;
@@ -600,6 +668,13 @@ export default function App() {
           align-items: center;
           justify-content: center;
           padding: 0 1.5rem;
+          /* a marca sai antes de a foto começar a viajar, para não haver dois
+             movimentos disputando a atenção */
+          transition: opacity 0.7s ease-out, filter 0.7s ease-out;
+        }
+        .hero-abertura.is-recolhendo .hero-abertura-marca {
+          opacity: 0;
+          filter: blur(10px);
         }
 
         .hero-marca-palavra {
@@ -617,25 +692,30 @@ export default function App() {
           display: inline-block;
           width: var(--w, auto);
         }
+        /* Tudo por transição, nada por keyframes: uma animação com fill
+           retém o valor final e o navegador não dispara transição sobre a
+           propriedade que ela estava animando — era por isso que "PAGAR"
+           sumia de uma vez em vez de se apagar letra a letra. */
         .hero-marca-letra {
-          animation: marca-letra-entra 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
-          animation-delay: calc(var(--i, 0) * 70ms);
+          opacity: 0;
+          transform: translateY(0.22em);
+          filter: blur(14px);
+          transition: opacity 0.9s ease-out,
+                      transform 0.9s cubic-bezier(0.16, 1, 0.3, 1),
+                      filter 0.9s ease-out,
+                      width 0.9s cubic-bezier(0.45, 0, 0.55, 1);
+          transition-delay: calc(var(--i, 0) * 70ms);
         }
-        @keyframes marca-letra-entra {
-          from { opacity: 0; transform: translateY(0.22em); filter: blur(14px); }
-          to   { opacity: 1; transform: translateY(0);      filter: blur(0); }
+        .hero-marca-palavra.is-dentro .hero-marca-letra {
+          opacity: 1;
+          transform: translateY(0);
+          filter: blur(0);
         }
         /* PROPAGAR → PRO: as extras se apagam da direita para a esquerda,
-           uma a uma, desfocando e sumindo (sem destaque nenhum sobre elas —
-           a marca não usa "proPAGAR" institucionalmente) */
-        .hero-marca-palavra.fase-pro .hero-marca-letra,
-        .hero-marca-palavra.fase-proh .hero-marca-letra { animation: none; }
-        .hero-marca-extra {
-          overflow: hidden;
-          transition: width 0.9s cubic-bezier(0.45, 0, 0.55, 1),
-                      opacity 0.8s ease-out,
-                      filter 0.8s ease-out;
-        }
+           uma a uma, desfocando e sumindo — e o espaço que cada uma libera
+           reacomoda as demais, até "PRO" assentar no centro (sem destaque
+           nenhum sobre elas: a marca não usa "proPAGAR" institucionalmente) */
+        .hero-marca-extra { overflow: hidden; }
         .hero-marca-palavra.fase-pro .hero-marca-extra,
         .hero-marca-palavra.fase-proh .hero-marca-extra {
           width: 0;
@@ -784,6 +864,7 @@ export default function App() {
         {/* Abertura: foto em tela cheia + a marca se escrevendo por cima */}
         {introFase !== 'pronto' && (
           <div
+            ref={aberturaRef}
             aria-hidden="true"
             className={`hero-abertura ${introFase === 'saindo' ? 'is-recolhendo' : ''}`}
           >
@@ -794,7 +875,7 @@ export default function App() {
             <div className="hero-abertura-marca">
               <span
                 ref={palavraRef}
-                className={`hero-marca-palavra font-mirano fase-${introFase === 'saindo' ? 'proh' : introFase}`}
+                className={`hero-marca-palavra font-mirano ${letrasDentro ? 'is-dentro' : ''} fase-${introFase === 'saindo' ? 'proh' : introFase}`}
               >
                 {['P', 'R', 'O', 'P', 'A', 'G', 'A', 'R'].map((letra, i) => (
                   <span
