@@ -243,42 +243,6 @@ export default function App() {
   }, []);
 
 
-  // Foto do hero: calcula o percurso do pan (desktop) e liga a animação
-  // apenas quando a imagem está decodificada — sem engasgo no carregamento.
-  // Corte de câmera nas fotos: cada vez que uma delas volta a aparecer,
-  // começa um fechamento novo. Ao sair de vista a classe cai, então o retorno
-  // ao plano aberto acontece sempre fora do campo de visão — nunca se vê a
-  // imagem "desfazendo" a aproximação. No hero a classe só existe depois que
-  // a foto se encaixa no card (nada se mexe enquanto o card viaja).
-  useEffect(() => {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    const fotos = Array.from(document.querySelectorAll('.foto-corte'));
-    if (!fotos.length) return;
-
-    // O observador vigia o CONTÊINER, nunca a imagem: a escala da animação
-    // muda o retângulo da imagem, o que dispararia o observador, que
-    // reiniciaria a animação — um laço que travava o corte no primeiro plano.
-    const porContainer = new Map();
-    const observador = new IntersectionObserver((entradas) => {
-      entradas.forEach(({ target, isIntersecting }) => {
-        const el = porContainer.get(target);
-        if (!el) return;
-        if (!isIntersecting) { el.classList.remove('is-fechando'); return; }
-        el.classList.remove('is-fechando');
-        void el.offsetWidth; // reinicia a passada do zero
-        el.classList.add('is-fechando');
-      });
-    }, { threshold: 0.25 });
-
-    fotos.forEach((f) => {
-      const container = f.parentElement;
-      if (!container) return;
-      porContainer.set(container, f);
-      observador.observe(container);
-    });
-    return () => observador.disconnect();
-  }, [introFase]);
-
   // Tipografia: palavras de 1–2 letras nunca ficam soltas no fim da linha.
   // O espaço depois delas vira espaço inseparável (NBSP), grudando-as à
   // palavra seguinte. Passada única sobre os textos estáticos do site.
@@ -390,9 +354,7 @@ export default function App() {
         }
         .img-brand:hover { filter: grayscale(0); }
 
-        /* Foto do hero — um corte de câmera que só fecha: parte do plano
-           aberto e vai fechando devagar, sem vai e vem de posição nem de cor.
-           Ligada pelo JS só depois da abertura e com a imagem decodificada. */
+        /* Foto do hero: enquadramento fixo, sem animação. */
         .hero-img {
           position: absolute;
           inset: 0;
@@ -400,71 +362,6 @@ export default function App() {
           height: 100%;
           object-fit: cover;
           object-position: 50% 30%;
-        }
-        /* Corte de câmera: a imagem SEGURA um plano e salta para o próximo —
-           corte seco, sem deslizar. Três planos, sempre do aberto ao fechado,
-           e o retorno ao aberto é ele mesmo um corte (novo enquadramento), não
-           um desfazer. O steps(1, end) é o que garante o salto: o valor fica
-           parado durante todo o intervalo e muda de uma vez no fim dele. */
-        @keyframes corte-planos {
-          0%   { transform: scale(1) translate(0%, 0%); }
-          33%  { transform: scale(var(--plano-2, 1.12)) translate(-3%, -2%); }
-          66%  { transform: scale(var(--plano-3, 1.26)) translate(3%, -5%); }
-          100% { transform: scale(var(--plano-3, 1.26)) translate(3%, -5%); }
-        }
-        .foto-corte.is-fechando {
-          animation: corte-planos var(--corte-tempo, 24s) steps(1, end) infinite;
-          will-change: transform;
-        }
-
-        /* ROSTOS DA FOTO DO HERO (retrato-editorial-diverso.jpg)
-           Medidos uma única vez sobre a imagem de 1400x1054 e gravados aqui —
-           nenhuma detecção acontece em tempo de execução. Centro de cada
-           rosto, em % da largura/altura da imagem:
-             1  homem de cabelo escuro ..... 11%, 28%
-             2  mulher de cabelo longo ..... 24%, 33%
-             3  mulher ao centro ........... 45%, 34%
-             4  homem de locs .............. 66%, 27%
-             5  homem loiro ................ 86%, 31%
-           ATENÇÃO: trocar a foto obriga a refazer estas medidas.
-
-           No card em retrato (desktop) o recorte só mostra a faixa central da
-           imagem, então o object-position é quem traz cada rosto para dentro
-           do quadro; a escala fecha e o transform-origin escolhe sobre qual
-           rosto ela fecha. Seis planos alternando aberto (3 rostos) e fechado
-           (1–2 rostos), variando de lado. */
-        @keyframes rostos-retrato {
-          /* aberto — esquerda: rostos 1, 2 e 3 */
-          0%     { object-position: 0% 30%;   transform: scale(1.15); transform-origin: 46% 32%; }
-          /* fechado — rosto 3 */
-          16.6%  { object-position: 38% 30%;  transform: scale(2.2);  transform-origin: 50% 32%; }
-          /* aberto — direita: rostos 3, 4 e 5 */
-          33.3%  { object-position: 85% 30%;  transform: scale(1.1);  transform-origin: 52% 30%; }
-          /* fechado — esquerda: rostos 1 e 2 */
-          50%    { object-position: 0% 28%;   transform: scale(2);    transform-origin: 30% 30%; }
-          /* aberto — centro: rostos 2, 3 e 4 */
-          66.6%  { object-position: 38% 30%;  transform: scale(1.1);  transform-origin: 50% 32%; }
-          /* fechado — direita: rostos 4 e 5 */
-          83.3%, 100% { object-position: 100% 28%; transform: scale(1.9); transform-origin: 58% 28%; }
-        }
-        /* No card deitado (celular e tablet) a imagem cabe quase inteira, com
-           os cinco rostos à vista: aqui quem escolhe o rosto é só o origin. */
-        @keyframes rostos-paisagem {
-          0%     { object-position: 50% 30%; transform: scale(1.25); transform-origin: 25% 30%; }
-          16.6%  { object-position: 50% 30%; transform: scale(2.2);  transform-origin: 44% 32%; }
-          33.3%  { object-position: 50% 30%; transform: scale(1.25); transform-origin: 66% 30%; }
-          50%    { object-position: 50% 30%; transform: scale(2);    transform-origin: 17% 30%; }
-          66.6%  { object-position: 50% 30%; transform: scale(1.3);  transform-origin: 44% 30%; }
-          83.3%, 100% { object-position: 50% 30%; transform: scale(2); transform-origin: 76% 30%; }
-        }
-        .foto-corte-rostos.is-fechando {
-          animation: rostos-paisagem var(--corte-tempo, 30s) steps(1, end) infinite;
-          will-change: transform;
-        }
-        @media (min-width: 1024px) {
-          .foto-corte-rostos.is-fechando {
-            animation-name: rostos-retrato;
-          }
         }
         @media (min-width: 768px) and (max-width: 1023px) {
           .hero-img { object-position: 50% 25%; }
@@ -837,8 +734,6 @@ export default function App() {
           .animate-spin-slow { animation: none !important; }
           .marquee-track { animation: none !important; }
           .foto-cor-pulso { animation: none !important; }
-          .foto-corte.is-fechando,
-          .foto-corte-rostos.is-fechando { animation: none !important; }
           .ia-trilho, .ia-interacao, .ia-resultados { transition: none !important; }
           .ia-foto { transition: opacity 0.4s linear !important; }
           .ia-palco.is-aberto .ia-foto { filter: none !important; }
@@ -999,8 +894,7 @@ export default function App() {
                 alt="Cinco pessoas diversas em retrato editorial, olhando em direções diferentes"
                 loading="eager"
                 decoding="async"
-                className={`hero-img img-brand ${introFase === 'pronto' ? 'foto-corte foto-corte-rostos' : ''}`}
-                style={{ '--corte-tempo': '30s' } as React.CSSProperties}
+                className="hero-img img-brand"
               />
             </div>
           </div>
@@ -1071,8 +965,7 @@ export default function App() {
                 src="/img/multidao-destaque.jpg"
                 alt="Vista aérea de uma multidão em movimento com algumas pessoas paradas em destaque"
                 loading="lazy"
-                className="img-brand foto-corte w-full h-full"
-                style={{ '--corte-tempo': '21s', '--plano-2': 1.09, '--plano-3': 1.2 } as React.CSSProperties}
+                className="img-brand w-full h-full"
               />
             </div>
 
