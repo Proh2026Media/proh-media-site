@@ -92,6 +92,13 @@ export default function App() {
       const moldura = molduraRef.current;
       if (!secao || !card || !moldura) return;
 
+      // As transições ficam desligadas durante a medição. Sem isso, o vaivém
+      // da classe com leituras de layout no meio registra o estado normal
+      // (cantos de 40px) como ponto de partida, e ao devolver a classe o
+      // navegador ANIMA 40px -> 0: a foto abria em tela cheia com os cantos
+      // arredondados, desarredondando ao longo de 2s.
+      card.style.setProperty('transition', 'none', 'important');
+
       const abrindo = card.classList.contains('is-abrindo');
       if (abrindo) card.classList.remove('is-abrindo');
       // devolver a moldura ao papel de referência exige !important: durante a
@@ -110,6 +117,10 @@ export default function App() {
       if (antesPos) moldura.style.setProperty('position', antesPos, antesPri);
       else moldura.style.removeProperty('position');
       if (abrindo) card.classList.add('is-abrindo');
+      // consolida o estado de tela cheia AINDA sem transição, para o retorno
+      // da classe não virar animação; só então as transições religam
+      void card.offsetWidth;
+      card.style.removeProperty('transition');
       if (!chegou) return;
 
       card.style.setProperty('--card-top', y.toFixed(1) + 'px');
