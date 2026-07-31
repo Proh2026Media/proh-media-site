@@ -386,10 +386,19 @@ export default function App() {
           overflow: hidden;
           border-radius: 1.25rem;
           height: 24rem;
+          /* a foto desfoca enquanto sai (e volta ao foco quando entra):
+             a troca ganha profundidade em vez de um corte seco */
+          filter: blur(0);
+          will-change: filter, opacity, transform;
           transition: opacity 0.8s ease-out,
+                      filter 1.2s cubic-bezier(0.45, 0, 0.55, 1),
                       transform 1.1s cubic-bezier(0.45, 0, 0.55, 1);
         }
-        .ia-palco.is-aberto .ia-foto { opacity: 0; transform: scale(0.985); }
+        .ia-palco.is-aberto .ia-foto {
+          opacity: 0;
+          filter: blur(10px);
+          transform: scale(0.985);
+        }
         .ia-foto img {
           position: absolute;
           inset: 0;
@@ -447,6 +456,9 @@ export default function App() {
             opacity: 1;
             transform: none;
           }
+          /* no lado a lado a foto não some antes da hora: ela sai deslizando e
+             só desfoca, senão fica um vazio na janela no meio do percurso */
+          .ia-palco.is-aberto .ia-foto { opacity: 1; transform: none; filter: blur(10px); }
           /* o respiro entre colunas mora nas colunas das pontas, para a
              interação encostar na borda do painel quando vira a primeira */
           .ia-foto img { width: calc(100% - 2.5rem); border-radius: 1.25rem; }
@@ -463,14 +475,15 @@ export default function App() {
           }
         }
 
-        /* Caixas de resposta: saem do desfoque quando o palco abre */
+        /* Caixas de resposta: entram desfocadas e ganham foco uma depois da
+           outra, no mesmo tempo em que a foto perde o foco ao sair */
         .ia-caixa {
-          filter: blur(2px);
-          transition: filter 0.9s ease-out;
+          filter: blur(6px);
+          transition: filter 1.1s cubic-bezier(0.45, 0, 0.55, 1);
           will-change: filter;
         }
-        /* saem do desfoque depois que o espaço já abriu */
-        .ia-palco.is-aberto .ia-caixa { filter: blur(0); transition-delay: 0.6s; }
+        /* entram em foco depois que o espaço já abriu */
+        .ia-palco.is-aberto .ia-caixa { filter: blur(0); transition-delay: 0.55s; }
         .ia-palco.is-aberto .ia-caixa.ia-caixa-2 { transition-delay: 0.75s; }
 
         /* Loader Animation */
@@ -493,6 +506,8 @@ export default function App() {
           .hero-img.hero-anim { animation: none !important; }
           .ia-trilho, .ia-interacao, .ia-resultados { transition: none !important; }
           .ia-foto { transition: opacity 0.4s linear !important; }
+          .ia-palco.is-aberto .ia-foto { filter: none !important; }
+          .ia-caixa { filter: none !important; }
           .ia-palco.is-aberto .ia-caixa { transition-delay: 0ms !important; }
         }
       `}} />
