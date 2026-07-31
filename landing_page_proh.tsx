@@ -387,6 +387,9 @@ export default function App() {
           width: 100%;
           height: 100%;
           object-fit: cover;
+          /* ancorada pela base e centrada na horizontal: o recorte come pelo
+             topo, nunca pelo chão da imagem */
+          object-position: 50% 100%;
           opacity: 0.25;
           -webkit-mask-image: radial-gradient(ellipse 80% 75% at 55% 45%, black 30%, transparent 80%);
           mask-image: radial-gradient(ellipse 80% 75% at 55% 45%, black 30%, transparent 80%);
@@ -706,7 +709,11 @@ export default function App() {
         /* PRO → PROH: o H entra com o mesmo efeito, no sentido inverso, e no
            off-white da marca (o H é a letra que pode destoar em cor) */
         .hero-marca-h {
-          overflow: hidden;
+          /* sem recorte: a caixa abre por baixo do glifo, que é desenhado
+             inteiro desde o começo. Com overflow escondido a letra era
+             revelada por uma máscara, de um lado para o outro — nas letras de
+             PAGAR isso não aparece porque elas já estão sumindo quando a
+             caixa fecha, mas numa letra que ENTRA a máscara fica evidente. */
           color: #D8D4BD;
           width: 0;
           opacity: 0;
