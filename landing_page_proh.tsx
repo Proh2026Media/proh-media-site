@@ -391,16 +391,19 @@ export default function App() {
           object-fit: cover;
           object-position: 50% 30%;
         }
-        /* Corte de câmera: uma passada só, do plano aberto ao fechado. O
-           visitante nunca vê a imagem desfazendo a aproximação — o retorno ao
-           plano aberto acontece com a seção fora da tela, e cada vez que ela
-           reaparece começa um corte novo. */
-        @keyframes corte-fecha {
-          from { transform: scale(1); }
-          to   { transform: scale(var(--fecha, 1.1)); }
+        /* Corte de câmera: a imagem SEGURA um plano e salta para o próximo —
+           corte seco, sem deslizar. Três planos, sempre do aberto ao fechado,
+           e o retorno ao aberto é ele mesmo um corte (novo enquadramento), não
+           um desfazer. O steps(1, end) é o que garante o salto: o valor fica
+           parado durante todo o intervalo e muda de uma vez no fim dele. */
+        @keyframes corte-planos {
+          0%   { transform: scale(1) translate(0%, 0%); }
+          33%  { transform: scale(var(--plano-2, 1.12)) translate(-3%, -2%); }
+          66%  { transform: scale(var(--plano-3, 1.26)) translate(3%, -5%); }
+          100% { transform: scale(var(--plano-3, 1.26)) translate(3%, -5%); }
         }
         .foto-corte.is-fechando {
-          animation: corte-fecha var(--corte-tempo, 40s) cubic-bezier(0.45, 0, 0.55, 1) 1 forwards;
+          animation: corte-planos var(--corte-tempo, 24s) steps(1, end) infinite;
           will-change: transform;
         }
         @media (min-width: 768px) and (max-width: 1023px) {
@@ -685,14 +688,24 @@ export default function App() {
            retém o valor final e o navegador não dispara transição sobre a
            propriedade que ela estava animando — era por isso que "PAGAR"
            sumia de uma vez em vez de se apagar letra a letra. */
+        /* Uma única lista de transições para TODAS as letras — inclusive as de
+           "PAGAR". Antes elas tinham lista própria, sem o transform, e por
+           isso "PRO" subia enquanto "PAGAR" só aparecia: a palavra entrava em
+           dois blocos em vez de fluir letra a letra. */
         .hero-marca-letra {
           opacity: 0;
           transform: translateY(0.22em);
           filter: blur(14px);
-          transition: opacity 0.9s ease-out,
-                      transform 0.9s cubic-bezier(0.16, 1, 0.3, 1),
-                      filter 0.9s ease-out;
-          transition-delay: calc(var(--i, 0) * 70ms);
+          transition-property: opacity, transform, filter, width;
+          transition-duration: 0.9s, 0.9s, 0.9s, 0.5s;
+          transition-timing-function: ease-out,
+                                      cubic-bezier(0.16, 1, 0.3, 1),
+                                      ease-out,
+                                      cubic-bezier(0.45, 0, 0.55, 1);
+          transition-delay: calc(var(--i, 0) * 70ms),
+                            calc(var(--i, 0) * 70ms),
+                            calc(var(--i, 0) * 70ms),
+                            0s;
         }
         .hero-marca-palavra.is-dentro .hero-marca-letra {
           opacity: 1;
@@ -706,20 +719,17 @@ export default function App() {
         /* Cada letra some INTEIRA (opacidade e desfoque, o glifo todo de uma
            vez) e só depois o espaço dela se fecha. Fechar o espaço junto com o
            sumiço é o que dava aquela sensação de máscara raspando a letra. */
-        .hero-marca-extra {
-          overflow: hidden;
-          transition-property: opacity, filter, width;
-          transition-duration: 0.45s, 0.45s, 0.5s;
-          transition-timing-function: ease-out, ease-out, cubic-bezier(0.45, 0, 0.55, 1);
-        }
+        .hero-marca-extra { overflow: hidden; }
         .hero-marca-palavra.fase-pro .hero-marca-extra,
         .hero-marca-palavra.fase-proh .hero-marca-extra {
           opacity: 0;
           filter: blur(10px);
           width: 0;
+          transition-duration: 0.45s, 0.9s, 0.45s, 0.5s;
           /* --r é o índice contado da direita: a última letra sai primeiro.
              A largura espera a letra já ter sumido para começar a fechar. */
           transition-delay: calc(var(--r, 0) * 260ms),
+                            0s,
                             calc(var(--r, 0) * 260ms),
                             calc(var(--r, 0) * 260ms + 0.45s);
         }
@@ -929,7 +939,7 @@ export default function App() {
                 loading="eager"
                 decoding="async"
                 className={`hero-img img-brand ${introFase === 'pronto' ? 'foto-corte' : ''}`}
-                style={{ '--corte-tempo': '40s', '--fecha': 1.1 } as React.CSSProperties}
+                style={{ '--corte-tempo': '24s', '--plano-2': 1.12, '--plano-3': 1.26 } as React.CSSProperties}
               />
             </div>
           </div>
@@ -1001,7 +1011,7 @@ export default function App() {
                 alt="Vista aérea de uma multidão em movimento com algumas pessoas paradas em destaque"
                 loading="lazy"
                 className="img-brand foto-corte w-full h-full"
-                style={{ '--corte-tempo': '34s', '--fecha': 1.08 } as React.CSSProperties}
+                style={{ '--corte-tempo': '21s', '--plano-2': 1.09, '--plano-3': 1.2 } as React.CSSProperties}
               />
             </div>
 
