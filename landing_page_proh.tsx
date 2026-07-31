@@ -593,6 +593,12 @@ export default function App() {
            inclusive o will-change: transform, que cria contenção mesmo com
            position: static. A moldura guarda a altura do card, senão o
            conteúdo abaixo saltaria quando ele voltasse ao fluxo. */
+        /* Enquanto a foto está em tela cheia o hero sobe na pilha: a seção
+           seguinte tem o topo arredondado e monta 48px sobre o rodapé dele,
+           e como ela vem depois na pilha esses cantos apareciam recortando a
+           base da foto — parecia arredondamento da própria imagem. A foto só
+           deve ganhar cantos quando começa a recolher. */
+        #hero.hero-abertura-ativa { z-index: 95; }
         #hero.hero-abertura-ativa .hero-conteudo-caixa { position: static !important; }
         #hero.hero-abertura-ativa .hero-foto-moldura {
           position: static !important;
