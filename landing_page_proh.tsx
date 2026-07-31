@@ -38,16 +38,17 @@ export default function App() {
 
   // Abertura do hero: 'propagar' → 'pro' → 'proh' → 'saindo' → 'pronto'.
   // Decidida já na primeira renderização para não piscar o estado final.
+  // Toca sempre que a página abre pelo começo — inclusive ao recarregar.
+  // Não toca quando o visitante já estava lendo mais abaixo (o navegador
+  // restaura a posição) nem quando o link aponta para uma seção interna.
   const [introFase, setIntroFase] = useState(() => {
     if (typeof window === 'undefined') return 'pronto';
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return 'pronto';
-    try {
-      if (sessionStorage.getItem('proh-abertura') === '1') return 'pronto';
-    } catch { /* modo privado: segue com a abertura */ }
+    if (window.location.hash) return 'pronto';
+    if (window.scrollY > 0) return 'pronto';
     return 'propagar';
   });
   const introAtiva = introFase === 'propagar' || introFase === 'pro' || introFase === 'proh';
-  const aberturaRef = useRef(null);
   const palavraRef = useRef(null);
 
   const closeMenu = () => setMenuOpen(false);
@@ -77,37 +78,24 @@ export default function App() {
   useEffect(() => {
     if (introFase === 'pronto') return;
 
-    const marcarVista = () => {
-      try { sessionStorage.setItem('proh-abertura', '1'); } catch { /* ignora */ }
-    };
-
-    // Mede o card real e guarda o destino do recolhimento da foto.
-    const mirarNoCard = () => {
-      const secao = document.getElementById('hero');
-      const card = document.querySelector('.hero-foto-card');
-      const camada = aberturaRef.current;
-      if (!secao || !card || !camada) return;
-      const s = secao.getBoundingClientRect();
-      const c = card.getBoundingClientRect();
-      camada.style.setProperty('--card-top', (c.top - s.top).toFixed(1) + 'px');
-      camada.style.setProperty('--card-left', (c.left - s.left).toFixed(1) + 'px');
-      camada.style.setProperty('--card-right', (s.right - c.right).toFixed(1) + 'px');
-      camada.style.setProperty('--card-bottom', (s.bottom - c.bottom).toFixed(1) + 'px');
-      camada.style.setProperty('--card-radius', getComputedStyle(card).borderRadius);
-    };
-
+    // Cada passo leva 2s: escrita → PROPAGAR vira PRO → entra o H → a foto
+    // dá lugar ao hero.
+    const PASSO = 2000;
     const relogios = [];
-    relogios.push(setTimeout(() => setIntroFase('pro'), 1800));
-    relogios.push(setTimeout(() => setIntroFase('proh'), 2500));
-    relogios.push(setTimeout(() => { mirarNoCard(); setIntroFase('saindo'); }, 3300));
-    relogios.push(setTimeout(() => { setIntroFase('pronto'); marcarVista(); }, 4800));
+    relogios.push(setTimeout(() => setIntroFase('pro'), PASSO));
+    relogios.push(setTimeout(() => setIntroFase('proh'), PASSO * 2));
+    relogios.push(setTimeout(() => setIntroFase('saindo'), PASSO * 3));
+    relogios.push(setTimeout(() => setIntroFase('pronto'), PASSO * 4));
 
     // Qualquer intenção de navegar adianta para o fim.
     const pular = () => {
       relogios.forEach(clearTimeout);
       setIntroFase('pronto');
-      marcarVista();
     };
+
+    // Se o navegador restaurar a posição de leitura depois da montagem,
+    // a abertura não faz sentido: vai direto ao conteúdo.
+    requestAnimationFrame(() => { if (window.scrollY > 0) pular(); });
     const opcoes = { passive: true };
     window.addEventListener('wheel', pular, opcoes);
     window.addEventListener('touchmove', pular, opcoes);
@@ -581,26 +569,15 @@ export default function App() {
           inset: 0;
           z-index: 30;
           overflow: hidden;
+          /* a saída é a mesma linguagem das entradas do site: desvanece e
+             o hero assume, sem morfar a foto até o recorte do card */
+          transition: opacity 2s cubic-bezier(0.16, 1, 0.3, 1);
         }
+        .hero-abertura.is-recolhendo { opacity: 0; pointer-events: none; }
         .hero-abertura-foto {
           position: absolute;
           inset: 0;
           overflow: hidden;
-          border-radius: 0;
-          /* o recolhimento usa as medidas reais do card (definidas por JS),
-             e o object-fit vai reenquadrando a foto durante o percurso */
-          transition: top 1.4s cubic-bezier(0.45, 0, 0.55, 1),
-                      right 1.4s cubic-bezier(0.45, 0, 0.55, 1),
-                      bottom 1.4s cubic-bezier(0.45, 0, 0.55, 1),
-                      left 1.4s cubic-bezier(0.45, 0, 0.55, 1),
-                      border-radius 1.4s cubic-bezier(0.45, 0, 0.55, 1);
-        }
-        .hero-abertura.is-recolhendo .hero-abertura-foto {
-          top: var(--card-top, 0px);
-          right: var(--card-right, 0px);
-          bottom: var(--card-bottom, 0px);
-          left: var(--card-left, 0px);
-          border-radius: var(--card-radius, 2.5rem);
         }
         .hero-abertura-foto img {
           position: absolute;
@@ -614,9 +591,7 @@ export default function App() {
           position: absolute;
           inset: 0;
           background: linear-gradient(180deg, rgba(15, 15, 21, 0.55), rgba(15, 15, 21, 0.72));
-          transition: opacity 1.1s ease-out;
         }
-        .hero-abertura.is-recolhendo .hero-abertura-veu { opacity: 0; }
 
         .hero-abertura-marca {
           position: absolute;
@@ -625,12 +600,6 @@ export default function App() {
           align-items: center;
           justify-content: center;
           padding: 0 1.5rem;
-          transition: opacity 0.7s ease-out, transform 1s cubic-bezier(0.45, 0, 0.55, 1);
-        }
-        .hero-abertura.is-recolhendo .hero-abertura-marca {
-          opacity: 0;
-          transform: scale(0.96);
-          filter: blur(6px);
         }
 
         .hero-marca-palavra {
@@ -651,34 +620,41 @@ export default function App() {
         .hero-marca-letra {
           animation: marca-letra-entra 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
           animation-delay: calc(var(--i, 0) * 70ms);
-          transition: width 0.7s cubic-bezier(0.45, 0, 0.55, 1),
-                      opacity 0.45s ease-out,
-                      filter 0.45s ease-out;
         }
         @keyframes marca-letra-entra {
           from { opacity: 0; transform: translateY(0.22em); filter: blur(14px); }
           to   { opacity: 1; transform: translateY(0);      filter: blur(0); }
         }
-        /* PROPAGAR → PRO: as letras extras recolhem juntas, sem destaque
-           nenhum sobre elas (a marca não usa "proPAGAR" institucionalmente) */
+        /* PROPAGAR → PRO: as extras se apagam da direita para a esquerda,
+           uma a uma, desfocando e sumindo (sem destaque nenhum sobre elas —
+           a marca não usa "proPAGAR" institucionalmente) */
         .hero-marca-palavra.fase-pro .hero-marca-letra,
         .hero-marca-palavra.fase-proh .hero-marca-letra { animation: none; }
-        .hero-marca-extra { overflow: hidden; }
+        .hero-marca-extra {
+          overflow: hidden;
+          transition: width 0.9s cubic-bezier(0.45, 0, 0.55, 1),
+                      opacity 0.8s ease-out,
+                      filter 0.8s ease-out;
+        }
         .hero-marca-palavra.fase-pro .hero-marca-extra,
         .hero-marca-palavra.fase-proh .hero-marca-extra {
           width: 0;
           opacity: 0;
-          filter: blur(12px);
+          filter: blur(16px);
+          /* --r é o índice contado da direita: a última letra sai primeiro */
+          transition-delay: calc(var(--r, 0) * 190ms);
         }
-        /* PRO → PROH: o H completa a marca */
+        /* PRO → PROH: o H entra com o mesmo efeito, no sentido inverso, e no
+           off-white da marca (o H é a letra que pode destoar em cor) */
         .hero-marca-h {
           overflow: hidden;
+          color: #D8D4BD;
           width: 0;
           opacity: 0;
-          filter: blur(12px);
-          transition: width 0.8s cubic-bezier(0.45, 0, 0.55, 1),
-                      opacity 0.6s ease-out 0.1s,
-                      filter 0.6s ease-out 0.1s;
+          filter: blur(16px);
+          transition: width 0.9s cubic-bezier(0.45, 0, 0.55, 1),
+                      opacity 0.8s ease-out 0.15s,
+                      filter 0.8s ease-out 0.15s;
         }
         .hero-marca-palavra.fase-proh .hero-marca-h {
           width: var(--w, auto);
@@ -808,7 +784,6 @@ export default function App() {
         {/* Abertura: foto em tela cheia + a marca se escrevendo por cima */}
         {introFase !== 'pronto' && (
           <div
-            ref={aberturaRef}
             aria-hidden="true"
             className={`hero-abertura ${introFase === 'saindo' ? 'is-recolhendo' : ''}`}
           >
@@ -825,7 +800,7 @@ export default function App() {
                   <span
                     key={i}
                     className={`hero-marca-letra ${i >= 3 ? 'hero-marca-extra' : ''}`}
-                    style={{ '--i': i }}
+                    style={{ '--i': i, '--r': 7 - i }}
                   >
                     {letra}
                   </span>
