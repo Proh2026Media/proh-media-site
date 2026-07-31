@@ -128,13 +128,16 @@ export default function App() {
     };
     mirarNoCard();
 
-    // Roteiro: a marca se escreve; PROPAGAR vira PRO em 3s; o H entra em 2s;
-    // 1,5s de respiro e a foto recolhe até o card (2s).
+    // Roteiro (os tempos das transições vêm da gramática das letras):
+    //   2,0s  a marca se escreve
+    //   +2,9s PROPAGAR vira PRO
+    //   +1,0s de pausa  →  o H entra (1,2s)
+    //   +2,0s de pausa  →  a foto recolhe até o card (2,0s)
     const relogios = [];
     relogios.push(setTimeout(() => setIntroFase('pro'), 2000));
-    relogios.push(setTimeout(() => setIntroFase('proh'), 5000));
-    relogios.push(setTimeout(() => { mirarNoCard(); setIntroFase('saindo'); }, 8500));
-    relogios.push(setTimeout(() => setIntroFase('pronto'), 10500));
+    relogios.push(setTimeout(() => setIntroFase('proh'), 5900));
+    relogios.push(setTimeout(() => { mirarNoCard(); setIntroFase('saindo'); }, 9100));
+    relogios.push(setTimeout(() => setIntroFase('pronto'), 11100));
 
     // Qualquer intenção de navegar adianta para o fim.
     const pular = () => {
@@ -650,22 +653,25 @@ export default function App() {
            "PAGAR". Antes elas tinham lista própria, sem o transform, e por
            isso "PRO" subia enquanto "PAGAR" só aparecia: a palavra entrava em
            dois blocos em vez de fluir letra a letra. */
+        /* GRAMÁTICA ÚNICA DAS LETRAS — vale para a entrada de PROPAGAR, para a
+           saída de PAGAR e para a entrada do H, sem exceção:
+             · a letra (opacidade, desfoque, deslocamento) leva 0,8s em ease-out
+             · o espaço dela leva 1s em ritmo constante
+             · há 0,4s de defasagem entre a letra e o seu espaço
+           Antes o H tinha durações próprias (1,2s) e a entrada misturava três
+           curvas diferentes — daí a sensação de que cada coisa andava num
+           compasso. A largura é linear porque vários espaços se movem ao mesmo
+           tempo e o olho vê a soma: aceleração por letra viraria ondulação. */
         .hero-marca-letra {
           opacity: 0;
           transform: translateY(0.22em);
-          filter: blur(14px);
+          filter: blur(12px);
           transition-property: opacity, transform, filter, width;
-          transition-duration: 0.9s, 0.9s, 0.9s, 0.5s;
-          /* a largura fecha em ritmo constante: como vários fechamentos se
-             sobrepõem, é a soma deles que o olho vê — qualquer aceleração
-             por letra viraria ondulação no conjunto */
-          transition-timing-function: ease-out,
-                                      cubic-bezier(0.16, 1, 0.3, 1),
-                                      ease-out,
-                                      linear;
-          transition-delay: calc(var(--i, 0) * 70ms),
-                            calc(var(--i, 0) * 70ms),
-                            calc(var(--i, 0) * 70ms),
+          transition-duration: 0.8s, 0.8s, 0.8s, 1s;
+          transition-timing-function: ease-out, ease-out, ease-out, linear;
+          transition-delay: calc(var(--i, 0) * 90ms),
+                            calc(var(--i, 0) * 90ms),
+                            calc(var(--i, 0) * 90ms),
                             0s;
         }
         .hero-marca-palavra.is-dentro .hero-marca-letra {
@@ -684,19 +690,18 @@ export default function App() {
         .hero-marca-palavra.fase-pro .hero-marca-extra,
         .hero-marca-palavra.fase-proh .hero-marca-extra {
           opacity: 0;
-          filter: blur(10px);
+          filter: blur(12px);
           width: 0;
-          transition-duration: 0.76s, 0.9s, 0.76s, 1.05s;
           /* --r é o índice contado da direita: a última letra sai primeiro.
-             O fecho de cada espaço dura mais que o intervalo entre as letras
-             (1,05s contra 380ms), então há sempre dois ou três fechando ao
-             mesmo tempo — é isso que faz a palavra andar de forma contínua em
-             vez de dar um solavanco por letra. Somando: 4 × 380ms + 480ms +
-             1,05s ≈ 3s do PROPAGAR ao PRO. */
+             O fecho de cada espaço (1s) dura mais que o intervalo entre as
+             letras (380ms), então há sempre dois ou três fechando ao mesmo
+             tempo — é isso que faz a palavra andar de forma contínua em vez de
+             dar um solavanco por letra. Somando: 4 × 380ms + 0,4s + 1s ≈ 2,9s
+             do PROPAGAR ao PRO. */
           transition-delay: calc(var(--r, 0) * 380ms),
                             0s,
                             calc(var(--r, 0) * 380ms),
-                            calc(var(--r, 0) * 380ms + 0.48s);
+                            calc(var(--r, 0) * 380ms + 0.4s);
         }
         /* PRO → PROH: o H entra com o mesmo efeito, no sentido inverso, e no
            off-white da marca (o H é a letra que pode destoar em cor) */
@@ -705,20 +710,19 @@ export default function App() {
           color: #D8D4BD;
           width: 0;
           opacity: 0;
-          filter: blur(10px);
+          filter: blur(12px);
+          /* mesmíssimos números da gramática das letras: 0,8s de letra, 1s de
+             espaço e 0,4s de defasagem — o H entra no mesmo compasso em que
+             as letras de PAGAR saem, só que na ordem inversa */
           transition-property: opacity, filter, width;
-          transition-duration: 1.2s, 1.2s, 1.2s;
+          transition-duration: 0.8s, 0.8s, 1s;
           transition-timing-function: ease-out, ease-out, linear;
         }
-        /* o inverso da saída, e pelo mesmo motivo sobreposto: o espaço começa
-           a abrir e a letra já vem aparecendo por cima dele (a partir de
-           0,8s), em vez de esperar o espaço terminar — 2s do PRO ao PROH sem
-           a pausa que separava os dois movimentos */
         .hero-marca-palavra.fase-proh .hero-marca-h {
           width: var(--w, auto);
           opacity: 1;
           filter: blur(0);
-          transition-delay: 0.8s, 0.8s, 0s;
+          transition-delay: 0.4s, 0.4s, 0s;
         }
 
         /* enquanto a marca se escreve, o conteúdo do hero espera — menos a
