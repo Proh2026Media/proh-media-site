@@ -51,7 +51,7 @@ export default function App() {
   const introAtiva = introFase === 'propagar' || introFase === 'pro' || introFase === 'proh';
   const [letrasDentro, setLetrasDentro] = useState(false);
   const palavraRef = useRef(null);
-  const aberturaRef = useRef(null);
+  const molduraRef = useRef(null);
 
   const closeMenu = () => setMenuOpen(false);
 
@@ -86,28 +86,47 @@ export default function App() {
       requestAnimationFrame(() => setLetrasDentro(true))
     );
 
-    // Guarda o retângulo real do card: é para lá que a foto vai.
+    // Onde o card nasce, medido com ele momentaneamente de volta ao lugar.
+    // Métricas de layout (offset*) porque o getBoundingClientRect traria o
+    // transform da entrada em cascata embutido e erraria o alvo em dezenas
+    // de pixels. A ida e volta da classe acontece dentro do mesmo quadro,
+    // antes de qualquer pintura, então nada pisca.
     const mirarNoCard = () => {
       const secao = document.getElementById('hero');
       const card = document.querySelector('.hero-foto-card');
-      const camada = aberturaRef.current;
-      if (!secao || !card || !camada) return;
-      // Medir por getBoundingClientRect erraria o alvo: nesse instante o card
-      // ainda carrega o transform da entrada em cascata (40px deslocado, em
-      // escala 0,98) e ele não pode ser desligado na hora — o elemento tem
-      // transition, então zerá-lo apenas dispara outra animação. As métricas
-      // de layout (offset*) ignoram transform e dão o retângulo verdadeiro.
+      const moldura = molduraRef.current;
+      if (!secao || !card || !moldura) return;
+
+      const abrindo = card.classList.contains('is-abrindo');
+      if (abrindo) card.classList.remove('is-abrindo');
+      // devolver a moldura ao papel de referência exige !important: durante a
+      // abertura o CSS a força a static com essa mesma prioridade
+      const antesPos = moldura.style.getPropertyValue('position');
+      const antesPri = moldura.style.getPropertyPriority('position');
+      moldura.style.setProperty('position', 'relative', 'important');
+
       let x = 0, y = 0, no = card;
       while (no && no !== secao) { x += no.offsetLeft; y += no.offsetTop; no = no.offsetParent; }
       const largura = card.offsetWidth;
       const altura = card.offsetHeight;
-      if (no !== secao || !largura || !altura) return; // fora do esperado: sem recolhimento
-      camada.style.setProperty('--card-top', y.toFixed(1) + 'px');
-      camada.style.setProperty('--card-left', x.toFixed(1) + 'px');
-      camada.style.setProperty('--card-right', (secao.offsetWidth - (x + largura)).toFixed(1) + 'px');
-      camada.style.setProperty('--card-bottom', (secao.offsetHeight - (y + altura)).toFixed(1) + 'px');
-      camada.style.setProperty('--card-radius', getComputedStyle(card).borderRadius);
+      const raio = getComputedStyle(card).borderRadius;
+      const chegou = no === secao && largura > 0 && altura > 0;
+
+      if (antesPos) moldura.style.setProperty('position', antesPos, antesPri);
+      else moldura.style.removeProperty('position');
+      if (abrindo) card.classList.add('is-abrindo');
+      if (!chegou) return;
+
+      card.style.setProperty('--card-top', y.toFixed(1) + 'px');
+      card.style.setProperty('--card-left', x.toFixed(1) + 'px');
+      card.style.setProperty('--card-right', (secao.offsetWidth - (x + largura)).toFixed(1) + 'px');
+      card.style.setProperty('--card-bottom', (secao.offsetHeight - (y + altura)).toFixed(1) + 'px');
+      card.style.setProperty('--card-radius', raio);
+      // altura reservada na moldura: sem ela o conteúdo abaixo saltaria
+      // quando o card voltasse ao fluxo no fim da abertura
+      moldura.style.setProperty('--altura-foto', altura.toFixed(1) + 'px');
     };
+    mirarNoCard();
 
     // Cada passo leva 2s: escrita → PROPAGAR vira PRO → entra o H → a foto
     // viaja até o card.
@@ -226,38 +245,21 @@ export default function App() {
 
   // Foto do hero: calcula o percurso do pan (desktop) e liga a animação
   // apenas quando a imagem está decodificada — sem engasgo no carregamento.
-  // O pan entra junto com o recolhimento da foto, não depois: no quadro zero
-  // ele deixa a imagem centralizada, que é exatamente o enquadramento da
-  // camada de abertura — é isso que faz a entrega ao card não ter salto.
-  // (Sem ele a imagem do card fica alinhada à esquerda e a troca pula.)
+  // A aproximação só começa quando a abertura termina: enquanto o card viaja,
+  // qualquer movimento dentro dele competiria com o próprio percurso.
   useEffect(() => {
-    if (introAtiva) return;
+    if (introFase !== 'pronto') return;
     const img = document.querySelector('.hero-img') as HTMLImageElement | null;
     if (!img) return;
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
-    const medirPan = () => {
-      if (!window.matchMedia('(min-width: 1024px)').matches) return;
-      const quadro = img.parentElement ? img.parentElement.getBoundingClientRect().width : 0;
-      const largura = img.getBoundingClientRect().width;
-      const sobra = Math.max(0, largura - quadro);
-      img.style.setProperty('--pan-c', `${(-sobra / 2).toFixed(1)}px`);
-      img.style.setProperty('--pan-r', `${(-sobra).toFixed(1)}px`);
-    };
     const ligar = () => {
-      requestAnimationFrame(() => requestAnimationFrame(() => {
-        medirPan();
-        img.classList.add('hero-anim');
-      }));
+      requestAnimationFrame(() => requestAnimationFrame(() => img.classList.add('hero-anim')));
     };
     if (img.complete && img.naturalWidth) ligar();
     else img.addEventListener('load', ligar, { once: true });
-    window.addEventListener('resize', medirPan);
-    return () => {
-      img.removeEventListener('load', ligar);
-      window.removeEventListener('resize', medirPan);
-    };
-  }, [introAtiva]);
+    return () => { img.removeEventListener('load', ligar); };
+  }, [introFase]);
 
   // Tipografia: palavras de 1–2 letras nunca ficam soltas no fim da linha.
   // O espaço depois delas vira espaço inseparável (NBSP), grudando-as à
@@ -370,11 +372,9 @@ export default function App() {
         }
         .img-brand:hover { filter: grayscale(0); }
 
-        /* Foto do hero — animações leves por transform (GPU), ligadas pelo
-           JS somente quando a imagem já está decodificada (sem engasgo).
-           Desktop: pan único centro -> direita -> esquerda (e permanece).
-           Tablet: estática, enquadrada do topo ao meio.
-           Mobile: zoom sutil em loop contínuo. */
+        /* Foto do hero — um corte de câmera que só fecha: parte do plano
+           aberto e vai fechando devagar, sem vai e vem de posição nem de cor.
+           Ligada pelo JS só depois da abertura e com a imagem decodificada. */
         .hero-img {
           position: absolute;
           inset: 0;
@@ -383,42 +383,16 @@ export default function App() {
           object-fit: cover;
           object-position: 50% 30%;
         }
-        @keyframes hero-zoom {
-          0%, 100% { transform: scale(1); }
-          50% { transform: scale(1.05); }
+        @keyframes hero-close {
+          from { transform: scale(1); }
+          to   { transform: scale(1.14); }
         }
-        /* A foto do hero também faz o vai e vem de cor (P&B ↔ cor), no mesmo
-           ciclo de 104s das demais — por isso a cor entra na mesma declaração
-           de animação do movimento, senão uma substituiria a outra. */
-        @media (max-width: 767px) {
-          .hero-img.hero-anim {
-            animation: hero-zoom 36s ease-in-out infinite,
-                       cor-vai-vem 104s ease-in-out infinite;
-            will-change: transform;
-          }
+        .hero-img.hero-anim {
+          animation: hero-close 104s cubic-bezier(0.45, 0, 0.55, 1) 1 forwards;
+          will-change: transform;
         }
         @media (min-width: 768px) and (max-width: 1023px) {
           .hero-img { object-position: 50% 25%; }
-          .hero-img.hero-anim { animation: cor-vai-vem 104s ease-in-out infinite; }
-        }
-        @keyframes hero-pan {
-          0%   { transform: translateX(var(--pan-c, 0px)); }
-          40%  { transform: translateX(var(--pan-r, 0px)); }
-          100% { transform: translateX(0px); }
-        }
-        @media (min-width: 1024px) {
-          .hero-img {
-            inset: auto;
-            top: 0; left: 0;
-            width: auto;
-            max-width: none;
-            height: 100%;
-          }
-          .hero-img.hero-anim {
-            animation: hero-pan 104s ease-in-out 1 forwards,
-                       cor-vai-vem 104s ease-in-out infinite;
-            will-change: transform;
-          }
         }
 
         /* Foto do Conceito: a cor vai e vem num ciclo lento — mesma
@@ -614,18 +588,19 @@ export default function App() {
            até o retângulo exato do card, enquanto o conteúdo entra em cascata.
            O recorte usa exatamente as mesmas regras da foto do card, para o
            enquadramento no fim do percurso ser idêntico e a troca não pular. */
-        .hero-abertura {
+        /* Quem viaja é o PRÓPRIO card da foto — não há segunda cópia da
+           imagem. Durante a abertura ele sai do lugar dele e passa a ocupar a
+           seção inteira; ao recolher, volta exatamente para onde nasceu. */
+        .hero-foto-card.is-abrindo {
           position: absolute;
-          inset: 0;
           z-index: 30;
-          overflow: hidden;
-          pointer-events: none;
-        }
-        .hero-abertura-foto {
-          position: absolute;
-          inset: 0;
-          overflow: hidden;
+          /* o card tem w-full/h-full: com largura explícita os right/bottom
+             seriam ignorados e só a posição viajaria, não o tamanho */
+          width: auto;
+          height: auto;
+          top: 0; right: 0; bottom: 0; left: 0;
           border-radius: 0;
+          box-shadow: none;
           transition: top 2s cubic-bezier(0.45, 0, 0.55, 1),
                       right 2s cubic-bezier(0.45, 0, 0.55, 1),
                       bottom 2s cubic-bezier(0.45, 0, 0.55, 1),
@@ -633,7 +608,7 @@ export default function App() {
                       border-radius 2s cubic-bezier(0.45, 0, 0.55, 1),
                       box-shadow 2s ease-out;
         }
-        .hero-abertura.is-recolhendo .hero-abertura-foto {
+        .hero-foto-card.is-abrindo.is-recolhendo {
           top: var(--card-top, 0px);
           right: var(--card-right, 0px);
           bottom: var(--card-bottom, 0px);
@@ -641,17 +616,26 @@ export default function App() {
           border-radius: var(--card-radius, 2.5rem);
           box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
         }
-        .hero-abertura-foto img {
+        /* Para o card se referenciar à SEÇÃO (e não à moldura ou ao container
+           de conteúdo), todo bloco de contenção no caminho é neutralizado —
+           inclusive o will-change: transform, que cria contenção mesmo com
+           position: static. A moldura guarda a altura do card, senão o
+           conteúdo abaixo saltaria quando ele voltasse ao fluxo. */
+        #hero.hero-abertura-ativa .hero-conteudo-caixa { position: static !important; }
+        #hero.hero-abertura-ativa .hero-foto-moldura {
+          position: static !important;
+          will-change: auto !important;
+          opacity: 1 !important;
+          transform: none !important;
+          min-height: var(--altura-foto, 0px);
+        }
+
+        .hero-abertura {
           position: absolute;
           inset: 0;
-          width: 100%;
-          max-width: none;
-          height: 100%;
-          object-fit: cover;
-          object-position: 50% 30%;
-        }
-        @media (min-width: 768px) and (max-width: 1023px) {
-          .hero-abertura-foto img { object-position: 50% 25%; }
+          z-index: 40;
+          overflow: hidden;
+          pointer-events: none;
         }
         .hero-abertura-veu {
           position: absolute;
@@ -702,8 +686,7 @@ export default function App() {
           filter: blur(14px);
           transition: opacity 0.9s ease-out,
                       transform 0.9s cubic-bezier(0.16, 1, 0.3, 1),
-                      filter 0.9s ease-out,
-                      width 0.9s cubic-bezier(0.45, 0, 0.55, 1);
+                      filter 0.9s ease-out;
           transition-delay: calc(var(--i, 0) * 70ms);
         }
         .hero-marca-palavra.is-dentro .hero-marca-letra {
@@ -715,14 +698,25 @@ export default function App() {
            uma a uma, desfocando e sumindo — e o espaço que cada uma libera
            reacomoda as demais, até "PRO" assentar no centro (sem destaque
            nenhum sobre elas: a marca não usa "proPAGAR" institucionalmente) */
-        .hero-marca-extra { overflow: hidden; }
+        /* Cada letra some INTEIRA (opacidade e desfoque, o glifo todo de uma
+           vez) e só depois o espaço dela se fecha. Fechar o espaço junto com o
+           sumiço é o que dava aquela sensação de máscara raspando a letra. */
+        .hero-marca-extra {
+          overflow: hidden;
+          transition-property: opacity, filter, width;
+          transition-duration: 0.45s, 0.45s, 0.5s;
+          transition-timing-function: ease-out, ease-out, cubic-bezier(0.45, 0, 0.55, 1);
+        }
         .hero-marca-palavra.fase-pro .hero-marca-extra,
         .hero-marca-palavra.fase-proh .hero-marca-extra {
-          width: 0;
           opacity: 0;
-          filter: blur(16px);
-          /* --r é o índice contado da direita: a última letra sai primeiro */
-          transition-delay: calc(var(--r, 0) * 190ms);
+          filter: blur(10px);
+          width: 0;
+          /* --r é o índice contado da direita: a última letra sai primeiro.
+             A largura espera a letra já ter sumido para começar a fechar. */
+          transition-delay: calc(var(--r, 0) * 260ms),
+                            calc(var(--r, 0) * 260ms),
+                            calc(var(--r, 0) * 260ms + 0.45s);
         }
         /* PRO → PROH: o H entra com o mesmo efeito, no sentido inverso, e no
            off-white da marca (o H é a letra que pode destoar em cor) */
@@ -731,19 +725,23 @@ export default function App() {
           color: #D8D4BD;
           width: 0;
           opacity: 0;
-          filter: blur(16px);
-          transition: width 0.9s cubic-bezier(0.45, 0, 0.55, 1),
-                      opacity 0.8s ease-out 0.15s,
-                      filter 0.8s ease-out 0.15s;
+          filter: blur(10px);
+          transition-property: opacity, filter, width;
+          transition-duration: 0.45s, 0.45s, 0.5s;
+          transition-timing-function: ease-out, ease-out, cubic-bezier(0.45, 0, 0.55, 1);
         }
+        /* o inverso da saída: o espaço abre primeiro, a letra aparece inteira
+           depois — nunca meia letra revelada por uma máscara */
         .hero-marca-palavra.fase-proh .hero-marca-h {
           width: var(--w, auto);
           opacity: 1;
           filter: blur(0);
+          transition-delay: 0.5s, 0.5s, 0s;
         }
 
-        /* enquanto a marca se escreve, o conteúdo do hero espera */
-        #hero.hero-abrindo .animate-on-scroll {
+        /* enquanto a marca se escreve, o conteúdo do hero espera — menos a
+           moldura da foto, que é a protagonista da abertura */
+        #hero.hero-abrindo .animate-on-scroll:not(.hero-foto-moldura) {
           opacity: 0 !important;
           transform: translateY(40px) scale(0.98) !important;
         }
@@ -860,18 +858,14 @@ export default function App() {
           Da seção Soluções em diante, o fluxo volta ao normal. */}
 
       {/* SEÇÃO 1 — HERO */}
-      <section id="hero" className={`stack-card z-[10] w-full min-h-screen flex flex-col justify-center overflow-hidden bg-[#D8D4BD] ${introAtiva ? 'hero-abrindo' : ''}`}>
+      <section id="hero" className={`stack-card z-[10] w-full min-h-screen flex flex-col justify-center overflow-hidden bg-[#D8D4BD] ${introAtiva ? 'hero-abrindo' : ''} ${introFase !== 'pronto' ? 'hero-abertura-ativa' : ''}`}>
         {/* Abertura: foto em tela cheia + a marca se escrevendo por cima */}
         {introFase !== 'pronto' && (
           <div
-            ref={aberturaRef}
             aria-hidden="true"
             className={`hero-abertura ${introFase === 'saindo' ? 'is-recolhendo' : ''}`}
           >
-            <div className="hero-abertura-foto">
-              <img src="/img/retrato-editorial-diverso.jpg" alt="" decoding="async" className="img-brand" />
-              <div className="hero-abertura-veu" />
-            </div>
+            <div className="hero-abertura-veu" />
             <div className="hero-abertura-marca">
               <span
                 ref={palavraRef}
@@ -891,7 +885,7 @@ export default function App() {
             </div>
           </div>
         )}
-        <div className="max-w-7xl w-full mx-auto px-6 md:px-12 relative z-10 pt-28 pb-32 md:pt-32 md:pb-36">
+        <div className="hero-conteudo-caixa max-w-7xl w-full mx-auto px-6 md:px-12 relative z-10 pt-28 pb-32 md:pt-32 md:pb-36">
           <div className="grid lg:grid-cols-[1.15fr_0.85fr] gap-10 lg:gap-16">
           <div className="max-w-4xl">
             {/* No desktop, a foto ao lado nasce no topo deste kicker */}
@@ -921,9 +915,10 @@ export default function App() {
             </p>
           </div>
 
-          {/* Foto oficial da marca: retrato editorial de pessoas diversas */}
-          <div className="animate-on-scroll delay-300 relative">
-            <div className="hero-foto-card relative w-full h-64 sm:h-80 lg:absolute lg:inset-0 lg:h-full rounded-[2rem] md:rounded-[2.5rem] shadow-2xl overflow-hidden">
+          {/* Foto oficial da marca: retrato editorial de pessoas diversas.
+              É este mesmo card que faz a abertura — não há cópia da imagem. */}
+          <div ref={molduraRef} className="hero-foto-moldura animate-on-scroll delay-300 relative">
+            <div className={`hero-foto-card relative w-full h-64 sm:h-80 lg:absolute lg:inset-0 lg:h-full rounded-[2rem] md:rounded-[2.5rem] shadow-2xl overflow-hidden ${introFase !== 'pronto' ? 'is-abrindo' : ''} ${introFase === 'saindo' ? 'is-recolhendo' : ''}`}>
               <img
                 src="/img/retrato-editorial-diverso.jpg"
                 alt="Cinco pessoas diversas em retrato editorial, olhando em direções diferentes"
