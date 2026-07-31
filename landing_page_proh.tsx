@@ -1485,7 +1485,19 @@ export default function App() {
 }
 
 // --- FORMULÁRIO DE CONTATO ---
-// Sem backend: monta um e-mail pré-preenchido (mailto) com os dados do projeto.
+// Valida um celular brasileiro digitado livremente: aceita com/sem +55,
+// espaços, parênteses e traços; exige DDD (11–99) + 9 + 8 dígitos.
+// A existência real do número no WhatsApp não tem consulta prévia nas
+// regras oficiais — o formato é o máximo verificável antes de um envio.
+function validarCelularBR(texto) {
+  let d = String(texto).replace(/\D+/g, '');
+  if (d.startsWith('55') && d.length >= 12) d = d.slice(2);
+  return d.length === 11 && Number(d.slice(0, 2)) >= 11 && d[2] === '9';
+}
+
+// O formulário abre o WhatsApp do visitante com a mensagem pronta (wa.me) e,
+// em paralelo, avisa a PROH pelo proxy do Zernio — assim o lead chega mesmo
+// que o visitante abandone antes de confirmar o envio no WhatsApp.
 function ContactForm() {
   const [form, setForm] = useState({
     nome: '', empresa: '', email: '', whatsapp: '', tipo: '', desafio: '', momento: '',
@@ -1501,7 +1513,23 @@ function ContactForm() {
       setFormError('Selecione o tipo e o momento do projeto.');
       return;
     }
+    if (form.whatsapp.trim() !== '' && !validarCelularBR(form.whatsapp)) {
+      setFormError('Confira o WhatsApp: DDD + 9 dígitos (ex.: 19 99999-9999).');
+      return;
+    }
     setFormError(null);
+
+    // Aviso interno via Zernio: dispara e segue — nunca bloqueia o wa.me.
+    // Em desenvolvimento o endpoint PHP não existe; o catch silencia.
+    try {
+      fetch('/api/whatsapp.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
+        keepalive: true,
+      }).catch(() => {});
+    } catch { /* nunca atrapalha o fluxo principal */ }
+
     // Monta a mensagem e abre o WhatsApp da PROH com o texto pronto para envio.
     const body = [
       `Olá, PROH! Quero propagar valor. 🚀`,
