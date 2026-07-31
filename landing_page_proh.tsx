@@ -353,21 +353,19 @@ export default function App() {
         }
         .img-brand:hover { filter: grayscale(0); }
 
-        /* Foto do hero: enquadramento fixo, sem animação.
-           Os três rostos centrais ficam em 24%, 45% e 66% da largura da
-           imagem — o centro deles é 45%, não 50%. Recortar em 50% jogava o
-           conjunto para a direita; 38% de object-position põe exatamente
-           esses 45% no meio do card em retrato. */
+        /* Foto do hero: enquadramento fixo, sem animação e centrado — o
+           deslocamento lateral existia para acertar os rostos da foto
+           anterior e não se aplica a esta. */
         .hero-img {
           position: absolute;
           inset: 0;
           width: 100%;
           height: 100%;
           object-fit: cover;
-          object-position: 38% 30%;
+          object-position: 50% 30%;
         }
         @media (min-width: 768px) and (max-width: 1023px) {
-          .hero-img { object-position: 38% 25%; }
+          .hero-img { object-position: 50% 25%; }
         }
 
         /* Foto do Conceito: a cor vai e vem num ciclo lento — mesma
@@ -890,13 +888,14 @@ export default function App() {
             </p>
           </div>
 
-          {/* Foto oficial da marca: retrato editorial de pessoas diversas.
-              É este mesmo card que faz a abertura — não há cópia da imagem. */}
+          {/* Foto oficial da marca: a multidão de onde algumas pessoas se
+              destacam. É este mesmo card que faz a abertura — não há cópia
+              da imagem: ele sai daqui, cobre a seção e volta. */}
           <div ref={molduraRef} className="hero-foto-moldura animate-on-scroll delay-300 relative">
             <div className={`hero-foto-card relative w-full h-64 sm:h-80 lg:absolute lg:inset-0 lg:h-full rounded-[2rem] md:rounded-[2.5rem] shadow-2xl overflow-hidden ${introFase !== 'pronto' ? 'is-abrindo' : ''} ${introFase === 'saindo' ? 'is-recolhendo' : ''}`}>
               <img
-                src="/img/retrato-editorial-diverso.jpg"
-                alt="Cinco pessoas diversas em retrato editorial, olhando em direções diferentes"
+                src="/img/multidao-praca.jpg"
+                alt="Vista do alto de uma praça movimentada, com cinco pessoas paradas em destaque no meio da multidão"
                 loading="eager"
                 decoding="async"
                 className="hero-img img-brand"
