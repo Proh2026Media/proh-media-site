@@ -1,23 +1,40 @@
 <?php
 // ============================================================================
-// Aviso interno de lead via Zernio (WhatsApp) — roda no servidor da Hostinger.
+// Aviso de lead no WhatsApp — via API não-oficial (conexão por QR Code).
 //
-// O formulário do site continua abrindo o wa.me para o visitante; este proxy
-// apenas garante que a PROH receba o lead no WhatsApp mesmo que o visitante
-// abandone antes de enviar a mensagem.
+// Não passa pela Meta: sem verificação comercial, sem template aprovado e sem
+// janela de 24h. A mensagem vai como texto livre.
 //
-// A CHAVE NÃO fica neste arquivo nem no repositório.
-// COMO CONFIGURAR (uma única vez):
-//   1. Pelo Gerenciador de Arquivos da Hostinger, na pasta do domínio (o
-//      nível ACIMA de public_html), crie  zernio_config.json  contendo:
-//        { "apiKey": "SUA_CHAVE_DA_API_DO_ZERNIO" }
-//   2. Abra  https://proh.media/api/whatsapp-setup.php?chave=XXXXXX  (os
-//      últimos 6 caracteres da chave). O configurador descobre a conta,
-//      completa este arquivo e cria o template "novo_lead" sozinho.
+// AS CREDENCIAIS NÃO ficam neste arquivo nem no repositório.
+// COMO CONFIGURAR (Gerenciador de Arquivos da Hostinger, na pasta do domínio
+// — o nível ACIMA de public_html, onde já está o gemini_key.txt):
 //
-// Por que template: o WhatsApp não permite mensagem livre para iniciar uma
-// conversa — fora da janela de 24h só entram templates aprovados. Enviar por
-// template torna o aviso confiável a qualquer hora.
+//   Crie/edite  whatsapp_config.json  conforme o serviço contratado.
+//
+//   Z-API (https://z-api.io):
+//     {
+//       "provedor": "zapi",
+//       "destino":  "5519995951316",
+//       "zapi": {
+//         "instancia":   "SUA_INSTANCIA",
+//         "token":       "SEU_TOKEN",
+//         "clientToken": "SEU_CLIENT_TOKEN"
+//       }
+//     }
+//
+//   Evolution API / WAME API e clones (formato sendText):
+//     {
+//       "provedor": "evolution",
+//       "destino":  "5519995951316",
+//       "evolution": {
+//         "url":       "https://sua-api.com.br",
+//         "instancia": "proh",
+//         "apikey":    "SUA_CHAVE"
+//       }
+//     }
+//
+// O "destino" é quem RECEBE o aviso — precisa ser um número diferente do que
+// foi conectado por QR Code (um número não envia mensagem para si mesmo).
 // ============================================================================
 
 header('Content-Type: application/json; charset=utf-8');
@@ -36,9 +53,9 @@ $method = $_SERVER['REQUEST_METHOD'] ?? '';
 if ($method === 'OPTIONS') { http_response_code(204); exit; }
 if ($method !== 'POST')    { http_response_code(405); echo json_encode(['error' => 'Método não permitido.']); exit; }
 
-// Limite de requisições: 5 por minuto por IP (um formulário legítimo não
-// precisa de mais; protege contra uso do endpoint como canal de spam).
-$ipHash = hash('sha256', ($_SERVER['REMOTE_ADDR'] ?? '') . '|proh-zernio');
+// Limite: 5 envios por minuto por IP (protege contra uso como canal de spam,
+// que é justamente o que faz um número conectado ser banido).
+$ipHash = hash('sha256', ($_SERVER['REMOTE_ADDR'] ?? '') . '|proh-whats');
 $rlFile = sys_get_temp_dir() . '/proh_rl_' . $ipHash;
 $now    = time();
 $hits   = [];
@@ -56,14 +73,14 @@ if (count($hits) >= 5) {
 $hits[] = $now;
 @file_put_contents($rlFile, implode("\n", $hits), LOCK_EX);
 
-// Configuração: procurada fora da pasta pública (1 ou 2 níveis acima).
+// Configuração fora da pasta pública.
 $config = null;
-foreach ([dirname(__DIR__, 2) . '/zernio_config.json', dirname(__DIR__, 3) . '/zernio_config.json'] as $cand) {
+foreach ([dirname(__DIR__, 2) . '/whatsapp_config.json', dirname(__DIR__, 3) . '/whatsapp_config.json'] as $cand) {
     if (is_readable($cand)) { $config = json_decode((string) file_get_contents($cand), true); break; }
 }
-if (!is_array($config) || empty($config['apiKey']) || empty($config['accountId']) || empty($config['destinationPhone'])) {
-    http_response_code(500);
-    echo json_encode(['error' => 'Integração do WhatsApp não configurada no servidor.']);
+if (!is_array($config) || empty($config['provedor']) || empty($config['destino'])) {
+    http_response_code(503);
+    echo json_encode(['error' => 'Aviso por WhatsApp não configurado.']);
     exit;
 }
 
@@ -72,7 +89,8 @@ if (strlen($corpo) >= 8192) { http_response_code(413); echo json_encode(['error'
 $input = json_decode($corpo, true);
 if (!is_array($input)) { http_response_code(400); echo json_encode(['error' => 'Corpo inválido.']); exit; }
 
-// Saneamento: corta no tamanho, remove quebras (vão como variáveis de template).
+// Saneamento. Quebras de linha viram espaço para não permitir injeção de
+// estrutura na mensagem final.
 $campo = function ($chave, $max) use ($input) {
     $v = trim((string) ($input[$chave] ?? ''));
     $v = preg_replace('/\s+/u', ' ', $v);
@@ -84,7 +102,7 @@ $email   = $campo('email', 120);
 $fone    = $campo('whatsapp', 30);
 $tipo    = $campo('tipo', 60);
 $momento = $campo('momento', 60);
-$desafio = $campo('desafio', 600);
+$desafio = $campo('desafio', 800);
 
 if ($nome === '' || $desafio === '') {
     http_response_code(400);
@@ -97,54 +115,65 @@ if ($email !== '' && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
     exit;
 }
 
-// Validação do WhatsApp do visitante (formato brasileiro, normalizado para
-// padrão internacional). O campo é opcional; quando preenchido, precisa ser
-// um celular plausível: 55 + DDD (11–99) + 9 + 8 dígitos.
-// Observação: a existência REAL do número no WhatsApp não tem consulta
-// prévia nas regras oficiais — só o resultado de um envio de verdade revela
-// número inválido (erro 131021 da Meta).
-$foneNormalizado = '';
+// Validação do celular informado (formato brasileiro): 55 + DDD + 9 + 8 dígitos.
+// A existência real do número só se confirma numa entrega de verdade.
+$foneExibicao = '—';
 if ($fone !== '') {
-    $digitos = preg_replace('/\D+/', '', $fone);
-    if (strpos($digitos, '55') === 0 && strlen($digitos) >= 12) { $digitos = substr($digitos, 2); }
-    if (strlen($digitos) === 10) { // formato antigo sem o 9: rejeita para celular
-        http_response_code(400);
-        echo json_encode(['error' => 'Número de WhatsApp incompleto: use DDD + 9 dígitos.', 'campo' => 'whatsapp']);
-        exit;
-    }
-    $ddd = (int) substr($digitos, 0, 2);
-    if (strlen($digitos) !== 11 || $ddd < 11 || $digitos[2] !== '9') {
+    $d = preg_replace('/\D+/', '', $fone);
+    if (strpos($d, '55') === 0 && strlen($d) >= 12) { $d = substr($d, 2); }
+    if (strlen($d) !== 11 || (int) substr($d, 0, 2) < 11 || $d[2] !== '9') {
         http_response_code(400);
         echo json_encode(['error' => 'Número de WhatsApp inválido: confira o DDD e os 9 dígitos.', 'campo' => 'whatsapp']);
         exit;
     }
-    $foneNormalizado = '55' . $digitos;
+    $foneExibicao = '+55 ' . substr($d, 0, 2) . ' ' . substr($d, 2, 5) . '-' . substr($d, 7);
 }
 
-// Envio do aviso via Zernio: template aprovado, direto para o número da PROH.
-$payload = json_encode([
-    'accountId'        => (string) $config['accountId'],
-    'participantId'    => preg_replace('/\D+/', '', (string) $config['destinationPhone']),
-    'templateName'     => (string) ($config['templateName'] ?? 'novo_lead'),
-    'templateLanguage' => (string) ($config['templateLanguage'] ?? 'pt_BR'),
-    'templateParams'   => [
-        $nome,
-        $empresa !== '' ? $empresa : '—',
-        $email   !== '' ? $email   : '—',
-        $foneNormalizado !== '' ? '+' . $foneNormalizado : '—',
-        $tipo    !== '' ? $tipo    : '—',
-        $momento !== '' ? $momento : '—',
-        $desafio,
-    ],
-], JSON_UNESCAPED_UNICODE);
+$mensagem = "*Novo lead no site PROH* 🚀\n\n"
+    . "*Nome:* {$nome}\n"
+    . '*Empresa ou projeto:* ' . ($empresa !== '' ? $empresa : '—') . "\n"
+    . '*E-mail:* ' . ($email !== '' ? $email : '—') . "\n"
+    . "*WhatsApp:* {$foneExibicao}\n"
+    . '*Tipo de projeto:* ' . ($tipo !== '' ? $tipo : '—') . "\n"
+    . '*Momento:* ' . ($momento !== '' ? $momento : '—') . "\n\n"
+    . "*Principal desafio:*\n{$desafio}";
 
-$ch = curl_init('https://api.zernio.com/v1/inbox/conversations');
+$destino = preg_replace('/\D+/', '', (string) $config['destino']);
+
+// Monta a requisição conforme o provedor.
+switch ((string) $config['provedor']) {
+    case 'zapi':
+        $z = (array) ($config['zapi'] ?? []);
+        if (empty($z['instancia']) || empty($z['token'])) {
+            http_response_code(503); echo json_encode(['error' => 'Credenciais da Z-API incompletas.']); exit;
+        }
+        $url      = 'https://api.z-api.io/instances/' . rawurlencode($z['instancia'])
+                  . '/token/' . rawurlencode($z['token']) . '/send-text';
+        $cabecalhos = ['Content-Type: application/json'];
+        if (!empty($z['clientToken'])) { $cabecalhos[] = 'Client-Token: ' . $z['clientToken']; }
+        $payload  = json_encode(['phone' => $destino, 'message' => $mensagem], JSON_UNESCAPED_UNICODE);
+        break;
+
+    case 'evolution':
+        $e = (array) ($config['evolution'] ?? []);
+        if (empty($e['url']) || empty($e['instancia']) || empty($e['apikey'])) {
+            http_response_code(503); echo json_encode(['error' => 'Credenciais da Evolution incompletas.']); exit;
+        }
+        $url        = rtrim((string) $e['url'], '/') . '/message/sendText/' . rawurlencode($e['instancia']);
+        $cabecalhos = ['Content-Type: application/json', 'apikey: ' . $e['apikey']];
+        $payload    = json_encode(['number' => $destino, 'text' => $mensagem], JSON_UNESCAPED_UNICODE);
+        break;
+
+    default:
+        http_response_code(503);
+        echo json_encode(['error' => 'Provedor de WhatsApp desconhecido.']);
+        exit;
+}
+
+$ch = curl_init($url);
 curl_setopt_array($ch, [
     CURLOPT_POST           => true,
-    CURLOPT_HTTPHEADER     => [
-        'Content-Type: application/json',
-        'Authorization: Bearer ' . $config['apiKey'],
-    ],
+    CURLOPT_HTTPHEADER     => $cabecalhos,
     CURLOPT_POSTFIELDS     => $payload,
     CURLOPT_RETURNTRANSFER => true,
     CURLOPT_TIMEOUT        => 20,
@@ -154,10 +183,11 @@ $code = (int) curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
 curl_close($ch);
 
 if ($resp === false || $code >= 400) {
-    // O aviso é um reforço: o visitante segue pelo wa.me de qualquer forma.
-    // Expõe apenas o status (sem corpo) para diagnóstico.
     http_response_code(502);
-    echo json_encode(['error' => 'Não foi possível enviar o aviso.', 'detalhe' => $resp === false ? 'sem resposta' : 'API HTTP ' . $code]);
+    echo json_encode([
+        'error'   => 'Não foi possível enviar o aviso.',
+        'detalhe' => $resp === false ? 'sem resposta do serviço' : 'API HTTP ' . $code,
+    ]);
     exit;
 }
 

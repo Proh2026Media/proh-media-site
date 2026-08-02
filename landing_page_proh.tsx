@@ -1495,28 +1495,21 @@ function validarCelularBR(texto) {
   return d.length === 11 && Number(d.slice(0, 2)) >= 11 && d[2] === '9';
 }
 
-// O formulário monta a mensagem e abre o WhatsApp da PROH com o texto pronto
-// para o visitante confirmar o envio (wa.me — sem backend).
+// O formulário tenta entregar o lead pela API (proxy no servidor). Se a API
+// não estiver configurada ou falhar, cai no wa.me — assim o visitante nunca
+// fica sem caminho e a troca de provedor não quebra o site.
 function ContactForm() {
   const [form, setForm] = useState({
     nome: '', empresa: '', email: '', whatsapp: '', tipo: '', desafio: '', momento: '',
   });
   const [sent, setSent] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [viaWhatsApp, setViaWhatsApp] = useState(false);
   const [formError, setFormError] = useState(null);
 
   const update = (field) => (e) => setForm((f) => ({ ...f, [field]: e.target.value }));
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (!form.tipo || !form.momento) {
-      setFormError('Selecione o tipo e o momento do projeto.');
-      return;
-    }
-    if (form.whatsapp.trim() !== '' && !validarCelularBR(form.whatsapp)) {
-      setFormError('Confira o WhatsApp: DDD + 9 dígitos (ex.: 19 99999-9999).');
-      return;
-    }
-    setFormError(null);
+  const abrirWhatsApp = () => {
     const body = [
       `Olá, PROH! Quero propagar valor. 🚀`,
       '',
@@ -1531,6 +1524,41 @@ function ContactForm() {
       form.desafio,
     ].join('\n');
     window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(body)}`, '_blank', 'noopener');
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (sending || sent) return;
+    if (!form.tipo || !form.momento) {
+      setFormError('Selecione o tipo e o momento do projeto.');
+      return;
+    }
+    if (form.whatsapp.trim() !== '' && !validarCelularBR(form.whatsapp)) {
+      setFormError('Confira o WhatsApp: DDD + 9 dígitos (ex.: 19 99999-9999).');
+      return;
+    }
+    setFormError(null);
+    setSending(true);
+    let entregue = false;
+    try {
+      const resp = await fetch('/api/whatsapp.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
+      });
+      const data = await resp.json().catch(() => null);
+      entregue = resp.ok && !!(data && data.ok);
+      // Erro de preenchimento (400) merece correção, não o desvio para o wa.me.
+      if (!entregue && resp.status === 400 && data && data.error) {
+        setFormError(data.error);
+        setSending(false);
+        return;
+      }
+    } catch { /* rede fora: segue para o wa.me */ }
+
+    if (!entregue) { abrirWhatsApp(); }
+    setViaWhatsApp(!entregue);
+    setSending(false);
     setSent(true);
   };
 
@@ -1588,13 +1616,17 @@ function ContactForm() {
         />
       </div>
 
-      <button type="submit" className="w-full bg-[#0F0F15] text-[#D8D4BD] px-8 py-5 text-sm font-bold uppercase tracking-widest hover:bg-black transition-all rounded-full font-extended shadow-lg flex items-center justify-center gap-2 group">
-        <MessageCircle className="w-4 h-4" />
-        Enviar pelo WhatsApp
-        <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+      <button
+        type="submit"
+        disabled={sending || sent}
+        className="w-full bg-[#0F0F15] text-[#D8D4BD] px-8 py-5 text-sm font-bold uppercase tracking-widest hover:bg-black transition-all rounded-full font-extended shadow-lg flex items-center justify-center gap-2 group disabled:opacity-60 disabled:cursor-not-allowed"
+      >
+        {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <MessageCircle className="w-4 h-4" />}
+        {sent ? 'Mensagem enviada' : sending ? 'Enviando...' : 'Enviar mensagem'}
+        {!sending && !sent && <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />}
       </button>
       <p className="mt-3 text-xs font-medium text-[#0F0F15]/50 text-center">
-        Ao enviar, o WhatsApp abre com sua mensagem pronta — é só confirmar.
+        Sua mensagem chega direto no WhatsApp da <span className="font-mirano">PROH</span>.
       </p>
 
       {formError && (
@@ -1603,8 +1635,9 @@ function ContactForm() {
 
       {sent && (
         <p className="mt-4 text-sm font-medium text-[#0F0F15]/80 text-center">
-          Abrimos o WhatsApp com sua mensagem pronta — é só apertar enviar.
-          Em breve, entraremos em contato para entender como podemos propagar esse valor.
+          {viaWhatsApp
+            ? 'Abrimos o WhatsApp com sua mensagem pronta — é só apertar enviar. Em breve, entraremos em contato para entender como podemos propagar esse valor.'
+            : 'Recebemos seu projeto! Em breve entraremos em contato para entender como podemos propagar esse valor.'}
         </p>
       )}
     </form>
