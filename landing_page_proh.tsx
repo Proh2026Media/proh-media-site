@@ -1495,21 +1495,19 @@ function validarCelularBR(texto) {
   return d.length === 11 && Number(d.slice(0, 2)) >= 11 && d[2] === '9';
 }
 
-// O formulário envia o lead direto pela API (proxy do Zernio): a mensagem
-// chega no WhatsApp da PROH sem o visitante precisar abrir o dele.
+// O formulário monta a mensagem e abre o WhatsApp da PROH com o texto pronto
+// para o visitante confirmar o envio (wa.me — sem backend).
 function ContactForm() {
   const [form, setForm] = useState({
     nome: '', empresa: '', email: '', whatsapp: '', tipo: '', desafio: '', momento: '',
   });
   const [sent, setSent] = useState(false);
-  const [sending, setSending] = useState(false);
   const [formError, setFormError] = useState(null);
 
   const update = (field) => (e) => setForm((f) => ({ ...f, [field]: e.target.value }));
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-    if (sending || sent) return;
     if (!form.tipo || !form.momento) {
       setFormError('Selecione o tipo e o momento do projeto.');
       return;
@@ -1519,24 +1517,21 @@ function ContactForm() {
       return;
     }
     setFormError(null);
-    setSending(true);
-    try {
-      const resp = await fetch('/api/whatsapp.php', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
-      });
-      const data = await resp.json().catch(() => null);
-      if (resp.ok && data && data.ok) {
-        setSent(true);
-      } else {
-        setFormError((data && data.error) || 'Não foi possível enviar agora. Tente novamente em instantes.');
-      }
-    } catch {
-      setFormError('Falha de conexão ao enviar. Confira sua internet e tente de novo.');
-    } finally {
-      setSending(false);
-    }
+    const body = [
+      `Olá, PROH! Quero propagar valor. 🚀`,
+      '',
+      `*Nome:* ${form.nome}`,
+      `*Empresa ou projeto:* ${form.empresa || '—'}`,
+      `*E-mail:* ${form.email}`,
+      `*WhatsApp:* ${form.whatsapp || '—'}`,
+      `*Tipo de projeto:* ${form.tipo}`,
+      `*Momento:* ${form.momento}`,
+      '',
+      `*Principal desafio:*`,
+      form.desafio,
+    ].join('\n');
+    window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(body)}`, '_blank', 'noopener');
+    setSent(true);
   };
 
   const inputClass = "w-full px-6 py-4 rounded-full bg-white/80 border border-[#0F0F15]/10 focus:outline-none focus:border-[#0F0F15]/40 text-[#0F0F15] placeholder:text-[#0F0F15]/40 font-medium";
@@ -1593,17 +1588,13 @@ function ContactForm() {
         />
       </div>
 
-      <button
-        type="submit"
-        disabled={sending || sent}
-        className="w-full bg-[#0F0F15] text-[#D8D4BD] px-8 py-5 text-sm font-bold uppercase tracking-widest hover:bg-black transition-all rounded-full font-extended shadow-lg flex items-center justify-center gap-2 group disabled:opacity-60 disabled:cursor-not-allowed"
-      >
-        {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <MessageCircle className="w-4 h-4" />}
-        {sent ? 'Mensagem enviada' : sending ? 'Enviando...' : 'Enviar mensagem'}
-        {!sending && !sent && <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />}
+      <button type="submit" className="w-full bg-[#0F0F15] text-[#D8D4BD] px-8 py-5 text-sm font-bold uppercase tracking-widest hover:bg-black transition-all rounded-full font-extended shadow-lg flex items-center justify-center gap-2 group">
+        <MessageCircle className="w-4 h-4" />
+        Enviar pelo WhatsApp
+        <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
       </button>
       <p className="mt-3 text-xs font-medium text-[#0F0F15]/50 text-center">
-        Sua mensagem chega direto no WhatsApp da <span className="font-mirano">PROH</span>.
+        Ao enviar, o WhatsApp abre com sua mensagem pronta — é só confirmar.
       </p>
 
       {formError && (
@@ -1612,8 +1603,8 @@ function ContactForm() {
 
       {sent && (
         <p className="mt-4 text-sm font-medium text-[#0F0F15]/80 text-center">
-          Recebemos seu projeto! Em breve entraremos em contato para entender
-          como podemos propagar esse valor.
+          Abrimos o WhatsApp com sua mensagem pronta — é só apertar enviar.
+          Em breve, entraremos em contato para entender como podemos propagar esse valor.
         </p>
       )}
     </form>
