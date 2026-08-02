@@ -10,3 +10,7 @@ gemini_key.txt
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# Configuração real da Evolution (vive só na VPS)
+infra/evolution/.env
+whatsapp_config.json

@@ -1,0 +1,23 @@
+# Porta de entrada da VPS. O Caddy pega e renova o certificado HTTPS
+# sozinho (Let's Encrypt) — basta o subdomínio já apontar para o IP.
+#
+# Troque o endereço abaixo se usar outro subdomínio.
+
+api.proh.media {
+	encode gzip
+
+	# O painel do Evolution (/manager) fica aberto na internet por padrão.
+	# Aqui ele só responde para a rede local do Docker; para acessar,
+	# use o túnel SSH descrito no README.
+	@manager path /manager*
+	respond @manager "Indisponível" 404
+
+	reverse_proxy evolution:8080
+
+	log {
+		output file /data/access.log {
+			roll_size 10mb
+			roll_keep 3
+		}
+	}
+}
