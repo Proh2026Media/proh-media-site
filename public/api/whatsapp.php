@@ -7,23 +7,13 @@
 // abandone antes de enviar a mensagem.
 //
 // A CHAVE NÃO fica neste arquivo nem no repositório.
-// COMO CONFIGURAR (uma única vez, pelo Gerenciador de Arquivos da Hostinger):
-//   1. Navegue até a pasta do domínio (ex.: /domains/proh.media/) — o nível
-//      ACIMA da pasta pública (public_html).
-//   2. Crie um arquivo chamado  zernio_config.json  com este conteúdo:
-//        {
-//          "apiKey":           "SUA_CHAVE_DA_API_DO_ZERNIO",
-//          "accountId":        "ID_DA_CONTA_WHATSAPP_CONECTADA",
-//          "templateName":     "novo_lead",
-//          "templateLanguage": "pt_BR",
-//          "destinationPhone": "5519995951316"
-//        }
-//   3. No painel do Zernio, crie o template "novo_lead" (categoria utility)
-//      com 7 variáveis no corpo, nesta ordem:
-//        Novo lead no site {{1}} — {{2}} | E-mail: {{3}} | WhatsApp: {{4}}
-//        Tipo: {{5}} | Momento: {{6}} | Desafio: {{7}}
-//      (o texto pode ser outro; o que importa é a ordem das variáveis:
-//       nome, empresa, e-mail, whatsapp, tipo, momento, desafio)
+// COMO CONFIGURAR (uma única vez):
+//   1. Pelo Gerenciador de Arquivos da Hostinger, na pasta do domínio (o
+//      nível ACIMA de public_html), crie  zernio_config.json  contendo:
+//        { "apiKey": "SUA_CHAVE_DA_API_DO_ZERNIO" }
+//   2. Abra  https://proh.media/api/whatsapp-setup.php?chave=XXXXXX  (os
+//      últimos 6 caracteres da chave). O configurador descobre a conta,
+//      completa este arquivo e cria o template "novo_lead" sozinho.
 //
 // Por que template: o WhatsApp não permite mensagem livre para iniciar uma
 // conversa — fora da janela de 24h só entram templates aprovados. Enviar por
