@@ -138,7 +138,10 @@ if ($email !== '' && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
 
 // Validação do celular informado (formato brasileiro): 55 + DDD + 9 + 8 dígitos.
 // A existência real do número só se confirma numa entrega de verdade.
+// Além do número legível, monta o link wa.me: o WhatsApp o transforma em
+// link clicável sozinho, e um toque já abre a conversa com o lead.
 $foneExibicao = '—';
+$foneLink     = '';
 if ($fone !== '') {
     $d = preg_replace('/\D+/', '', $fone);
     if (strpos($d, '55') === 0 && strlen($d) >= 12) { $d = substr($d, 2); }
@@ -148,6 +151,7 @@ if ($fone !== '') {
         exit;
     }
     $foneExibicao = '+55 ' . substr($d, 0, 2) . ' ' . substr($d, 2, 5) . '-' . substr($d, 7);
+    $foneLink     = 'https://wa.me/55' . $d;
 }
 
 $mensagem = "*Novo lead no site PROH* 🚀\n\n"
@@ -155,6 +159,7 @@ $mensagem = "*Novo lead no site PROH* 🚀\n\n"
     . '*Empresa ou projeto:* ' . ($empresa !== '' ? $empresa : '—') . "\n"
     . '*E-mail:* ' . ($email !== '' ? $email : '—') . "\n"
     . "*WhatsApp:* {$foneExibicao}\n"
+    . ($foneLink !== '' ? "💬 Falar agora: {$foneLink}\n" : '')
     . '*Tipo de projeto:* ' . ($tipo !== '' ? $tipo : '—') . "\n"
     . '*Momento:* ' . ($momento !== '' ? $momento : '—') . "\n\n"
     . "*Principal desafio:*\n{$desafio}";
