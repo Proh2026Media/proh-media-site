@@ -36,31 +36,43 @@
 //   por e-mail — rede de segurança se o WhatsApp falhar e arquivo
 //   pesquisável de tudo que já entrou.
 //
-//   Como o e-mail do domínio é gerenciado pela HostGator, o envio precisa
-//   sair pelo SMTP DELA. Mandar pelo servidor da Hostinger faria a mensagem
-//   cair em spam (o SPF do domínio não autoriza esse servidor).
+//   O envio NÃO pode sair do servidor do site: o SPF do domínio não
+//   autoriza a Hostinger, e a mensagem cairia em spam. E o e-mail do
+//   domínio é Titan (revendido pela HostGator), cujo plano não libera
+//   cliente externo — o webmail entra, mas o SMTP responde
+//   "535 authentication failed" mesmo com a senha certa.
+//
+//   Por isso o envio sai pelo RESEND (HTTPS, sem SMTP). O Titan continua
+//   recebendo normalmente; muda só quem despacha o aviso.
 //
 //     "email": {
-//       "para": "contato@proh.media",
-//       "de":   "site@proh.media",
+//       "para":   "contato@proh.media",
+//       "de":     "site@send.proh.media",
+//       "resend": { "chave": "re_SUA_CHAVE" }
+//     }
+//
+//   Passos, uma vez só:
+//     1. Conta em https://resend.com (faixa grátis: 3.000 e-mails/mês).
+//     2. Add domain → use o subdomínio "send.proh.media". O subdomínio
+//        mantém os registros do Titan intactos — o recebimento não muda.
+//     3. Cole na zona DNS do domínio os registros que o Resend mostrar
+//        (SPF e DKIM). Aguarde a verificação ficar verde.
+//     4. API Keys → cria a chave e põe em "chave" acima.
+//     5. O "de" TEM de ser do domínio verificado, senão o Resend recusa.
+//
+//   ALTERNATIVA — SMTP autenticado, caso um dia haja uma caixa que libere
+//   cliente externo. Só é usado quando não existe o bloco "resend":
+//
 //       "smtp": {
-//         "host":       "mail.proh.media",
+//         "host":       "smtp.titan.email",
 //         "porta":      465,
 //         "seguranca":  "ssl",
 //         "usuario":    "site@proh.media",
 //         "senha":      "SENHA_DA_CONTA_DE_EMAIL"
 //       }
-//     }
 //
-//   Os dados de host/porta estão no painel da HostGator, em "Contas de
-//   e-mail → Configurar cliente de e-mail". Costuma ser mail.SEUDOMINIO
-//   na porta 465 com SSL (ou 587 com "seguranca": "tls").
-//
-//   Recomendação: crie uma conta dedicada (ex.: site@proh.media) só para
-//   isso. Assim a senha guardada aqui não é a da sua caixa principal.
-//
-//   Sem o bloco "smtp", o envio cai no mail() do PHP — funciona, mas com
-//   entrega muito menos confiável nesse cenário.
+//   Sem "resend" nem "smtp", o envio cai no mail() do PHP — funciona, mas
+//   com entrega muito menos confiável nesse cenário.
 //
 //   Z-API (https://z-api.io):
 //     {
@@ -323,8 +335,47 @@ if ($paraEmail !== '' && filter_var($paraEmail, FILTER_VALIDATE_EMAIL)) {
     // Responder ao e-mail leva direto ao lead.
     if ($email !== '') { $cabecalhosEmail[] = 'Reply-To: ' . $email; }
 
-    $smtp = (array) ($emailCfg['smtp'] ?? []);
-    if (!empty($smtp['host']) && !empty($smtp['usuario'])) {
+    $resend = (array) ($emailCfg['resend'] ?? []);
+    $smtp   = (array) ($emailCfg['smtp'] ?? []);
+
+    if (!empty($resend['chave'])) {
+        // ------------------------------------------------------------------
+        // Envio pelo Resend (HTTPS, sem SMTP). É o caminho em uso: o e-mail
+        // do domínio é Titan de plano revendido, que não libera cliente
+        // externo — o webmail entra, o SMTP responde 535. O Titan segue
+        // RECEBENDO normalmente; aqui só sai o aviso de lead.
+        // ------------------------------------------------------------------
+        $payloadEmail = [
+            'from'    => 'PROH Site <' . $de . '>',
+            'to'      => [$paraEmail],
+            'subject' => $assunto,
+            'text'    => $corpoEmail,
+        ];
+        // Responder ao aviso cai direto na caixa do lead.
+        if ($email !== '') { $payloadEmail['reply_to'] = $email; }
+
+        $ch = curl_init('https://api.resend.com/emails');
+        curl_setopt_array($ch, [
+            CURLOPT_POST           => true,
+            CURLOPT_HTTPHEADER     => [
+                'Content-Type: application/json',
+                'Authorization: Bearer ' . $resend['chave'],
+            ],
+            CURLOPT_POSTFIELDS     => json_encode($payloadEmail, JSON_UNESCAPED_UNICODE),
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_TIMEOUT        => 20,
+        ]);
+        $respEmail = curl_exec($ch);
+        $codeEmail = (int) curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
+        curl_close($ch);
+
+        $emailOk = $codeEmail >= 200 && $codeEmail < 300;
+        // A resposta crua do Resend diz o motivo: domínio não verificado,
+        // remetente fora do domínio, chave inválida.
+        $emailDetalhe = $emailOk ? 'enviado pelo Resend'
+            : 'Resend recusou (HTTP ' . $codeEmail . '): '
+              . ($respEmail === false ? 'sem resposta' : mb_substr((string) $respEmail, 0, 200));
+    } elseif (!empty($smtp['host']) && !empty($smtp['usuario'])) {
         // ------------------------------------------------------------------
         // Envio autenticado pelo SMTP do provedor de e-mail (HostGator).
         // Necessário porque o servidor do site (Hostinger) não é autorizado
