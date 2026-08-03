@@ -1626,7 +1626,7 @@ function ContactForm() {
         {!sending && !sent && <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />}
       </button>
       <p className="mt-3 text-xs font-medium text-[#0F0F15]/50 text-center">
-        Sua mensagem chega direto no WhatsApp da <span className="font-mirano">PROH</span>.
+        Respondemos em até um dia útil.
       </p>
 
       {formError && (

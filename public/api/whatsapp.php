@@ -32,6 +32,13 @@
 //   fim deste arquivo.
 //     "destino": ["5519995951316", "120363012345678901@g.us"]
 //
+//   CÓPIA POR E-MAIL (opcional, mas recomendada): todo lead também chega
+//   por e-mail — rede de segurança se o WhatsApp falhar e arquivo
+//   pesquisável de tudo que já entrou. Basta acrescentar:
+//     "email": { "para": "contato@proh.media", "de": "site@proh.media" }
+//   O "de" precisa ser um endereço DO SEU domínio, senão a mensagem cai
+//   em spam. Responder ao e-mail responde direto ao lead (Reply-To).
+//
 //   Z-API (https://z-api.io):
 //     {
 //       "provedor": "zapi",
@@ -253,7 +260,50 @@ foreach ($destinos as $d) {
     $relatorio[] = ['destino' => $d, 'ok' => $ok, 'codigo' => $codigo, 'detalhe' => $detalhe];
 }
 
-if ($entregues === 0) {
+// ---------------------------------------------------------------------------
+// Cópia por e-mail. Vai SEMPRE, não só quando o WhatsApp falha: além de rede
+// de segurança, vira o arquivo pesquisável de todos os leads. O lead conta
+// como entregue se QUALQUER um dos dois canais funcionar.
+// ---------------------------------------------------------------------------
+$emailOk  = false;
+$emailCfg = (array) ($config['email'] ?? []);
+$paraEmail = trim((string) ($emailCfg['para'] ?? ''));
+if ($paraEmail !== '' && filter_var($paraEmail, FILTER_VALIDATE_EMAIL)) {
+    // Remetente no próprio domínio: e-mail enviado em nome de outro domínio
+    // costuma cair em spam (falha de SPF).
+    $de = trim((string) ($emailCfg['de'] ?? 'site@proh.media'));
+    if (!filter_var($de, FILTER_VALIDATE_EMAIL)) { $de = 'site@proh.media'; }
+
+    $assunto = 'Novo lead: ' . $nome . ($empresa !== '' ? ' (' . $empresa . ')' : '');
+    // Assunto com acento precisa vir codificado, senão chega ilegível.
+    $assuntoCodificado = '=?UTF-8?B?' . base64_encode($assunto) . '?=';
+
+    $corpoEmail = "Novo lead pelo site\n"
+        . str_repeat('-', 40) . "\n\n"
+        . "Nome: {$nome}\n"
+        . 'Empresa ou projeto: ' . ($empresa !== '' ? $empresa : '—') . "\n"
+        . 'E-mail: ' . ($email !== '' ? $email : '—') . "\n"
+        . "WhatsApp: {$foneExibicao}\n"
+        . ($foneLink !== '' ? "Falar agora: {$foneLink}\n" : '')
+        . 'Tipo de projeto: ' . ($tipo !== '' ? $tipo : '—') . "\n"
+        . 'Momento: ' . ($momento !== '' ? $momento : '—') . "\n\n"
+        . "Principal desafio:\n{$desafio}\n\n"
+        . str_repeat('-', 40) . "\n"
+        . 'Recebido em ' . date('d/m/Y \à\s H:i') . "\n";
+
+    $cabecalhosEmail = [
+        'From: PROH Site <' . $de . '>',
+        'Content-Type: text/plain; charset=UTF-8',
+        'X-Mailer: PHP/' . phpversion(),
+    ];
+    // Responder ao e-mail leva direto ao lead.
+    if ($email !== '') { $cabecalhosEmail[] = 'Reply-To: ' . $email; }
+
+    $emailOk = @mail($paraEmail, $assuntoCodificado, $corpoEmail, implode("\r\n", $cabecalhosEmail), '-f' . $de);
+}
+$relatorio[] = ['destino' => $paraEmail !== '' ? 'e-mail: ' . $paraEmail : 'e-mail não configurado', 'ok' => $emailOk];
+
+if ($entregues === 0 && !$emailOk) {
     http_response_code(502);
     echo json_encode([
         'error'   => 'Não foi possível enviar o aviso.',
@@ -267,7 +317,12 @@ if ($entregues === 0) {
 $chaveConfig = (string) ($config['wame']['key'] ?? $config['zapi']['token'] ?? $config['evolution']['apikey'] ?? '');
 if (($input['diagnostico'] ?? '') !== '' && $chaveConfig !== ''
     && hash_equals(substr($chaveConfig, -6), (string) $input['diagnostico'])) {
-    echo json_encode(['ok' => true, 'entregues' => $entregues, 'destinos' => $relatorio], JSON_UNESCAPED_UNICODE);
+    echo json_encode([
+        'ok'         => true,
+        'entregues'  => $entregues,
+        'emailEnviado' => $emailOk,
+        'destinos'   => $relatorio,
+    ], JSON_UNESCAPED_UNICODE);
     exit;
 }
 
