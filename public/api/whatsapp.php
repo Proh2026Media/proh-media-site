@@ -140,17 +140,26 @@ $chaveConfig = (string) ($config['wame']['key'] ?? $config['zapi']['token'] ?? $
 $modoDiagnostico = ($input['diagnostico'] ?? '') !== '' && $chaveConfig !== ''
     && hash_equals(substr($chaveConfig, -6), (string) $input['diagnostico']);
 
-// Limite: 5 envios por minuto por visitante (protege contra uso como canal de
-// spam, que é justamente o que faz um número conectado ser banido).
+// Identificação do visitante, para o limite de taxa.
 //
-// A chave é o IP do VISITANTE. Atrás de proxy/CDN o REMOTE_ADDR é o mesmo
-// para todo mundo, e aí um balde só serviria o site inteiro — qualquer bot
-// batendo no endpoint deixaria o formulário fora do ar para os demais.
-if (!$modoDiagnostico) {
-    $encaminhado = trim(explode(',', (string) ($_SERVER['HTTP_X_FORWARDED_FOR'] ?? ''))[0]);
-    $ipCliente = filter_var($encaminhado, FILTER_VALIDATE_IP) ? $encaminhado : ($_SERVER['REMOTE_ADDR'] ?? '');
-    $ipHash = hash('sha256', $ipCliente . '|proh-whats');
-    $rlFile = sys_get_temp_dir() . '/proh_rl_' . $ipHash;
+// Vale o ÚLTIMO item válido do X-Forwarded-For: é o que o proxy mais próximo
+// acrescentou. Os primeiros vêm do cliente e podem ser forjados — pegando o
+// primeiro, qualquer um inventa um IP e pula o limite.
+$ipCliente = '';
+foreach (array_reverse(array_map('trim', explode(',', (string) ($_SERVER['HTTP_X_FORWARDED_FOR'] ?? '')))) as $p) {
+    if (filter_var($p, FILTER_VALIDATE_IP)) { $ipCliente = $p; break; }
+}
+if ($ipCliente === '') { $ipCliente = (string) ($_SERVER['REMOTE_ADDR'] ?? ''); }
+
+// Limite: 5 por minuto por visitante. Protege o número conectado de virar
+// canal de spam, que é o que leva ao banimento.
+//
+// Só conta o que chega a ENVIAR. Contar requisição malformada deixava o
+// endpoint refém: bastava um robô despejando corpo inválido para encher o
+// balde e derrubar o formulário para todo mundo, sem disparar um aviso
+// sequer. Por isso esta função só é chamada depois da validação.
+$aplicarLimite = function () use ($ipCliente) {
+    $rlFile = sys_get_temp_dir() . '/proh_rl_' . hash('sha256', $ipCliente . '|proh-whats');
     $now    = time();
     $hits   = [];
     if (is_readable($rlFile)) {
@@ -169,7 +178,7 @@ if (!$modoDiagnostico) {
     }
     $hits[] = $now;
     @file_put_contents($rlFile, implode("\n", $hits), LOCK_EX);
-}
+};
 
 // Saneamento. Quebras de linha viram espaço para não permitir injeção de
 // estrutura na mensagem final.
@@ -214,6 +223,10 @@ if ($fone !== '') {
     $foneExibicao = '+55 ' . substr($d, 0, 2) . ' ' . substr($d, 2, 5) . '-' . substr($d, 7);
     $foneLink     = 'https://wa.me/55' . $d;
 }
+
+// Corpo válido: daqui pra frente vai virar envio de verdade, então agora sim
+// conta no limite. O diagnóstico, que traz a chave, segue isento.
+if (!$modoDiagnostico) { $aplicarLimite(); }
 
 $mensagem = "*Novo lead no site PROH* 🚀\n\n"
     . "*Nome:* {$nome}\n"
@@ -506,6 +519,14 @@ if ($modoDiagnostico) {
         'entregues'  => $entregues,
         'emailEnviado' => $emailOk,
         'destinos'   => $relatorio,
+        // Como o visitante foi identificado para o limite de taxa. Se
+        // "visitante" for igual para pessoas diferentes, o balde é comum e o
+        // limite derruba o formulário do site inteiro.
+        'limite'     => [
+            'visitante'  => $ipCliente,
+            'remoteAddr' => $_SERVER['REMOTE_ADDR'] ?? '',
+            'encaminhado'=> $_SERVER['HTTP_X_FORWARDED_FOR'] ?? '(ausente)',
+        ],
     ], JSON_UNESCAPED_UNICODE);
     exit;
 }
