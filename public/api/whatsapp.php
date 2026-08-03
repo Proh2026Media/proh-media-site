@@ -11,6 +11,18 @@
 //
 //   Crie/edite  whatsapp_config.json  conforme o serviço contratado.
 //
+//   WAME API (https://api-wa.me):
+//     {
+//       "provedor": "wame",
+//       "destino":  "5519995951316",
+//       "wame": {
+//         "key": "SUA_CHAVE_DE_INSTANCIA"
+//       }
+//     }
+//     (a chave aparece no painel da WAME; ela vai na própria URL, que é
+//      como a API autentica. Opcionalmente aceita "url" para trocar o
+//      servidor — o padrão é https://us.api-wa.me)
+//
 //   Z-API (https://z-api.io):
 //     {
 //       "provedor": "zapi",
@@ -142,6 +154,20 @@ $destino = preg_replace('/\D+/', '', (string) $config['destino']);
 
 // Monta a requisição conforme o provedor.
 switch ((string) $config['provedor']) {
+    case 'wame':
+        $w = (array) ($config['wame'] ?? []);
+        if (empty($w['key'])) {
+            http_response_code(503); echo json_encode(['error' => 'Chave da WAME não configurada.']); exit;
+        }
+        // A chave da instância vai na URL — é assim que a WAME autentica.
+        $base       = rtrim((string) ($w['url'] ?? 'https://us.api-wa.me'), '/');
+        $url        = $base . '/' . rawurlencode((string) $w['key']) . '/message/text';
+        $cabecalhos = ['Content-Type: application/json'];
+        // Alguns painéis também emitem um token de header; se existir, envia.
+        if (!empty($w['token'])) { $cabecalhos[] = 'Authorization: Bearer ' . $w['token']; }
+        $payload    = json_encode(['to' => $destino, 'text' => $mensagem], JSON_UNESCAPED_UNICODE);
+        break;
+
     case 'zapi':
         $z = (array) ($config['zapi'] ?? []);
         if (empty($z['instancia']) || empty($z['token'])) {
