@@ -355,28 +355,43 @@ if ($paraEmail !== '' && filter_var($paraEmail, FILTER_VALIDATE_EMAIL)) {
                 return $ler();
             };
             $codigo = fn ($r) => substr(trim((string) $r), 0, 3);
+            // A resposta crua é o que diferencia senha errada de "exige senha
+            // de aplicativo" — sem ela o diagnóstico não distingue os dois.
+            $crua = fn ($r) => preg_replace('/\s+/', ' ', trim((string) $r));
 
-            if ($codigo($ler()) !== '220') { fclose($sock); return [false, 'servidor não respondeu à conexão']; }
+            $boasVindas = $ler();
+            if ($codigo($boasVindas) !== '220') { fclose($sock); return [false, 'servidor não respondeu à conexão: ' . $crua($boasVindas)]; }
 
             // Identificação no EHLO: o domínio do próprio remetente.
             $eu = substr(strrchr($de, '@') ?: '@localhost', 1);
-            $conversar('EHLO ' . $eu);
+            $capacidades = $conversar('EHLO ' . $eu);
 
             if ($seguranca === 'tls') {
-                if ($codigo($conversar('STARTTLS')) !== '220') { fclose($sock); return [false, 'STARTTLS recusado']; }
+                $r = $conversar('STARTTLS');
+                if ($codigo($r) !== '220') { fclose($sock); return [false, 'STARTTLS recusado: ' . $crua($r)]; }
                 if (!@stream_socket_enable_crypto($sock, true, STREAM_CRYPTO_METHOD_TLS_CLIENT)) {
                     fclose($sock); return [false, 'não foi possível ativar TLS'];
                 }
-                $conversar('EHLO ' . $eu);
+                $capacidades = $conversar('EHLO ' . $eu);
             }
 
-            if ($codigo($conversar('AUTH LOGIN')) !== '334') { fclose($sock); return [false, 'servidor recusou AUTH LOGIN']; }
-            if ($codigo($conversar(base64_encode((string) $smtp['usuario']))) !== '334') { fclose($sock); return [false, 'usuário recusado']; }
-            if ($codigo($conversar(base64_encode((string) ($smtp['senha'] ?? '')))) !== '235') { fclose($sock); return [false, 'autenticação recusada — confira usuário e senha']; }
+            // Quais mecanismos de AUTH o servidor anuncia — se LOGIN não estiver
+            // na lista, o problema é de mecanismo, não de senha.
+            $mecanismos = preg_match('/250[- ]AUTH ([^\r\n]+)/i', (string) $capacidades, $m) ? trim($m[1]) : 'não anunciado';
 
-            if ($codigo($conversar('MAIL FROM:<' . $de . '>')) !== '250')      { fclose($sock); return [false, 'remetente recusado']; }
-            if ($codigo($conversar('RCPT TO:<' . $paraEmail . '>')) !== '250') { fclose($sock); return [false, 'destinatário recusado']; }
-            if ($codigo($conversar('DATA')) !== '354')                          { fclose($sock); return [false, 'servidor recusou o corpo']; }
+            $r = $conversar('AUTH LOGIN');
+            if ($codigo($r) !== '334') { fclose($sock); return [false, 'servidor recusou AUTH LOGIN (anuncia: ' . $mecanismos . '): ' . $crua($r)]; }
+            $r = $conversar(base64_encode((string) $smtp['usuario']));
+            if ($codigo($r) !== '334') { fclose($sock); return [false, 'usuário recusado: ' . $crua($r)]; }
+            $r = $conversar(base64_encode((string) ($smtp['senha'] ?? '')));
+            if ($codigo($r) !== '235') { fclose($sock); return [false, 'autenticação recusada (anuncia: ' . $mecanismos . '): ' . $crua($r)]; }
+
+            $r = $conversar('MAIL FROM:<' . $de . '>');
+            if ($codigo($r) !== '250') { fclose($sock); return [false, 'remetente recusado: ' . $crua($r)]; }
+            $r = $conversar('RCPT TO:<' . $paraEmail . '>');
+            if ($codigo($r) !== '250') { fclose($sock); return [false, 'destinatário recusado: ' . $crua($r)]; }
+            $r = $conversar('DATA');
+            if ($codigo($r) !== '354') { fclose($sock); return [false, 'servidor recusou o corpo: ' . $crua($r)]; }
 
             // Linha iniciada por ponto precisa ser escapada, senão encerra o envio.
             $corpoSeguro = preg_replace('/^\./m', '..', str_replace("\n", "\r\n", $corpoEmail));
