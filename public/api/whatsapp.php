@@ -217,4 +217,33 @@ if ($resp === false || $code >= 400) {
     exit;
 }
 
+// HTTP 200 não garante entrega: estes serviços costumam devolver o erro no
+// corpo (instância desconectada, número inexistente...). Sem checar isso, uma
+// falha silenciosa passa por sucesso — foi o que aconteceu no primeiro teste.
+$retorno = json_decode((string) $resp, true);
+$falhou  = false;
+if (is_array($retorno)) {
+    $temErro = isset($retorno['error']) && $retorno['error'] !== false && $retorno['error'] !== '';
+    $negou   = (isset($retorno['success']) && $retorno['success'] === false)
+            || (isset($retorno['status'])  && in_array(strtolower((string) $retorno['status']), ['error', 'failed', 'fail'], true));
+    $falhou  = $temErro || $negou;
+}
+if ($falhou) {
+    http_response_code(502);
+    echo json_encode([
+        'error'   => 'O serviço de WhatsApp recusou o envio.',
+        'detalhe' => mb_substr((string) $resp, 0, 300),
+    ], JSON_UNESCAPED_UNICODE);
+    exit;
+}
+
+// Modo diagnóstico: só para quem já conhece a chave (últimos 6 caracteres).
+// Devolve o retorno cru do provedor, útil para conferir o id da mensagem.
+$chaveConfig = (string) ($config['wame']['key'] ?? $config['zapi']['token'] ?? $config['evolution']['apikey'] ?? '');
+if (($input['diagnostico'] ?? '') !== '' && $chaveConfig !== ''
+    && hash_equals(substr($chaveConfig, -6), (string) $input['diagnostico'])) {
+    echo json_encode(['ok' => true, 'retornoDoProvedor' => $retorno ?? (string) $resp], JSON_UNESCAPED_UNICODE);
+    exit;
+}
+
 echo json_encode(['ok' => true]);
