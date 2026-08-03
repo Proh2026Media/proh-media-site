@@ -117,26 +117,6 @@ $method = $_SERVER['REQUEST_METHOD'] ?? '';
 if ($method === 'OPTIONS') { http_response_code(204); exit; }
 if ($method !== 'POST')    { http_response_code(405); echo json_encode(['error' => 'Método não permitido.']); exit; }
 
-// Limite: 5 envios por minuto por IP (protege contra uso como canal de spam,
-// que é justamente o que faz um número conectado ser banido).
-$ipHash = hash('sha256', ($_SERVER['REMOTE_ADDR'] ?? '') . '|proh-whats');
-$rlFile = sys_get_temp_dir() . '/proh_rl_' . $ipHash;
-$now    = time();
-$hits   = [];
-if (is_readable($rlFile)) {
-    foreach (file($rlFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) as $t) {
-        if ($now - (int) $t < 60) { $hits[] = (int) $t; }
-    }
-}
-if (count($hits) >= 5) {
-    http_response_code(429);
-    header('Retry-After: 60');
-    echo json_encode(['error' => 'Muitas solicitações. Aguarde um instante.']);
-    exit;
-}
-$hits[] = $now;
-@file_put_contents($rlFile, implode("\n", $hits), LOCK_EX);
-
 // Configuração fora da pasta pública.
 $config = null;
 foreach ([dirname(__DIR__, 2) . '/whatsapp_config.json', dirname(__DIR__, 3) . '/whatsapp_config.json'] as $cand) {
@@ -152,6 +132,44 @@ $corpo = (string) file_get_contents('php://input', false, null, 0, 8192);
 if (strlen($corpo) >= 8192) { http_response_code(413); echo json_encode(['error' => 'Requisição muito grande.']); exit; }
 $input = json_decode($corpo, true);
 if (!is_array($input)) { http_response_code(400); echo json_encode(['error' => 'Corpo inválido.']); exit; }
+
+// Quem conhece os últimos 6 da chave é o dono do site: recebe o relatório
+// destino a destino e não passa pelo limite de taxa — senão um teste fica
+// refém do tráfego alheio, que foi exatamente o que travou o diagnóstico.
+$chaveConfig = (string) ($config['wame']['key'] ?? $config['zapi']['token'] ?? $config['evolution']['apikey'] ?? '');
+$modoDiagnostico = ($input['diagnostico'] ?? '') !== '' && $chaveConfig !== ''
+    && hash_equals(substr($chaveConfig, -6), (string) $input['diagnostico']);
+
+// Limite: 5 envios por minuto por visitante (protege contra uso como canal de
+// spam, que é justamente o que faz um número conectado ser banido).
+//
+// A chave é o IP do VISITANTE. Atrás de proxy/CDN o REMOTE_ADDR é o mesmo
+// para todo mundo, e aí um balde só serviria o site inteiro — qualquer bot
+// batendo no endpoint deixaria o formulário fora do ar para os demais.
+if (!$modoDiagnostico) {
+    $encaminhado = trim(explode(',', (string) ($_SERVER['HTTP_X_FORWARDED_FOR'] ?? ''))[0]);
+    $ipCliente = filter_var($encaminhado, FILTER_VALIDATE_IP) ? $encaminhado : ($_SERVER['REMOTE_ADDR'] ?? '');
+    $ipHash = hash('sha256', $ipCliente . '|proh-whats');
+    $rlFile = sys_get_temp_dir() . '/proh_rl_' . $ipHash;
+    $now    = time();
+    $hits   = [];
+    if (is_readable($rlFile)) {
+        foreach (file($rlFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) as $t) {
+            // Carimbo no futuro (relógio que voltou) nunca envelheceria e
+            // prenderia o visitante em 429 para sempre — descarta.
+            $idade = $now - (int) $t;
+            if ($idade >= 0 && $idade < 60) { $hits[] = (int) $t; }
+        }
+    }
+    if (count($hits) >= 5) {
+        http_response_code(429);
+        header('Retry-After: 60');
+        echo json_encode(['error' => 'Muitas solicitações. Aguarde um instante.']);
+        exit;
+    }
+    $hits[] = $now;
+    @file_put_contents($rlFile, implode("\n", $hits), LOCK_EX);
+}
 
 // Saneamento. Quebras de linha viram espaço para não permitir injeção de
 // estrutura na mensagem final.
@@ -480,11 +498,9 @@ if ($entregues === 0 && !$emailOk) {
     exit;
 }
 
-// Modo diagnóstico: só para quem já conhece a chave (últimos 6 caracteres).
-// Devolve o retorno cru do provedor, destino a destino.
-$chaveConfig = (string) ($config['wame']['key'] ?? $config['zapi']['token'] ?? $config['evolution']['apikey'] ?? '');
-if (($input['diagnostico'] ?? '') !== '' && $chaveConfig !== ''
-    && hash_equals(substr($chaveConfig, -6), (string) $input['diagnostico'])) {
+// Modo diagnóstico (chave conferida lá em cima, antes do limite de taxa):
+// devolve o retorno cru do provedor, destino a destino.
+if ($modoDiagnostico) {
     echo json_encode([
         'ok'         => true,
         'entregues'  => $entregues,
