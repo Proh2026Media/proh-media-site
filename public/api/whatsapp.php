@@ -23,6 +23,15 @@
 //      como a API autentica. Opcionalmente aceita "url" para trocar o
 //      servidor — o padrão é https://us.api-wa.me)
 //
+//   VÁRIOS DESTINOS: o "destino" também aceita uma lista. Cada um recebe
+//   sua própria cópia do aviso; um que falhe não impede os demais.
+//     "destino": ["5519995951316", "5519991234567"]
+//
+//   GRUPO: use o identificador do grupo no lugar do número. Ele termina em
+//   "@g.us" e sai da listagem de grupos da API — veja o passo a passo no
+//   fim deste arquivo.
+//     "destino": ["5519995951316", "120363012345678901@g.us"]
+//
 //   Z-API (https://z-api.io):
 //     {
 //       "provedor": "zapi",
@@ -150,100 +159,127 @@ $mensagem = "*Novo lead no site PROH* 🚀\n\n"
     . '*Momento:* ' . ($momento !== '' ? $momento : '—') . "\n\n"
     . "*Principal desafio:*\n{$desafio}";
 
-$destino = preg_replace('/\D+/', '', (string) $config['destino']);
-
-// Monta a requisição conforme o provedor.
-switch ((string) $config['provedor']) {
-    case 'wame':
-        $w = (array) ($config['wame'] ?? []);
-        if (empty($w['key'])) {
-            http_response_code(503); echo json_encode(['error' => 'Chave da WAME não configurada.']); exit;
-        }
-        // A chave da instância vai na URL — é assim que a WAME autentica.
-        $base       = rtrim((string) ($w['url'] ?? 'https://us.api-wa.me'), '/');
-        $url        = $base . '/' . rawurlencode((string) $w['key']) . '/message/text';
-        $cabecalhos = ['Content-Type: application/json'];
-        // Alguns painéis também emitem um token de header; se existir, envia.
-        if (!empty($w['token'])) { $cabecalhos[] = 'Authorization: Bearer ' . $w['token']; }
-        $payload    = json_encode(['to' => $destino, 'text' => $mensagem], JSON_UNESCAPED_UNICODE);
-        break;
-
-    case 'zapi':
-        $z = (array) ($config['zapi'] ?? []);
-        if (empty($z['instancia']) || empty($z['token'])) {
-            http_response_code(503); echo json_encode(['error' => 'Credenciais da Z-API incompletas.']); exit;
-        }
-        $url      = 'https://api.z-api.io/instances/' . rawurlencode($z['instancia'])
-                  . '/token/' . rawurlencode($z['token']) . '/send-text';
-        $cabecalhos = ['Content-Type: application/json'];
-        if (!empty($z['clientToken'])) { $cabecalhos[] = 'Client-Token: ' . $z['clientToken']; }
-        $payload  = json_encode(['phone' => $destino, 'message' => $mensagem], JSON_UNESCAPED_UNICODE);
-        break;
-
-    case 'evolution':
-        $e = (array) ($config['evolution'] ?? []);
-        if (empty($e['url']) || empty($e['instancia']) || empty($e['apikey'])) {
-            http_response_code(503); echo json_encode(['error' => 'Credenciais da Evolution incompletas.']); exit;
-        }
-        $url        = rtrim((string) $e['url'], '/') . '/message/sendText/' . rawurlencode($e['instancia']);
-        $cabecalhos = ['Content-Type: application/json', 'apikey: ' . $e['apikey']];
-        $payload    = json_encode(['number' => $destino, 'text' => $mensagem], JSON_UNESCAPED_UNICODE);
-        break;
-
-    default:
-        http_response_code(503);
-        echo json_encode(['error' => 'Provedor de WhatsApp desconhecido.']);
-        exit;
-}
-
-$ch = curl_init($url);
-curl_setopt_array($ch, [
-    CURLOPT_POST           => true,
-    CURLOPT_HTTPHEADER     => $cabecalhos,
-    CURLOPT_POSTFIELDS     => $payload,
-    CURLOPT_RETURNTRANSFER => true,
-    CURLOPT_TIMEOUT        => 20,
-]);
-$resp = curl_exec($ch);
-$code = (int) curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
-curl_close($ch);
-
-if ($resp === false || $code >= 400) {
-    http_response_code(502);
-    echo json_encode([
-        'error'   => 'Não foi possível enviar o aviso.',
-        'detalhe' => $resp === false ? 'sem resposta do serviço' : 'API HTTP ' . $code,
-    ]);
+// Destinos: aceita um número, uma lista, ou identificadores de grupo
+// (terminam em "@g.us" e não podem ter os dígitos removidos).
+$destinos = $config['destino'];
+if (!is_array($destinos)) { $destinos = [$destinos]; }
+$destinos = array_values(array_filter(array_map(function ($d) {
+    $d = trim((string) $d);
+    return (strpos($d, '@') !== false) ? $d : preg_replace('/\D+/', '', $d);
+}, $destinos), fn ($d) => $d !== ''));
+if (!$destinos) {
+    http_response_code(503);
+    echo json_encode(['error' => 'Nenhum destino configurado.']);
     exit;
 }
 
-// HTTP 200 não garante entrega: estes serviços costumam devolver o erro no
-// corpo (instância desconectada, número inexistente...). Sem checar isso, uma
-// falha silenciosa passa por sucesso — foi o que aconteceu no primeiro teste.
-$retorno = json_decode((string) $resp, true);
-$falhou  = false;
-if (is_array($retorno)) {
-    $temErro = isset($retorno['error']) && $retorno['error'] !== false && $retorno['error'] !== '';
-    $negou   = (isset($retorno['success']) && $retorno['success'] === false)
-            || (isset($retorno['status'])  && in_array(strtolower((string) $retorno['status']), ['error', 'failed', 'fail'], true));
-    $falhou  = $temErro || $negou;
+// Uma requisição por destino. Uma falha não impede as demais — melhor um
+// aviso entregue pela metade do que nenhum.
+$enviar = function ($destino) use ($config, $mensagem) {
+    switch ((string) $config['provedor']) {
+        case 'wame':
+            $w = (array) ($config['wame'] ?? []);
+            if (empty($w['key'])) { return [0, 'Chave da WAME não configurada.']; }
+            // A chave da instância vai na URL — é assim que a WAME autentica.
+            $base       = rtrim((string) ($w['url'] ?? 'https://us.api-wa.me'), '/');
+            $url        = $base . '/' . rawurlencode((string) $w['key']) . '/message/text';
+            $cabecalhos = ['Content-Type: application/json'];
+            // Alguns painéis também emitem um token de header; se existir, envia.
+            if (!empty($w['token'])) { $cabecalhos[] = 'Authorization: Bearer ' . $w['token']; }
+            $payload    = json_encode(['to' => $destino, 'text' => $mensagem], JSON_UNESCAPED_UNICODE);
+            break;
+
+        case 'zapi':
+            $z = (array) ($config['zapi'] ?? []);
+            if (empty($z['instancia']) || empty($z['token'])) { return [0, 'Credenciais da Z-API incompletas.']; }
+            $url        = 'https://api.z-api.io/instances/' . rawurlencode($z['instancia'])
+                        . '/token/' . rawurlencode($z['token']) . '/send-text';
+            $cabecalhos = ['Content-Type: application/json'];
+            if (!empty($z['clientToken'])) { $cabecalhos[] = 'Client-Token: ' . $z['clientToken']; }
+            $payload    = json_encode(['phone' => $destino, 'message' => $mensagem], JSON_UNESCAPED_UNICODE);
+            break;
+
+        case 'evolution':
+            $e = (array) ($config['evolution'] ?? []);
+            if (empty($e['url']) || empty($e['instancia']) || empty($e['apikey'])) { return [0, 'Credenciais da Evolution incompletas.']; }
+            $url        = rtrim((string) $e['url'], '/') . '/message/sendText/' . rawurlencode($e['instancia']);
+            $cabecalhos = ['Content-Type: application/json', 'apikey: ' . $e['apikey']];
+            $payload    = json_encode(['number' => $destino, 'text' => $mensagem], JSON_UNESCAPED_UNICODE);
+            break;
+
+        default:
+            return [0, 'Provedor de WhatsApp desconhecido.'];
+    }
+
+    $ch = curl_init($url);
+    curl_setopt_array($ch, [
+        CURLOPT_POST           => true,
+        CURLOPT_HTTPHEADER     => $cabecalhos,
+        CURLOPT_POSTFIELDS     => $payload,
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_TIMEOUT        => 20,
+    ]);
+    $resp = curl_exec($ch);
+    $code = (int) curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
+    curl_close($ch);
+
+    if ($resp === false) { return [0, 'sem resposta do serviço']; }
+    if ($code >= 400)    { return [$code, mb_substr((string) $resp, 0, 200)]; }
+
+    // HTTP 200 não garante entrega: estes serviços costumam devolver o erro
+    // no corpo (instância desconectada, número inexistente...). Sem checar
+    // isso, uma falha silenciosa passa por sucesso.
+    $retorno = json_decode((string) $resp, true);
+    if (is_array($retorno)) {
+        $temErro = isset($retorno['error']) && $retorno['error'] !== false && $retorno['error'] !== '';
+        $negou   = (isset($retorno['success']) && $retorno['success'] === false)
+                || (isset($retorno['status'])  && in_array(strtolower((string) $retorno['status']), ['error', 'failed', 'fail'], true));
+        if ($temErro || $negou) { return [$code, mb_substr((string) $resp, 0, 200)]; }
+    }
+    return [$code, $retorno ?? (string) $resp];
+};
+
+$entregues = 0;
+$relatorio = [];
+foreach ($destinos as $d) {
+    [$codigo, $detalhe] = $enviar($d);
+    $ok = $codigo >= 200 && $codigo < 300;
+    if ($ok) { $entregues++; }
+    $relatorio[] = ['destino' => $d, 'ok' => $ok, 'codigo' => $codigo, 'detalhe' => $detalhe];
 }
-if ($falhou) {
+
+if ($entregues === 0) {
     http_response_code(502);
     echo json_encode([
-        'error'   => 'O serviço de WhatsApp recusou o envio.',
-        'detalhe' => mb_substr((string) $resp, 0, 300),
+        'error'   => 'Não foi possível enviar o aviso.',
+        'detalhe' => $relatorio[0]['detalhe'] ?? 'falha desconhecida',
     ], JSON_UNESCAPED_UNICODE);
     exit;
 }
 
 // Modo diagnóstico: só para quem já conhece a chave (últimos 6 caracteres).
-// Devolve o retorno cru do provedor, útil para conferir o id da mensagem.
+// Devolve o retorno cru do provedor, destino a destino.
 $chaveConfig = (string) ($config['wame']['key'] ?? $config['zapi']['token'] ?? $config['evolution']['apikey'] ?? '');
 if (($input['diagnostico'] ?? '') !== '' && $chaveConfig !== ''
     && hash_equals(substr($chaveConfig, -6), (string) $input['diagnostico'])) {
-    echo json_encode(['ok' => true, 'retornoDoProvedor' => $retorno ?? (string) $resp], JSON_UNESCAPED_UNICODE);
+    echo json_encode(['ok' => true, 'entregues' => $entregues, 'destinos' => $relatorio], JSON_UNESCAPED_UNICODE);
     exit;
 }
 
 echo json_encode(['ok' => true]);
+
+// ============================================================================
+// COMO DESCOBRIR O IDENTIFICADOR DE UM GRUPO (para usar em "destino")
+//
+//   1. O número conectado precisa ser membro do grupo.
+//   2. No seu computador, rode (trocando SUA_CHAVE):
+//
+//        curl -s https://us.api-wa.me/SUA_CHAVE/groups
+//
+//   3. A resposta lista os grupos. Localize o seu pelo nome e copie o "id"
+//      — algo como 120363012345678901@g.us.
+//   4. Coloque esse id no "destino" do whatsapp_config.json, sozinho ou
+//      junto de números:
+//
+//        "destino": ["5519995951316", "120363012345678901@g.us"]
+// ============================================================================
