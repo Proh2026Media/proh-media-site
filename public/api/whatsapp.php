@@ -37,41 +37,42 @@
 //   pesquisável de tudo que já entrou.
 //
 //   O envio NÃO pode sair do servidor do site: o SPF do domínio não
-//   autoriza a Hostinger, e a mensagem cairia em spam. E o e-mail do
-//   domínio é Titan (revendido pela HostGator), cujo plano não libera
-//   cliente externo — o webmail entra, mas o SMTP responde
-//   "535 authentication failed" mesmo com a senha certa.
-//
-//   Por isso o envio sai pelo RESEND (HTTPS, sem SMTP). O Titan continua
-//   recebendo normalmente; muda só quem despacha o aviso.
+//   autoriza a Hostinger, e a mensagem cairia em spam. Sai pelo SMTP do
+//   Titan, que é quem cuida do e-mail do domínio.
 //
 //     "email": {
-//       "para":   "contato@proh.media",
-//       "de":     "site@send.proh.media",
-//       "resend": { "chave": "re_SUA_CHAVE" }
+//       "para": "contato@proh.media",
+//       "de":   "contato@proh.media",
+//       "smtp": {
+//         "host":      "smtp.titan.email",
+//         "porta":     465,
+//         "seguranca": "ssl",
+//         "usuario":   "contato@proh.media",
+//         "senha":     "SENHA_DA_CAIXA"
+//       }
 //     }
 //
-//   Passos, uma vez só:
-//     1. Conta em https://resend.com (faixa grátis: 3.000 e-mails/mês).
-//     2. Add domain → use o subdomínio "send.proh.media". O subdomínio
-//        mantém os registros do Titan intactos — o recebimento não muda.
-//     3. Cole na zona DNS do domínio os registros que o Resend mostrar
-//        (SPF e DKIM). Aguarde a verificação ficar verde.
-//     4. API Keys → cria a chave e põe em "chave" acima.
-//     5. O "de" TEM de ser do domínio verificado, senão o Resend recusa.
+//   Dois detalhes que já custaram tempo:
 //
-//   ALTERNATIVA — SMTP autenticado, caso um dia haja uma caixa que libere
-//   cliente externo. Só é usado quando não existe o bloco "resend":
+//     - O acesso por cliente externo (IMAP/SMTP) é uma permissão SEPARADA
+//       do webmail e vem DESLIGADA. Com ela desligada o servidor responde
+//       "535 authentication failed" com o motivo em branco, mesmo com a
+//       senha certa — parece senha errada, mas não é. Liga-se no painel
+//       de e-mail (nas opções de acesso a outros aplicativos).
 //
-//       "smtp": {
-//         "host":       "smtp.titan.email",
-//         "porta":      465,
-//         "seguranca":  "ssl",
-//         "usuario":    "site@proh.media",
-//         "senha":      "SENHA_DA_CONTA_DE_EMAIL"
-//       }
+//     - O "de" tem de ser a MESMA caixa que autentica. Um remetente que
+//       não existe no Titan passa no login e é recusado no MAIL FROM.
 //
-//   Sem "resend" nem "smtp", o envio cai no mail() do PHP — funciona, mas
+//   ALTERNATIVA — Resend (HTTPS, sem SMTP), se um dia o SMTP fechar.
+//   Quando existe este bloco, ele tem preferência sobre o "smtp":
+//
+//       "resend": { "chave": "re_SUA_CHAVE" }
+//
+//   Exige conta no resend.com e verificação do subdomínio send.proh.media
+//   por DNS (subdomínio de propósito: não mexe nos registros do Titan).
+//   O "de" precisa ser do domínio verificado.
+//
+//   Sem "smtp" nem "resend", o envio cai no mail() do PHP — funciona, mas
 //   com entrega muito menos confiável nesse cenário.
 //
 //   Z-API (https://z-api.io):
@@ -340,10 +341,9 @@ if ($paraEmail !== '' && filter_var($paraEmail, FILTER_VALIDATE_EMAIL)) {
 
     if (!empty($resend['chave'])) {
         // ------------------------------------------------------------------
-        // Envio pelo Resend (HTTPS, sem SMTP). É o caminho em uso: o e-mail
-        // do domínio é Titan de plano revendido, que não libera cliente
-        // externo — o webmail entra, o SMTP responde 535. O Titan segue
-        // RECEBENDO normalmente; aqui só sai o aviso de lead.
+        // Envio pelo Resend (HTTPS, sem SMTP). Alternativa desligada por
+        // padrão — o caminho em uso é o SMTP do Titan, logo abaixo. Serve
+        // se o SMTP fechar: o Titan segue recebendo, muda só quem despacha.
         // ------------------------------------------------------------------
         $payloadEmail = [
             'from'    => 'PROH Site <' . $de . '>',
@@ -377,9 +377,9 @@ if ($paraEmail !== '' && filter_var($paraEmail, FILTER_VALIDATE_EMAIL)) {
               . ($respEmail === false ? 'sem resposta' : mb_substr((string) $respEmail, 0, 200));
     } elseif (!empty($smtp['host']) && !empty($smtp['usuario'])) {
         // ------------------------------------------------------------------
-        // Envio autenticado pelo SMTP do provedor de e-mail (HostGator).
-        // Necessário porque o servidor do site (Hostinger) não é autorizado
-        // a enviar em nome do domínio — o SPF barraria.
+        // Caminho em uso: SMTP autenticado do Titan, provedor de e-mail do
+        // domínio. Necessário porque o servidor do site (Hostinger) não é
+        // autorizado a enviar em nome do domínio — o SPF barraria.
         // ------------------------------------------------------------------
         $enviarSmtp = function () use ($smtp, $de, $paraEmail, $assuntoCodificado, $corpoEmail, $cabecalhosEmail) {
             $porta     = (int) ($smtp['porta'] ?? 465);
