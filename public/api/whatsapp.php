@@ -34,10 +34,33 @@
 //
 //   CÓPIA POR E-MAIL (opcional, mas recomendada): todo lead também chega
 //   por e-mail — rede de segurança se o WhatsApp falhar e arquivo
-//   pesquisável de tudo que já entrou. Basta acrescentar:
-//     "email": { "para": "contato@proh.media", "de": "site@proh.media" }
-//   O "de" precisa ser um endereço DO SEU domínio, senão a mensagem cai
-//   em spam. Responder ao e-mail responde direto ao lead (Reply-To).
+//   pesquisável de tudo que já entrou.
+//
+//   Como o e-mail do domínio é gerenciado pela HostGator, o envio precisa
+//   sair pelo SMTP DELA. Mandar pelo servidor da Hostinger faria a mensagem
+//   cair em spam (o SPF do domínio não autoriza esse servidor).
+//
+//     "email": {
+//       "para": "contato@proh.media",
+//       "de":   "site@proh.media",
+//       "smtp": {
+//         "host":       "mail.proh.media",
+//         "porta":      465,
+//         "seguranca":  "ssl",
+//         "usuario":    "site@proh.media",
+//         "senha":      "SENHA_DA_CONTA_DE_EMAIL"
+//       }
+//     }
+//
+//   Os dados de host/porta estão no painel da HostGator, em "Contas de
+//   e-mail → Configurar cliente de e-mail". Costuma ser mail.SEUDOMINIO
+//   na porta 465 com SSL (ou 587 com "seguranca": "tls").
+//
+//   Recomendação: crie uma conta dedicada (ex.: site@proh.media) só para
+//   isso. Assim a senha guardada aqui não é a da sua caixa principal.
+//
+//   Sem o bloco "smtp", o envio cai no mail() do PHP — funciona, mas com
+//   entrega muito menos confiável nesse cenário.
 //
 //   Z-API (https://z-api.io):
 //     {
@@ -265,8 +288,9 @@ foreach ($destinos as $d) {
 // de segurança, vira o arquivo pesquisável de todos os leads. O lead conta
 // como entregue se QUALQUER um dos dois canais funcionar.
 // ---------------------------------------------------------------------------
-$emailOk  = false;
-$emailCfg = (array) ($config['email'] ?? []);
+$emailOk      = false;
+$emailDetalhe = 'não configurado';
+$emailCfg     = (array) ($config['email'] ?? []);
 $paraEmail = trim((string) ($emailCfg['para'] ?? ''));
 if ($paraEmail !== '' && filter_var($paraEmail, FILTER_VALIDATE_EMAIL)) {
     // Remetente no próprio domínio: e-mail enviado em nome de outro domínio
@@ -299,9 +323,87 @@ if ($paraEmail !== '' && filter_var($paraEmail, FILTER_VALIDATE_EMAIL)) {
     // Responder ao e-mail leva direto ao lead.
     if ($email !== '') { $cabecalhosEmail[] = 'Reply-To: ' . $email; }
 
-    $emailOk = @mail($paraEmail, $assuntoCodificado, $corpoEmail, implode("\r\n", $cabecalhosEmail), '-f' . $de);
+    $smtp = (array) ($emailCfg['smtp'] ?? []);
+    if (!empty($smtp['host']) && !empty($smtp['usuario'])) {
+        // ------------------------------------------------------------------
+        // Envio autenticado pelo SMTP do provedor de e-mail (HostGator).
+        // Necessário porque o servidor do site (Hostinger) não é autorizado
+        // a enviar em nome do domínio — o SPF barraria.
+        // ------------------------------------------------------------------
+        $enviarSmtp = function () use ($smtp, $de, $paraEmail, $assuntoCodificado, $corpoEmail, $cabecalhosEmail) {
+            $porta     = (int) ($smtp['porta'] ?? 465);
+            $seguranca = strtolower((string) ($smtp['seguranca'] ?? ($porta === 465 ? 'ssl' : 'tls')));
+            $endereco  = ($seguranca === 'ssl' ? 'ssl://' : '') . $smtp['host'] . ':' . $porta;
+
+            $contexto = stream_context_create(['ssl' => ['verify_peer' => true, 'verify_peer_name' => true]]);
+            $sock = @stream_socket_client($endereco, $errno, $errstr, 15, STREAM_CLIENT_CONNECT, $contexto);
+            if (!$sock) { return [false, 'conexão falhou: ' . $errstr]; }
+            stream_set_timeout($sock, 15);
+
+            // Respostas SMTP podem vir em várias linhas; a última traz espaço
+            // após o código ("250 OK"), as intermediárias trazem hífen.
+            $ler = function () use ($sock) {
+                $resposta = '';
+                while (($linha = fgets($sock, 515)) !== false) {
+                    $resposta .= $linha;
+                    if (strlen($linha) < 4 || $linha[3] !== '-') { break; }
+                }
+                return $resposta;
+            };
+            $conversar = function ($comando) use ($sock, $ler) {
+                fwrite($sock, $comando . "\r\n");
+                return $ler();
+            };
+            $codigo = fn ($r) => substr(trim((string) $r), 0, 3);
+
+            if ($codigo($ler()) !== '220') { fclose($sock); return [false, 'servidor não respondeu à conexão']; }
+
+            // Identificação no EHLO: o domínio do próprio remetente.
+            $eu = substr(strrchr($de, '@') ?: '@localhost', 1);
+            $conversar('EHLO ' . $eu);
+
+            if ($seguranca === 'tls') {
+                if ($codigo($conversar('STARTTLS')) !== '220') { fclose($sock); return [false, 'STARTTLS recusado']; }
+                if (!@stream_socket_enable_crypto($sock, true, STREAM_CRYPTO_METHOD_TLS_CLIENT)) {
+                    fclose($sock); return [false, 'não foi possível ativar TLS'];
+                }
+                $conversar('EHLO ' . $eu);
+            }
+
+            if ($codigo($conversar('AUTH LOGIN')) !== '334') { fclose($sock); return [false, 'servidor recusou AUTH LOGIN']; }
+            if ($codigo($conversar(base64_encode((string) $smtp['usuario']))) !== '334') { fclose($sock); return [false, 'usuário recusado']; }
+            if ($codigo($conversar(base64_encode((string) ($smtp['senha'] ?? '')))) !== '235') { fclose($sock); return [false, 'autenticação recusada — confira usuário e senha']; }
+
+            if ($codigo($conversar('MAIL FROM:<' . $de . '>')) !== '250')      { fclose($sock); return [false, 'remetente recusado']; }
+            if ($codigo($conversar('RCPT TO:<' . $paraEmail . '>')) !== '250') { fclose($sock); return [false, 'destinatário recusado']; }
+            if ($codigo($conversar('DATA')) !== '354')                          { fclose($sock); return [false, 'servidor recusou o corpo']; }
+
+            // Linha iniciada por ponto precisa ser escapada, senão encerra o envio.
+            $corpoSeguro = preg_replace('/^\./m', '..', str_replace("\n", "\r\n", $corpoEmail));
+            $mensagemSmtp = implode("\r\n", array_merge($cabecalhosEmail, [
+                'To: ' . $paraEmail,
+                'Subject: ' . $assuntoCodificado,
+                'Date: ' . date('r'),
+            ])) . "\r\n\r\n" . $corpoSeguro . "\r\n.";
+
+            $r = $conversar($mensagemSmtp);
+            $conversar('QUIT');
+            fclose($sock);
+            return [$codigo($r) === '250', $codigo($r) === '250' ? 'enviado' : 'recusado no envio: ' . trim((string) $r)];
+        };
+        [$emailOk, $emailDetalhe] = $enviarSmtp();
+    } else {
+        // Sem SMTP configurado: envio pelo servidor local (menos confiável
+        // quando o e-mail do domínio é de outro provedor).
+        $emailOk = @mail($paraEmail, $assuntoCodificado, $corpoEmail, implode("\r\n", $cabecalhosEmail), '-f' . $de);
+        $emailDetalhe = $emailOk ? 'enviado pelo servidor local' : 'mail() falhou';
+    }
 }
-$relatorio[] = ['destino' => $paraEmail !== '' ? 'e-mail: ' . $paraEmail : 'e-mail não configurado', 'ok' => $emailOk];
+$relatorio[] = [
+    'destino' => $paraEmail !== '' ? 'e-mail: ' . $paraEmail : 'e-mail não configurado',
+    'ok'      => $emailOk,
+    'detalhe' => $emailDetalhe ?? 'não configurado',
+];
 
 if ($entregues === 0 && !$emailOk) {
     http_response_code(502);
