@@ -1,0 +1,64 @@
+name: Avisar hub (sincronização instantânea)
+
+# Onde instalar: no repositório DE ORIGEM do site (o que você edita), em
+# .github/workflows/. NÃO é no hub-control e NÃO é no espelho.
+# O que faz: a cada push, avisa o hub-control para espelhar na hora, em vez de
+# esperar a rede de segurança (cron de 2 em 2 horas).
+#
+# Este é o modelo do HUB. O da Blindagem é outro arquivo (sync-instantanea.yml)
+# e aponta para outro controle — os dois sistemas não se cruzam.
+#
+# Antes de usar, cadastre no repositório de origem o segredo HUB_DISPATCH_TOKEN:
+#   gh secret set HUB_DISPATCH_TOKEN --repo <owner>/<repo-de-origem>
+# O token deve ser fine-grained, com acesso APENAS a PROH-Media/hub-control e
+# APENAS a permissão "Actions: Read and write" (não lê nem escreve código algum).
+#
+# Instalado para o projeto proh-media-site.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: {}
+
+permissions: {}
+
+concurrency:
+  group: avisar-hub
+  cancel-in-progress: true
+
+jobs:
+  avisar:
+    # Trava de segurança: o hub espelha este repositório inteiro, inclusive esta
+    # pasta. Sem a trava, a cópia no espelho também dispararia sincronizações.
+    # Troque pelo caminho do SEU repositório de origem.
+    if: github.repository == 'Proh2026Media/proh-media-site'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      TOKEN: ${{ secrets.HUB_DISPATCH_TOKEN }}
+      CONTROLE: PROH-Media/hub-control
+      ARQUIVO: hub-espelho.yml
+      RAMO: main
+      PROJETO: proh-media-site
+    steps:
+      - name: Pedir espelhamento ao hub
+        run: |
+          set -euo pipefail
+          if [ -z "${TOKEN:-}" ]; then
+            echo "::error::Segredo HUB_DISPATCH_TOKEN não cadastrado neste repositório."
+            exit 1
+          fi
+          # Chamada REST direta: usa apenas a permissão "Actions: write" do token.
+          # (o gh CLI precisaria ler a branch padrão, o que exigiria mais permissões)
+          COD=$(curl -s -o /tmp/resposta.txt -w '%{http_code}' -X POST \
+            -H "Authorization: Bearer ${TOKEN}" \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "https://api.github.com/repos/${CONTROLE}/actions/workflows/${ARQUIVO}/dispatches" \
+            -d "{\"ref\":\"${RAMO}\",\"inputs\":{\"projeto\":\"${PROJETO}\"}}")
+          if [ "$COD" = "204" ]; then
+            echo "✅ Espelhamento solicitado — o site atualiza em ~1 minuto."
+          else
+            echo "::error::Falha ao pedir espelhamento (HTTP ${COD}): $(cat /tmp/resposta.txt)"
+            exit 1
+          fi
